@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package rbac.v1;
+
+option go_package = "microservice-golang/gen/rbac/v1;rbacv1";
+
+import "google/protobuf/timestamp.proto";
+import "buf/validate/validate.proto";
+
+// ─── Message ──────────────────────────────────────────────────────────────────
+
+message Permission {
+  string id          = 1;
+  string resource    = 2;
+  string action      = 3;
+  string description = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+// ─── Requests ─────────────────────────────────────────────────────────────────
+
+message CreatePermissionRequest {
+  string resource = 1 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 50
+  ];
+  string action = 2 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 50
+  ];
+  string description = 3 [
+    (buf.validate.field).string.max_len = 255
+  ];
+}
+
+message GetPermissionRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeletePermissionRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message ListPermissionsRequest {
+  int32 page = 1 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 2 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+// ─── Responses ────────────────────────────────────────────────────────────────
+
+message CreatePermissionResponse { Permission permission = 1; }
+message GetPermissionResponse    { Permission permission = 1; }
+message DeletePermissionResponse {}
+message ListPermissionsResponse {
+  repeated Permission permissions = 1;
+  int64 total     = 2;
+  int32 page      = 3;
+  int32 page_size = 4;
+}

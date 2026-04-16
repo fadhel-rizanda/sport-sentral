@@ -1,0 +1,47 @@
+# Go build artifacts
+bin/
+build/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go workspace / modules
+go.work.sum
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Air (live reload)
+tmp/
+*.air.toml
+
+# Coverage
+coverage.out
+coverage.html
+
+# Protobuf
+# gen/
+
+# Misc
+*.bak
+*.tmp

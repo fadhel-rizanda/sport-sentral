@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package rbac.v1;
+
+option go_package = "microservice-golang/gen/rbac/v1;rbacv1";
+
+import "buf/validate/validate.proto";
+import "rbac/v1/role.proto";
+import "rbac/v1/permission.proto";
+
+// ─── Assignment Requests/Responses ───────────────────────────────────────────
+
+message AssignPermissionToRoleRequest {
+  string role_id = 1 [(buf.validate.field).string.uuid = true];
+  repeated string permission_ids = 2 [
+    (buf.validate.field).repeated = {
+      min_items: 1,
+      max_items: 100,
+      items: { string: { uuid: true } }
+    }
+  ];
+}
+
+message RevokePermissionFromRoleRequest {
+  string role_id = 1 [(buf.validate.field).string.uuid = true];
+  repeated string permission_ids = 2 [
+    (buf.validate.field).repeated = {
+      min_items: 1,
+      max_items: 100,
+      items: { string: { uuid: true } }
+    }
+  ];
+}
+
+message AssignRolesToUserRequest {
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  repeated string role_ids = 2 [
+    (buf.validate.field).repeated = {
+      min_items: 1,
+      max_items: 50,
+      items: { string: { uuid: true } }
+    }
+  ];
+}
+
+message RemoveRolesFromUserRequest {
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  repeated string role_ids = 2 [
+    (buf.validate.field).repeated = {
+      min_items: 1,
+      max_items: 50,
+      items: { string: { uuid: true } }
+    }
+  ];
+}
+
+message AssignPermissionToRoleResponse {}
+message RevokePermissionFromRoleResponse {}
+message AssignRolesToUserResponse {}
+message RemoveRolesFromUserResponse {}
+
+// ─── Permission Check ─────────────────────────────────────────────────────────
+
+message CheckPermissionRequest {
+  string user_id  = 1 [(buf.validate.field).string.uuid = true];
+  string resource = 2 [(buf.validate.field).string.min_len = 1];
+  string action   = 3 [(buf.validate.field).string.min_len = 1];
+}
+
+message CheckPermissionResponse {
+  bool allowed = 1;
+}
+
+// ─── Service ──────────────────────────────────────────────────────────────────
+
+service RBACService {
+  // Role CRUD
+  rpc CreateRole (CreateRoleRequest) returns (CreateRoleResponse);
+  rpc GetRole    (GetRoleRequest)    returns (GetRoleResponse);
+  rpc UpdateRole (UpdateRoleRequest) returns (UpdateRoleResponse);
+  rpc DeleteRole (DeleteRoleRequest) returns (DeleteRoleResponse);
+  rpc ListRoles  (ListRolesRequest)  returns (ListRolesResponse);
+
+  // Permission CRUD
+  rpc CreatePermission (CreatePermissionRequest) returns (CreatePermissionResponse);
+  rpc GetPermission    (GetPermissionRequest)    returns (GetPermissionResponse);
+  rpc DeletePermission (DeletePermissionRequest) returns (DeletePermissionResponse);
+  rpc ListPermissions  (ListPermissionsRequest)  returns (ListPermissionsResponse);
+
+  // Assignment
+  rpc AssignPermissionToRole  (AssignPermissionToRoleRequest)  returns (AssignPermissionToRoleResponse);
+  rpc RevokePermissionFromRole(RevokePermissionFromRoleRequest) returns (RevokePermissionFromRoleResponse);
+  rpc AssignRolesToUser       (AssignRolesToUserRequest)       returns (AssignRolesToUserResponse);
+  rpc RemoveRolesFromUser     (RemoveRolesFromUserRequest)     returns (RemoveRolesFromUserResponse);
+
+  // Authorization check
+  rpc CheckPermission (CheckPermissionRequest) returns (CheckPermissionResponse);
+}

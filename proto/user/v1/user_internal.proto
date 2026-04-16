@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package user.v1;
+
+option go_package = "microservice-golang/gen/user/v1;userv1";
+
+import "buf/validate/validate.proto";
+
+// ─── Message ──────────────────────────────────────────────────────────────────
+
+message UserInternal {
+  string id                = 1;
+  string email             = 2;
+  string username          = 3;
+  string full_name         = 4;
+  repeated string role_ids = 5;
+  string hashed_password   = 6;
+}
+
+// ─── Requests/Responses ───────────────────────────────────────────────────────
+
+message GetUserByEmailInternalRequest {
+  string email = 1 [(buf.validate.field).string.email = true];
+}
+
+message GetUserByEmailInternalResponse {
+  UserInternal user = 1;
+}
+
+// ─── Service ──────────────────────────────────────────────────────────────────
+
+service UserInternalService {
+  rpc GetUserByEmailInternal (GetUserByEmailInternalRequest) returns (GetUserByEmailInternalResponse);
+}

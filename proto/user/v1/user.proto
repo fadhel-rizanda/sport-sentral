@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package user.v1;
+
+option go_package = "microservice-golang/gen/user/v1;userv1";
+
+import "google/protobuf/timestamp.proto";
+import "buf/validate/validate.proto";
+
+// ─── Message ──────────────────────────────────────────────────────────────────
+
+message User {
+  string id                = 1;
+  string email             = 2;
+  string username          = 3;
+  string full_name         = 4;
+  repeated string role_ids = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+// ─── Requests ─────────────────────────────────────────────────────────────────
+
+message CreateUserRequest {
+  string email = 1 [
+    (buf.validate.field).string.email = true,
+    (buf.validate.field).string.max_len = 255
+  ];
+  string username = 2 [
+    (buf.validate.field).string.min_len = 3,
+    (buf.validate.field).string.max_len = 50,
+    (buf.validate.field).string.pattern = "^[a-zA-Z0-9_]+$"
+  ];
+  string full_name = 3 [
+    (buf.validate.field).string.max_len = 100
+  ];
+  string password = 4 [
+    (buf.validate.field).string.min_len = 8,
+    (buf.validate.field).string.max_len = 72
+  ];
+}
+
+message GetUserRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetUserByEmailRequest {
+  string email = 1 [(buf.validate.field).string.email = true];
+}
+
+message UpdateUserRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string full_name = 2 [
+    (buf.validate.field).string.max_len = 100
+  ];
+  string username = 3 [
+    (buf.validate.field).string.max_len = 50,
+    (buf.validate.field).string.pattern = "^[a-zA-Z0-9_]*$"
+  ];
+}
+
+message DeleteUserRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message ListUsersRequest {
+  int32 page = 1 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 2 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+// ─── Responses ────────────────────────────────────────────────────────────────
+
+message CreateUserResponse   { User user = 1; }
+message GetUserResponse      { User user = 1; }
+message GetUserByEmailResponse { User user = 1; }
+message UpdateUserResponse   { User user = 1; }
+message DeleteUserResponse   {}
+message ListUsersResponse {
+  repeated User users = 1;
+  int64 total     = 2;
+  int32 page      = 3;
+  int32 page_size = 4;
+}
+
+// ─── Service ──────────────────────────────────────────────────────────────────
+
+service UserService {
+  rpc CreateUser     (CreateUserRequest)       returns (CreateUserResponse);
+  rpc GetUser        (GetUserRequest)          returns (GetUserResponse);
+  rpc GetUserByEmail (GetUserByEmailRequest)   returns (GetUserByEmailResponse);
+  rpc UpdateUser     (UpdateUserRequest)       returns (UpdateUserResponse);
+  rpc DeleteUser     (DeleteUserRequest)       returns (DeleteUserResponse);
+  rpc ListUsers      (ListUsersRequest)        returns (ListUsersResponse);
+}
