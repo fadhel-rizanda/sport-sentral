@@ -45,3 +45,5 @@ coverage.html
 # Misc
 *.bak
 *.tmp
+
+/documentation/checkpoint.md
