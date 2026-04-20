@@ -2,10 +2,9 @@ package repository
 
 import (
 	"context"
-	"errors"
-
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	pgerr "microservice-golang/shared/infrastructure/postgres"
 	apperr "microservice-golang/shared/pkg/errors"
 
 	"microservice-golang/services/user-service/internal/entity"
@@ -24,6 +23,7 @@ type UserRepository interface {
 	ReplaceRoles(ctx context.Context, userID uuid.UUID, roleIDs []uuid.UUID) error
 
 	GetByIDWithRoles(ctx context.Context, id uuid.UUID) (*entity.User, error)
+	GetByEmailWithRoles(ctx context.Context, email string) (*entity.User, error)
 	GetRoles(ctx context.Context, userID uuid.UUID) ([]*entity.Role, error)
 }
 
@@ -38,8 +38,11 @@ func NewGormUserRepository(db *gorm.DB) UserRepository {
 func (r *gormUserRepo) Create(ctx context.Context, user *entity.User) error {
 	result := r.db.WithContext(ctx).Create(user)
 	if result.Error != nil {
-		if isDuplicateError(result.Error) {
-			return apperr.Conflict("email or username already exists")
+		if pgerr.IsUniqueConstraint(result.Error, "idx_users_email") {
+			return apperr.Conflict("email already exists")
+		}
+		if pgerr.IsUniqueConstraint(result.Error, "idx_users_username") {
+			return apperr.Conflict("username already exists")
 		}
 		return apperr.Internal(result.Error)
 	}
@@ -53,7 +56,7 @@ func (r *gormUserRepo) GetByID(ctx context.Context, id uuid.UUID) (*entity.User,
 		First(&user)
 
 	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if pgerr.IsNotFound(result.Error) {
 			return nil, apperr.NotFound("user not found")
 		}
 		return nil, apperr.Internal(result.Error)
@@ -69,7 +72,7 @@ func (r *gormUserRepo) GetByIDWithRoles(ctx context.Context, id uuid.UUID) (*ent
 		First(&user, "id = ?", id)
 
 	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if pgerr.IsNotFound(result.Error) {
 			return nil, apperr.NotFound("user not found")
 		}
 		return nil, apperr.Internal(result.Error)
@@ -84,7 +87,24 @@ func (r *gormUserRepo) GetByEmail(ctx context.Context, email string) (*entity.Us
 		First(&user)
 
 	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if pgerr.IsNotFound(result.Error) {
+			return nil, apperr.NotFound("user not found")
+		}
+		return nil, apperr.Internal(result.Error)
+	}
+	return &user, nil
+}
+
+func (r *gormUserRepo) GetByEmailWithRoles(ctx context.Context, email string) (*entity.User, error) {
+	var user entity.User
+	result := r.db.WithContext(ctx).
+		Preload("Roles").
+		Preload("Roles.Permissions").
+		Where("email = ?", email).
+		First(&user)
+
+	if result.Error != nil {
+		if pgerr.IsNotFound(result.Error) {
 			return nil, apperr.NotFound("user not found")
 		}
 		return nil, apperr.Internal(result.Error)
@@ -101,6 +121,9 @@ func (r *gormUserRepo) Update(ctx context.Context, user *entity.User) error {
 		})
 
 	if result.Error != nil {
+		if pgerr.IsUniqueConstraint(result.Error, "idx_users_username") {
+			return apperr.Conflict("username already exists")
+		}
 		return apperr.Internal(result.Error)
 	}
 	if result.RowsAffected == 0 {
@@ -150,8 +173,11 @@ func (r *gormUserRepo) AssignRoles(ctx context.Context, userID uuid.UUID, roleID
 	user := &entity.User{ID: userID}
 
 	if err := r.db.WithContext(ctx).Model(user).Association("Roles").Append(roles); err != nil {
-		if isDuplicateError(err) {
-			return apperr.Conflict("user already has one or more of the specified roles")
+		if pgerr.IsUniqueViolation(err) {
+			return apperr.Conflict("user already has one or more roles")
+		}
+		if pgerr.IsForeignKeyViolation(err) {
+			return apperr.NotFound("one or more roles not found")
 		}
 		return apperr.Internal(err)
 	}
@@ -173,8 +199,8 @@ func (r *gormUserRepo) ReplaceRoles(ctx context.Context, userID uuid.UUID, roleI
 	user := &entity.User{ID: userID}
 
 	if err := r.db.WithContext(ctx).Model(user).Association("Roles").Replace(roles); err != nil {
-		if isDuplicateError(err) {
-			return apperr.Conflict("user already has one or more of the specified roles")
+		if pgerr.IsUniqueViolation(err) {
+			return apperr.Conflict("user already has one or more roles")
 		}
 		return apperr.Internal(err)
 	}
@@ -189,7 +215,7 @@ func (r *gormUserRepo) GetRoles(ctx context.Context, userID uuid.UUID) ([]*entit
 		First(&user, "id = ?", userID)
 
 	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if pgerr.IsNotFound(result.Error) {
 			return nil, apperr.NotFound("user not found")
 		}
 		return nil, apperr.Internal(result.Error)
@@ -203,15 +229,4 @@ func toRoleRefs(ids []uuid.UUID) []*entity.Role {
 		roles[i] = &entity.Role{ID: id}
 	}
 	return roles
-}
-
-func isDuplicateError(err error) bool {
-	if err == nil {
-		return false
-	}
-	type pgErr interface{ SQLState() string }
-	if pe, ok := err.(pgErr); ok {
-		return pe.SQLState() == "23505"
-	}
-	return false
 }

@@ -22,7 +22,11 @@ type Permission struct {
 
 func (p *Permission) BeforeCreate(_ *gorm.DB) error {
 	if p.ID == uuid.Nil {
-		p.ID = uuid.New()
+		id, err := uuid.NewV7()
+		if err != nil {
+			return err
+		}
+		p.ID = id
 	}
 	return nil
 }

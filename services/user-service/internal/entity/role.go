@@ -19,7 +19,11 @@ type Role struct {
 
 func (r *Role) BeforeCreate(_ *gorm.DB) error {
 	if r.ID == uuid.Nil {
-		r.ID = uuid.New()
+		id, err := uuid.NewV7()
+		if err != nil {
+			return err
+		}
+		r.ID = id
 	}
 	return nil
 }

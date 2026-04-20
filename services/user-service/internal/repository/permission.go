@@ -2,10 +2,10 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"microservice-golang/services/user-service/internal/entity"
+	pgerr "microservice-golang/shared/infrastructure/postgres"
 	apperr "microservice-golang/shared/pkg/errors"
 )
 
@@ -34,7 +34,7 @@ func (r *gormPermissionRepo) Create(ctx context.Context, permission *entity.Perm
 	result := r.db.WithContext(ctx).Create(permission)
 
 	if result.Error != nil {
-		if isDuplicateError(result.Error) {
+		if pgerr.IsUniqueConstraint(result.Error, "permissions_resource_action_key") {
 			return apperr.Conflict("permission already exists")
 		}
 		return apperr.Internal(result.Error)
@@ -48,7 +48,7 @@ func (r *gormPermissionRepo) GetByID(ctx context.Context, id uuid.UUID) (*entity
 	result := r.db.WithContext(ctx).First(&permission, "id = ?", id)
 
 	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if pgerr.IsNotFound(result.Error) {
 			return nil, apperr.NotFound("permission not found")
 		}
 		return nil, apperr.Internal(result.Error)
@@ -114,7 +114,7 @@ func (r *gormPermissionRepo) AssignToRole(ctx context.Context, roleID, permissio
 	permission := &entity.Permission{ID: permissionID}
 
 	if err := r.db.WithContext(ctx).Model(role).Association("Permissions").Append(permission); err != nil {
-		if isDuplicateError(err) {
+		if pgerr.IsUniqueConstraint(err, "role_permissions_pkey") {
 			return apperr.Conflict("permission already assigned to role")
 		}
 		return apperr.Internal(err)

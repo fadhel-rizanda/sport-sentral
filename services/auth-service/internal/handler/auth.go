@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc"
 
 	authv1 "microservice-golang/gen/auth/v1"
+	userv1 "microservice-golang/gen/user/v1"
 	"microservice-golang/services/auth-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
 )
@@ -24,15 +25,21 @@ func (h *AuthHandler) RegisterGRPC(s *grpc.Server) {
 }
 
 func (h *AuthHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.LoginResponse, error) {
-	tokens, err := h.uc.Login(ctx, req.Email, req.Password)
+	result, err := h.uc.Login(ctx, req.Email, req.Password)
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
 	}
 	return &authv1.LoginResponse{
 		Tokens: &authv1.TokenPair{
-			AccessToken:  tokens.AccessToken,
-			RefreshToken: tokens.RefreshToken,
-			ExpiresAt:    tokens.ExpiresAt.Unix(),
+			AccessToken:  result.Tokens.AccessToken,
+			RefreshToken: result.Tokens.RefreshToken,
+			ExpiresAt:    result.Tokens.ExpiresAt.Unix(),
+		},
+		User: &userv1.User{
+			Id:       result.UserID,
+			Email:    result.Email,
+			Username: result.Username,
+			Roles:    result.Roles,
 		},
 	}, nil
 }

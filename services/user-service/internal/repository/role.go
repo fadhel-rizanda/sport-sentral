@@ -2,10 +2,10 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"microservice-golang/services/user-service/internal/entity"
+	pgerr "microservice-golang/shared/infrastructure/postgres"
 	apperr "microservice-golang/shared/pkg/errors"
 )
 
@@ -36,7 +36,7 @@ func (r *gormRoleRepo) Create(ctx context.Context, role *entity.Role) error {
 	result := r.db.WithContext(ctx).Create(role)
 
 	if result.Error != nil {
-		if isDuplicateError(result.Error) {
+		if pgerr.IsUniqueConstraint(result.Error, "idx_roles_name") {
 			return apperr.Conflict("role name already exists")
 		}
 		return apperr.Internal(result.Error)
@@ -50,7 +50,7 @@ func (r *gormRoleRepo) GetByID(ctx context.Context, id uuid.UUID) (*entity.Role,
 	result := r.db.WithContext(ctx).First(&role, "id = ?", id)
 
 	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if pgerr.IsNotFound(result.Error) {
 			return nil, apperr.NotFound("role not found")
 		}
 		return nil, apperr.Internal(result.Error)
@@ -64,7 +64,7 @@ func (r *gormRoleRepo) GetByIDWithPermissions(ctx context.Context, id uuid.UUID)
 	result := r.db.WithContext(ctx).Preload("Permissions").First(&role, "id = ?", id)
 
 	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if pgerr.IsNotFound(result.Error) {
 			return nil, apperr.NotFound("role not found")
 		}
 		return nil, apperr.Internal(result.Error)
@@ -82,7 +82,7 @@ func (r *gormRoleRepo) Update(ctx context.Context, role *entity.Role) error {
 		})
 
 	if result.Error != nil {
-		if isDuplicateError(result.Error) {
+		if pgerr.IsUniqueConstraint(result.Error, "idx_roles_name") {
 			return apperr.Conflict("role name already exists")
 		}
 		return apperr.Internal(result.Error)
@@ -137,7 +137,7 @@ func (r *gormRoleRepo) AssignPermissions(ctx context.Context, roleID uuid.UUID, 
 	role.ID = roleID
 
 	if err := r.db.WithContext(ctx).Model(role).Association("Permissions").Append(permissions); err != nil {
-		if isDuplicateError(err) {
+		if pgerr.IsUniqueConstraint(err, "role_permissions_pkey") {
 			return apperr.Conflict("one or more permissions already assigned to role")
 		}
 		return apperr.Internal(err)
@@ -174,7 +174,7 @@ func (r *gormRoleRepo) GetPermissions(ctx context.Context, roleID uuid.UUID) ([]
 	var role entity.Role
 
 	if err := r.db.WithContext(ctx).Preload("Permissions").First(&role, "id = ?", roleID).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if pgerr.IsNotFound(err) {
 			return nil, apperr.NotFound("role not found")
 		}
 		return nil, apperr.Internal(err)

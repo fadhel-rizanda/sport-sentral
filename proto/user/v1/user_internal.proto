@@ -5,6 +5,7 @@ package user.v1;
 option go_package = "microservice-golang/gen/user/v1;userv1";
 
 import "buf/validate/validate.proto";
+import "rbac/v1/role.proto";
 
 // ─── Message ──────────────────────────────────────────────────────────────────
 
@@ -13,7 +14,7 @@ message UserInternal {
   string email             = 2;
   string username          = 3;
   string full_name         = 4;
-  repeated string role_ids = 5;
+  repeated rbac.v1.Role roles = 5;
   string hashed_password   = 6;
 }
 

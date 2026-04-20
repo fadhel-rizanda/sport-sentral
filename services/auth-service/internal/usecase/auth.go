@@ -14,7 +14,7 @@ import (
 )
 
 type AuthUseCase interface {
-	Login(ctx context.Context, email, password string) (*jwt.TokenPair, error)
+	Login(ctx context.Context, email, password string) (*LoginResponse, error)
 	Logout(ctx context.Context, refreshToken string) error
 	RefreshToken(ctx context.Context, refreshToken string) (*jwt.TokenPair, error)
 	ValidateToken(ctx context.Context, accessToken string) (*jwt.Claims, error)
@@ -41,7 +41,7 @@ func NewAuthUseCase(
 	}
 }
 
-func (uc *authUseCase) Login(ctx context.Context, email, password string) (*jwt.TokenPair, error) {
+func (uc *authUseCase) Login(ctx context.Context, email, password string) (*LoginResponse, error) {
 	resp, err := uc.userClient.GetUserByEmailInternal(ctx, &userv1.GetUserByEmailInternalRequest{
 		Email: email,
 	})
@@ -55,7 +55,11 @@ func (uc *authUseCase) Login(ctx context.Context, email, password string) (*jwt.
 		return nil, apperr.Unauthorized("invalid email or password")
 	}
 
-	tokens, err := uc.jwtManager.GenerateTokenPair(user.Id, user.Email, user.Username, user.RoleIds)
+	roleIds := make([]string, len(user.Roles))
+	for i, r := range user.Roles {
+		roleIds[i] = r.Id
+	}
+	tokens, err := uc.jwtManager.GenerateTokenPair(user.Id, user.Email, user.Username, roleIds)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -65,7 +69,13 @@ func (uc *authUseCase) Login(ctx context.Context, email, password string) (*jwt.
 		return nil, apperr.Internal(err)
 	}
 
-	return tokens, nil
+	return &LoginResponse{
+		Tokens:   tokens,
+		UserID:   user.Id,
+		Email:    user.Email,
+		Username: user.Username,
+		Roles:    user.Roles,
+	}, nil
 }
 
 func (uc *authUseCase) Logout(ctx context.Context, refreshToken string) error {

@@ -2,10 +2,8 @@ package handler
 
 import (
 	"context"
-
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
-
 	userv1 "microservice-golang/gen/user/v1"
 	"microservice-golang/services/user-service/internal/entity"
 	"microservice-golang/services/user-service/internal/usecase"
@@ -106,7 +104,7 @@ func toProto(u *entity.User) *userv1.User {
 		Email:     u.Email,
 		Username:  u.Username,
 		FullName:  u.FullName,
-		RoleIds:   u.RoleIDs(),
+		Roles:     toProtoRoles(u.Roles),
 		CreatedAt: timestamppb.New(u.CreatedAt),
 		UpdatedAt: timestamppb.New(u.UpdatedAt),
 	}
@@ -118,7 +116,7 @@ func toProtoInternal(u *entity.User) *userv1.UserInternal {
 		Email:          u.Email,
 		Username:       u.Username,
 		FullName:       u.FullName,
-		RoleIds:        u.RoleIDs(),
+		Roles:          toProtoRoles(u.Roles),
 		HashedPassword: u.HashedPassword,
 	}
 }

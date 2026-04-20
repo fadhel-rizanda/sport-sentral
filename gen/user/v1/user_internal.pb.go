@@ -10,6 +10,7 @@ import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	v1 "microservice-golang/gen/rbac/v1"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -28,7 +29,7 @@ type UserInternal struct {
 	Email          string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	Username       string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
 	FullName       string                 `protobuf:"bytes,4,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
-	RoleIds        []string               `protobuf:"bytes,5,rep,name=role_ids,json=roleIds,proto3" json:"role_ids,omitempty"`
+	Roles          []*v1.Role             `protobuf:"bytes,5,rep,name=roles,proto3" json:"roles,omitempty"`
 	HashedPassword string                 `protobuf:"bytes,6,opt,name=hashed_password,json=hashedPassword,proto3" json:"hashed_password,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -92,9 +93,9 @@ func (x *UserInternal) GetFullName() string {
 	return ""
 }
 
-func (x *UserInternal) GetRoleIds() []string {
+func (x *UserInternal) GetRoles() []*v1.Role {
 	if x != nil {
-		return x.RoleIds
+		return x.Roles
 	}
 	return nil
 }
@@ -198,13 +199,13 @@ var File_user_v1_user_internal_proto protoreflect.FileDescriptor
 
 const file_user_v1_user_internal_proto_rawDesc = "" +
 	"\n" +
-	"\x1buser/v1/user_internal.proto\x12\auser.v1\x1a\x1bbuf/validate/validate.proto\"\xb1\x01\n" +
+	"\x1buser/v1/user_internal.proto\x12\auser.v1\x1a\x1bbuf/validate/validate.proto\x1a\x12rbac/v1/role.proto\"\xbb\x01\n" +
 	"\fUserInternal\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
 	"\busername\x18\x03 \x01(\tR\busername\x12\x1b\n" +
-	"\tfull_name\x18\x04 \x01(\tR\bfullName\x12\x19\n" +
-	"\brole_ids\x18\x05 \x03(\tR\aroleIds\x12'\n" +
+	"\tfull_name\x18\x04 \x01(\tR\bfullName\x12#\n" +
+	"\x05roles\x18\x05 \x03(\v2\r.rbac.v1.RoleR\x05roles\x12'\n" +
 	"\x0fhashed_password\x18\x06 \x01(\tR\x0ehashedPassword\">\n" +
 	"\x1dGetUserByEmailInternalRequest\x12\x1d\n" +
 	"\x05email\x18\x01 \x01(\tB\a\xbaH\x04r\x02`\x01R\x05email\"K\n" +
@@ -230,16 +231,18 @@ var file_user_v1_user_internal_proto_goTypes = []any{
 	(*UserInternal)(nil),                   // 0: user.v1.UserInternal
 	(*GetUserByEmailInternalRequest)(nil),  // 1: user.v1.GetUserByEmailInternalRequest
 	(*GetUserByEmailInternalResponse)(nil), // 2: user.v1.GetUserByEmailInternalResponse
+	(*v1.Role)(nil),                        // 3: rbac.v1.Role
 }
 var file_user_v1_user_internal_proto_depIdxs = []int32{
-	0, // 0: user.v1.GetUserByEmailInternalResponse.user:type_name -> user.v1.UserInternal
-	1, // 1: user.v1.UserInternalService.GetUserByEmailInternal:input_type -> user.v1.GetUserByEmailInternalRequest
-	2, // 2: user.v1.UserInternalService.GetUserByEmailInternal:output_type -> user.v1.GetUserByEmailInternalResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	3, // 0: user.v1.UserInternal.roles:type_name -> rbac.v1.Role
+	0, // 1: user.v1.GetUserByEmailInternalResponse.user:type_name -> user.v1.UserInternal
+	1, // 2: user.v1.UserInternalService.GetUserByEmailInternal:input_type -> user.v1.GetUserByEmailInternalRequest
+	2, // 3: user.v1.UserInternalService.GetUserByEmailInternal:output_type -> user.v1.GetUserByEmailInternalResponse
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_user_v1_user_internal_proto_init() }

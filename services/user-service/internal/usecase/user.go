@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 
 	"github.com/google/uuid"
 	"microservice-golang/services/user-service/internal/entity"
@@ -34,6 +35,7 @@ func (uc *userUseCase) CreateUser(ctx context.Context, email, username, fullName
 	}
 
 	if err := uc.repo.Create(ctx, user); err != nil {
+		log.Printf("repo.Create error: %v", err)
 		return nil, err
 	}
 
@@ -54,7 +56,7 @@ func (uc *userUseCase) GetUserByEmail(ctx context.Context, email string) (*entit
 }
 
 func (uc *userUseCase) GetUserByEmailInternal(ctx context.Context, email string) (*entity.User, error) {
-	return uc.repo.GetByEmail(ctx, email)
+	return uc.repo.GetByEmailWithRoles(ctx, email)
 }
 
 func (uc *userUseCase) UpdateUser(ctx context.Context, id, fullName, username string) (*entity.User, error) {

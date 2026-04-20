@@ -5,6 +5,7 @@ package auth.v1;
 option go_package = "microservice-golang/gen/auth/v1;authv1";
 
 import "buf/validate/validate.proto";
+import "user/v1/user.proto";
 
 // ─── Messages ─────────────────────────────────────────────────────────────────
 
@@ -27,6 +28,7 @@ message LoginRequest {
 
 message LoginResponse {
   TokenPair tokens = 1;
+  user.v1.User  user   = 2;
 }
 
 message LogoutRequest {

@@ -10,6 +10,7 @@ import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	v1 "microservice-golang/gen/user/v1"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -137,6 +138,7 @@ func (x *LoginRequest) GetPassword() string {
 type LoginResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Tokens        *TokenPair             `protobuf:"bytes,1,opt,name=tokens,proto3" json:"tokens,omitempty"`
+	User          *v1.User               `protobuf:"bytes,2,opt,name=user,proto3" json:"user,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -174,6 +176,13 @@ func (*LoginResponse) Descriptor() ([]byte, []int) {
 func (x *LoginResponse) GetTokens() *TokenPair {
 	if x != nil {
 		return x.Tokens
+	}
+	return nil
+}
+
+func (x *LoginResponse) GetUser() *v1.User {
+	if x != nil {
+		return x.User
 	}
 	return nil
 }
@@ -462,7 +471,7 @@ var File_auth_v1_auth_proto protoreflect.FileDescriptor
 
 const file_auth_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x12auth/v1/auth.proto\x12\aauth.v1\x1a\x1bbuf/validate/validate.proto\"r\n" +
+	"\x12auth/v1/auth.proto\x12\aauth.v1\x1a\x1bbuf/validate/validate.proto\x1a\x12user/v1/user.proto\"r\n" +
 	"\tTokenPair\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12\x1d\n" +
@@ -470,9 +479,10 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"expires_at\x18\x03 \x01(\x03R\texpiresAt\"R\n" +
 	"\fLoginRequest\x12\x1d\n" +
 	"\x05email\x18\x01 \x01(\tB\a\xbaH\x04r\x02`\x01R\x05email\x12#\n" +
-	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\";\n" +
+	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\"^\n" +
 	"\rLoginResponse\x12*\n" +
-	"\x06tokens\x18\x01 \x01(\v2\x12.auth.v1.TokenPairR\x06tokens\"=\n" +
+	"\x06tokens\x18\x01 \x01(\v2\x12.auth.v1.TokenPairR\x06tokens\x12!\n" +
+	"\x04user\x18\x02 \x01(\v2\r.user.v1.UserR\x04user\"=\n" +
 	"\rLogoutRequest\x12,\n" +
 	"\rrefresh_token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\frefreshToken\"\x10\n" +
 	"\x0eLogoutResponse\"C\n" +
@@ -516,23 +526,25 @@ var file_auth_v1_auth_proto_goTypes = []any{
 	(*RefreshTokenResponse)(nil),  // 6: auth.v1.RefreshTokenResponse
 	(*ValidateTokenRequest)(nil),  // 7: auth.v1.ValidateTokenRequest
 	(*ValidateTokenResponse)(nil), // 8: auth.v1.ValidateTokenResponse
+	(*v1.User)(nil),               // 9: user.v1.User
 }
 var file_auth_v1_auth_proto_depIdxs = []int32{
 	0, // 0: auth.v1.LoginResponse.tokens:type_name -> auth.v1.TokenPair
-	0, // 1: auth.v1.RefreshTokenResponse.tokens:type_name -> auth.v1.TokenPair
-	1, // 2: auth.v1.AuthService.Login:input_type -> auth.v1.LoginRequest
-	3, // 3: auth.v1.AuthService.Logout:input_type -> auth.v1.LogoutRequest
-	5, // 4: auth.v1.AuthService.RefreshToken:input_type -> auth.v1.RefreshTokenRequest
-	7, // 5: auth.v1.AuthService.ValidateToken:input_type -> auth.v1.ValidateTokenRequest
-	2, // 6: auth.v1.AuthService.Login:output_type -> auth.v1.LoginResponse
-	4, // 7: auth.v1.AuthService.Logout:output_type -> auth.v1.LogoutResponse
-	6, // 8: auth.v1.AuthService.RefreshToken:output_type -> auth.v1.RefreshTokenResponse
-	8, // 9: auth.v1.AuthService.ValidateToken:output_type -> auth.v1.ValidateTokenResponse
-	6, // [6:10] is the sub-list for method output_type
-	2, // [2:6] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	9, // 1: auth.v1.LoginResponse.user:type_name -> user.v1.User
+	0, // 2: auth.v1.RefreshTokenResponse.tokens:type_name -> auth.v1.TokenPair
+	1, // 3: auth.v1.AuthService.Login:input_type -> auth.v1.LoginRequest
+	3, // 4: auth.v1.AuthService.Logout:input_type -> auth.v1.LogoutRequest
+	5, // 5: auth.v1.AuthService.RefreshToken:input_type -> auth.v1.RefreshTokenRequest
+	7, // 6: auth.v1.AuthService.ValidateToken:input_type -> auth.v1.ValidateTokenRequest
+	2, // 7: auth.v1.AuthService.Login:output_type -> auth.v1.LoginResponse
+	4, // 8: auth.v1.AuthService.Logout:output_type -> auth.v1.LogoutResponse
+	6, // 9: auth.v1.AuthService.RefreshToken:output_type -> auth.v1.RefreshTokenResponse
+	8, // 10: auth.v1.AuthService.ValidateToken:output_type -> auth.v1.ValidateTokenResponse
+	7, // [7:11] is the sub-list for method output_type
+	3, // [3:7] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_auth_v1_auth_proto_init() }

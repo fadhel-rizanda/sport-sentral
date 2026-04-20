@@ -30,7 +30,7 @@ func (e *ValidationError) Error() string {
 func (e *InvalidArgumentError) Error() string { return e.Reason }
 func (e *UnauthorizedError) Error() string    { return e.Reason }
 func (e *ForbiddenError) Error() string       { return e.Reason }
-func (e *InternalError) Error() string        { return e.Err.Error() }
+func (e *InternalError) Error() string        { return "internal server error" }
 func (e *InternalError) Unwrap() error        { return e.Err }
 
 // ---- Constructors ----
@@ -42,6 +42,43 @@ func InvalidArgument(reason string) error   { return &InvalidArgumentError{Reaso
 func Unauthorized(reason string) error      { return &UnauthorizedError{Reason: reason} }
 func Forbidden(reason string) error         { return &ForbiddenError{Reason: reason} }
 func Internal(err error) error              { return &InternalError{Err: err} }
+
+// ---- Is* helpers ----
+
+func IsNotFound(err error) bool {
+	var e *NotFoundError
+	return errors.As(err, &e)
+}
+
+func IsConflict(err error) bool {
+	var e *ConflictError
+	return errors.As(err, &e)
+}
+
+func IsValidation(err error) bool {
+	var e *ValidationError
+	return errors.As(err, &e)
+}
+
+func IsInvalidArgument(err error) bool {
+	var e *InvalidArgumentError
+	return errors.As(err, &e)
+}
+
+func IsUnauthorized(err error) bool {
+	var e *UnauthorizedError
+	return errors.As(err, &e)
+}
+
+func IsForbidden(err error) bool {
+	var e *ForbiddenError
+	return errors.As(err, &e)
+}
+
+func IsInternal(err error) bool {
+	var e *InternalError
+	return errors.As(err, &e)
+}
 
 // ---- gRPC mapping ----
 

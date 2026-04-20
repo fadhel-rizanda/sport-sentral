@@ -181,3 +181,11 @@ func toProtoRole(r *entity.Role) *rbacv1.Role {
 		UpdatedAt:   timestamppb.New(r.UpdatedAt),
 	}
 }
+
+func toProtoRoles(roles []*entity.Role) []*rbacv1.Role {
+	protoRoles := make([]*rbacv1.Role, len(roles))
+	for i, r := range roles {
+		protoRoles[i] = toProtoRole(r)
+	}
+	return protoRoles
+}
