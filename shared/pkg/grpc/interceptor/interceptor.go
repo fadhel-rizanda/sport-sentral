@@ -22,6 +22,7 @@ func UnaryLogger(log *zap.Logger) grpc.UnaryServerInterceptor {
 			zap.String("method", info.FullMethod),
 			zap.String("code", code.String()),
 			zap.Duration("duration", time.Since(start)),
+			zap.Error(err),
 		)
 		return resp, err
 	}

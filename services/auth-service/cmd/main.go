@@ -2,7 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"github.com/joho/godotenv"
+	"go.uber.org/zap"
+	envConfig "microservice-golang/shared/pkg/config"
+	"microservice-golang/shared/pkg/grpc/interceptor"
+	"microservice-golang/shared/pkg/logger"
 	"net"
 
 	"github.com/redis/go-redis/v9"
@@ -18,10 +22,34 @@ import (
 )
 
 func main() {
+	// ── Environment Variables ─────────────────────────────────────────────────
+	_ = godotenv.Load()
+	env := envConfig.GetEnv("APP_ENV", "development")
+	appName := envConfig.GetEnv("APP_NAME", "microservice-golang")
+	appVersion := envConfig.GetEnv("APP_VERSION", "0.0.1")
+	serviceName := envConfig.GetEnv("SERVICE_NAME", "auth-service")
+	serviceVersion := envConfig.GetEnv("SERVICE_VERSION", "0.0.1")
+
+	// ── Logger ────────────────────────────────────────────────────────────────
+	log := logger.New(env).With(
+		zap.String("app_name", appName),
+		zap.String("app_version", appVersion),
+		zap.String("service", serviceName),
+		zap.String("service_version", serviceVersion),
+		zap.String("env", env),
+	)
+
+	defer func(log *zap.Logger) {
+		err := log.Sync()
+		if err != nil {
+			panic(err)
+		}
+	}(log)
+
 	// ── Config ────────────────────────────────────────────────────────────────
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		log.Fatal("failed to load config", zap.Error(err))
 	}
 
 	// ── JWT Manager ───────────────────────────────────────────────────────────
@@ -45,9 +73,14 @@ func main() {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Fatalf("failed to connect to user-service: %v", err)
+		log.Fatal("failed to connect to user-service", zap.Error(err))
 	}
-	defer userConn.Close()
+	defer func(userConn *grpc.ClientConn) {
+		err := userConn.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(userConn)
 
 	userClient := userv1.NewUserInternalServiceClient(userConn)
 
@@ -58,19 +91,26 @@ func main() {
 	authHandler := handler.NewAuthHandler(authUC)
 
 	// ── gRPC Server ───────────────────────────────────────────────────────────
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			interceptor.UnaryLogger(log),
+			interceptor.UnaryRecovery(log),
+		),
+	)
 
 	authHandler.RegisterGRPC(grpcServer)
+
 	reflection.Register(grpcServer)
 
+	// ── Listen ────────────────────────────────────────────────────────────────
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.GRPC.Port))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatal("failed to listen", zap.Error(err))
 	}
 
-	log.Printf("auth-service gRPC server listening on :%d", cfg.GRPC.Port)
+	log.Info("auth-service gRPC server listening", zap.Int("port", cfg.GRPC.Port))
 
 	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatal("failed to serve", zap.Error(err))
 	}
 }
