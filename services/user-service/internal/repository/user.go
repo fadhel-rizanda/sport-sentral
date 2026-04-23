@@ -25,6 +25,8 @@ type UserRepository interface {
 	GetByIDWithRoles(ctx context.Context, id uuid.UUID) (*entity.User, error)
 	GetByEmailWithRoles(ctx context.Context, email string) (*entity.User, error)
 	GetRoles(ctx context.Context, userID uuid.UUID) ([]*entity.Role, error)
+
+	UpdatePassword(ctx context.Context, user *entity.User) error
 }
 
 type gormUserRepo struct {
@@ -116,8 +118,9 @@ func (r *gormUserRepo) Update(ctx context.Context, user *entity.User) error {
 	result := r.db.WithContext(ctx).
 		Model(user).
 		Updates(map[string]any{
-			"full_name": user.FullName,
-			"username":  user.Username,
+			"full_name":   user.FullName,
+			"username":    user.Username,
+			"verified_at": user.VerifiedAt,
 		})
 
 	if result.Error != nil {
@@ -221,6 +224,19 @@ func (r *gormUserRepo) GetRoles(ctx context.Context, userID uuid.UUID) ([]*entit
 		return nil, apperr.Internal(result.Error)
 	}
 	return user.Roles, nil
+}
+
+func (r *gormUserRepo) UpdatePassword(ctx context.Context, user *entity.User) error {
+	result := r.db.WithContext(ctx).
+		Model(user).
+		Update("hashed_password", user.HashedPassword)
+	if result.Error != nil {
+		return apperr.Internal(result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return apperr.NotFound("user not found")
+	}
+	return nil
 }
 
 func toRoleRefs(ids []uuid.UUID) []*entity.Role {

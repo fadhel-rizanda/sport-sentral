@@ -18,6 +18,7 @@ message User {
   repeated rbac.v1.Role roles = 5;
   google.protobuf.Timestamp created_at = 6;
   google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Timestamp verified_at = 8;
 }
 
 // ─── Requests ─────────────────────────────────────────────────────────────────
@@ -72,6 +73,26 @@ message ListUsersRequest {
   ];
 }
 
+message SendVerifyEmailRequest {
+  string email = 1 [(buf.validate.field).string.email = true];
+}
+
+message VerifyAccountRequest {
+  string token = 1 [(buf.validate.field).string.len = 36];
+}
+
+message ForgotPasswordRequest {
+  string email = 1 [(buf.validate.field).string.email = true];
+}
+
+message ResetPasswordRequest {
+  string token = 1 [(buf.validate.field).string.len = 36];
+  string password = 2 [
+    (buf.validate.field).string.min_len = 8,
+    (buf.validate.field).string.max_len = 72
+  ];
+}
+
 // ─── Responses ────────────────────────────────────────────────────────────────
 
 message CreateUserResponse   { User user = 1; }
@@ -85,6 +106,10 @@ message ListUsersResponse {
   int32 page      = 3;
   int32 page_size = 4;
 }
+message SendVerifyEmailResponse {}
+message VerifyAccountResponse {}
+message ForgotPasswordResponse {}
+message ResetPasswordResponse {}
 
 // ─── Service ──────────────────────────────────────────────────────────────────
 
@@ -95,4 +120,8 @@ service UserService {
   rpc UpdateUser     (UpdateUserRequest)       returns (UpdateUserResponse);
   rpc DeleteUser     (DeleteUserRequest)       returns (DeleteUserResponse);
   rpc ListUsers      (ListUsersRequest)        returns (ListUsersResponse);
+  rpc SendVerifyEmail (SendVerifyEmailRequest) returns (SendVerifyEmailResponse);
+  rpc VerifyAccount   (VerifyAccountRequest) returns (VerifyAccountResponse);
+  rpc ForgotPassword  (ForgotPasswordRequest)   returns (ForgotPasswordResponse);
+  rpc ResetPassword   (ResetPasswordRequest)    returns (ResetPasswordResponse);
 }

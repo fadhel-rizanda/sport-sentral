@@ -17,6 +17,7 @@ type User struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      gorm.DeletedAt `gorm:"index"`
+	VerifiedAt     *time.Time
 
 	Roles []*Role `gorm:"many2many:user_roles;"`
 }
@@ -64,4 +65,18 @@ func (u *User) RoleIDs() []string {
 		ids[i] = role.ID.String()
 	}
 	return ids
+}
+
+func (u *User) Verify() {
+	now := time.Now()
+	u.VerifiedAt = &now
+}
+
+func (u *User) UpdatePassword(newPassword string) error {
+	hashed, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	u.HashedPassword = string(hashed)
+	return nil
 }

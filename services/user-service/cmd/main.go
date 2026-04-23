@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -11,6 +13,7 @@ import (
 	envConfig "microservice-golang/shared/pkg/config"
 	"microservice-golang/shared/pkg/grpc/interceptor"
 	"microservice-golang/shared/pkg/logger"
+	"microservice-golang/shared/pkg/mailer"
 	"net"
 
 	"microservice-golang/services/user-service/internal/config"
@@ -21,6 +24,8 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
 	// ── Environment Variables ─────────────────────────────────────────────────
 	_ = godotenv.Load()
 	env := envConfig.GetEnv("APP_ENV", "development")
@@ -51,6 +56,24 @@ func main() {
 		log.Fatal("failed to load config", zap.Error(err))
 	}
 
+	// ── Redis ─────────────────────────────────────────────────────────────────
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     cfg.Redis.Address,
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+	})
+	if err := redisClient.Ping(ctx).Err(); err != nil {
+		log.Fatal("failed to connect to redis", zap.Error(err))
+	}
+	// ── Mailer ────────────────────────────────────────────────────────────────
+	mailerClient := mailer.New(mailer.Config{
+		Host:     cfg.Mailer.Host,
+		Port:     cfg.Mailer.Port,
+		Username: cfg.Mailer.Username,
+		Password: cfg.Mailer.Password,
+		From:     cfg.Mailer.From,
+	})
+
 	// ── Database ──────────────────────────────────────────────────────────────
 	db, err := gorm.Open(postgres.Open(cfg.Database.DSN()), &gorm.Config{})
 	if err != nil {
@@ -71,7 +94,7 @@ func main() {
 	permissionRepo := repository.NewGormPermissionRepository(db)
 
 	// ── Usecase ───────────────────────────────────────────────────────────────
-	userUC := usecase.NewUserUseCase(userRepo)
+	userUC := usecase.NewUserUseCase(userRepo, redisClient, mailerClient, cfg.AppURL)
 	roleUC := usecase.NewRoleUseCase(roleRepo, permissionRepo, userRepo)
 	permissionUC := usecase.NewPermissionUseCase(permissionRepo)
 

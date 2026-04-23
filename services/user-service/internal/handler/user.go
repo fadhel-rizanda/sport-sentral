@@ -85,6 +85,34 @@ func (h *UserHandler) ListUsers(ctx context.Context, req *userv1.ListUsersReques
 	}, nil
 }
 
+func (h *UserHandler) SendVerifyEmail(ctx context.Context, req *userv1.SendVerifyEmailRequest) (*userv1.SendVerifyEmailResponse, error) {
+	if err := h.uc.SendVerifyEmail(ctx, req.Email); err != nil {
+		return nil, apperr.ToGRPC(err)
+	}
+	return &userv1.SendVerifyEmailResponse{}, nil
+}
+
+func (h *UserHandler) VerifyAccount(ctx context.Context, req *userv1.VerifyAccountRequest) (*userv1.VerifyAccountResponse, error) {
+	if err := h.uc.VerifyAccount(ctx, req.Token); err != nil {
+		return nil, apperr.ToGRPC(err)
+	}
+	return &userv1.VerifyAccountResponse{}, nil
+}
+
+func (h *UserHandler) ForgotPassword(ctx context.Context, req *userv1.ForgotPasswordRequest) (*userv1.ForgotPasswordResponse, error) {
+	if err := h.uc.ForgotPassword(ctx, req.Email); err != nil {
+		return nil, apperr.ToGRPC(err)
+	}
+	return &userv1.ForgotPasswordResponse{}, nil
+}
+
+func (h *UserHandler) ResetPassword(ctx context.Context, req *userv1.ResetPasswordRequest) (*userv1.ResetPasswordResponse, error) {
+	if err := h.uc.ResetPassword(ctx, req.Token, req.Password); err != nil {
+		return nil, apperr.ToGRPC(err)
+	}
+	return &userv1.ResetPasswordResponse{}, nil
+}
+
 // ─── UserInternalService ──────────────────────────────────────────────────────
 
 func (h *UserHandler) GetUserByEmailInternal(ctx context.Context, req *userv1.GetUserByEmailInternalRequest) (*userv1.GetUserByEmailInternalResponse, error) {
@@ -99,18 +127,29 @@ func (h *UserHandler) GetUserByEmailInternal(ctx context.Context, req *userv1.Ge
 
 // ─── Mappers ──────────────────────────────────────────────────────────────────
 func toProto(u *entity.User) *userv1.User {
+	var verifiedAt *timestamppb.Timestamp
+	if u.VerifiedAt != nil {
+		verifiedAt = timestamppb.New(*u.VerifiedAt)
+	}
+
 	return &userv1.User{
-		Id:        u.ID.String(),
-		Email:     u.Email,
-		Username:  u.Username,
-		FullName:  u.FullName,
-		Roles:     toProtoRoles(u.Roles),
-		CreatedAt: timestamppb.New(u.CreatedAt),
-		UpdatedAt: timestamppb.New(u.UpdatedAt),
+		Id:         u.ID.String(),
+		Email:      u.Email,
+		Username:   u.Username,
+		FullName:   u.FullName,
+		Roles:      toProtoRoles(u.Roles),
+		CreatedAt:  timestamppb.New(u.CreatedAt),
+		UpdatedAt:  timestamppb.New(u.UpdatedAt),
+		VerifiedAt: verifiedAt,
 	}
 }
 
 func toProtoInternal(u *entity.User) *userv1.UserInternal {
+	var verifiedAt *timestamppb.Timestamp
+	if u.VerifiedAt != nil {
+		verifiedAt = timestamppb.New(*u.VerifiedAt)
+	}
+
 	return &userv1.UserInternal{
 		Id:             u.ID.String(),
 		Email:          u.Email,
@@ -118,5 +157,6 @@ func toProtoInternal(u *entity.User) *userv1.UserInternal {
 		FullName:       u.FullName,
 		Roles:          toProtoRoles(u.Roles),
 		HashedPassword: u.HashedPassword,
+		VerifiedAt:     verifiedAt,
 	}
 }

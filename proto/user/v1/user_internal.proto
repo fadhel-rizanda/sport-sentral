@@ -4,6 +4,7 @@ package user.v1;
 
 option go_package = "microservice-golang/gen/user/v1;userv1";
 
+import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
 import "rbac/v1/role.proto";
 
@@ -16,6 +17,7 @@ message UserInternal {
   string full_name         = 4;
   repeated rbac.v1.Role roles = 5;
   string hashed_password   = 6;
+  google.protobuf.Timestamp verified_at = 7;
 }
 
 // ─── Requests/Responses ───────────────────────────────────────────────────────

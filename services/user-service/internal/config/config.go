@@ -11,6 +11,9 @@ import (
 type Config struct {
 	GRPC     GRPCConfig
 	Database DatabaseConfig
+	Redis    RedisConfig
+	Mailer   MailerConfig
+	AppURL   string
 }
 
 type GRPCConfig struct {
@@ -24,6 +27,20 @@ type DatabaseConfig struct {
 	Password string
 	Name     string
 	SSLMode  string
+}
+
+type MailerConfig struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	From     string
+}
+
+type RedisConfig struct {
+	Address  string
+	Password string
+	DB       int
 }
 
 func (d DatabaseConfig) DSN() string {
@@ -46,6 +63,13 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("invalid DB_PORT: %w", err)
 	}
 
+	mailerPort, err := strconv.Atoi(envConfig.GetEnv("SMTP_PORT", "587"))
+	if err != nil {
+		return nil, fmt.Errorf("invalid SMTP_PORT: %w", err)
+	}
+
+	appURL := envConfig.MustGetEnv("APP_URL")
+
 	return &Config{
 		GRPC: GRPCConfig{
 			Port: grpcPort,
@@ -58,5 +82,13 @@ func Load() (*Config, error) {
 			Name:     envConfig.MustGetEnv("DB_NAME"),
 			SSLMode:  envConfig.GetEnv("DB_SSLMODE", "disable"),
 		},
+		Mailer: MailerConfig{
+			Host:     envConfig.MustGetEnv("SMTP_HOST"),
+			Port:     mailerPort,
+			Username: envConfig.MustGetEnv("SMTP_USERNAME"),
+			Password: envConfig.MustGetEnv("SMTP_PASSWORD"),
+			From:     envConfig.MustGetEnv("SMTP_FROM"),
+		},
+		AppURL: appURL,
 	}, nil
 }

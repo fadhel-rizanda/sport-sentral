@@ -51,6 +51,10 @@ func (uc *authUseCase) Login(ctx context.Context, email, password string) (*Logi
 
 	user := resp.User
 
+	if user.VerifiedAt == nil {
+		return nil, apperr.Unauthorized("account not verified")
+	}
+
 	if !checkPassword(user.HashedPassword, password) {
 		return nil, apperr.Unauthorized("invalid email or password")
 	}
