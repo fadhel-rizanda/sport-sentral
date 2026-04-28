@@ -6,19 +6,27 @@ option go_package = "microservice-golang/gen/user/v1;userv1";
 
 import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
-import "rbac/v1/role.proto";
 
-// ─── Message ──────────────────────────────────────────────────────────────────
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+message UserProfile {
+  string role_id   = 1;
+  string role_name = 2;
+  bool   is_active = 3;
+  string status    = 4;
+}
 
 message User {
-  string id                = 1;
-  string email             = 2;
-  string username          = 3;
-  string full_name         = 4;
-  repeated rbac.v1.Role roles = 5;
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp updated_at = 7;
-  google.protobuf.Timestamp verified_at = 8;
+  string    id             = 1;
+  string    email          = 2;
+  string    username       = 3;
+  string    full_name      = 4;
+  string    status         = 5;
+  string    active_profile = 6;
+  repeated UserProfile profiles = 7;
+  google.protobuf.Timestamp created_at  = 8;
+  google.protobuf.Timestamp updated_at  = 9;
+  google.protobuf.Timestamp verified_at = 10;
 }
 
 // ─── Requests ─────────────────────────────────────────────────────────────────
@@ -40,21 +48,18 @@ message CreateUserRequest {
     (buf.validate.field).string.min_len = 8,
     (buf.validate.field).string.max_len = 72
   ];
+  string role_name = 5 [
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message GetUserRequest {
   string id = 1 [(buf.validate.field).string.uuid = true];
 }
 
-message GetUserByEmailRequest {
-  string email = 1 [(buf.validate.field).string.email = true];
-}
-
 message UpdateUserRequest {
   string id = 1 [(buf.validate.field).string.uuid = true];
-  string full_name = 2 [
-    (buf.validate.field).string.max_len = 100
-  ];
+  string full_name = 2 [(buf.validate.field).string.max_len = 100];
   string username = 3 [
     (buf.validate.field).string.max_len = 50,
     (buf.validate.field).string.pattern = "^[a-zA-Z0-9_]*$"
@@ -97,7 +102,6 @@ message ResetPasswordRequest {
 
 message CreateUserResponse   { User user = 1; }
 message GetUserResponse      { User user = 1; }
-message GetUserByEmailResponse { User user = 1; }
 message UpdateUserResponse   { User user = 1; }
 message DeleteUserResponse   {}
 message ListUsersResponse {
@@ -107,21 +111,20 @@ message ListUsersResponse {
   int32 page_size = 4;
 }
 message SendVerifyEmailResponse {}
-message VerifyAccountResponse {}
-message ForgotPasswordResponse {}
-message ResetPasswordResponse {}
+message VerifyAccountResponse   {}
+message ForgotPasswordResponse  {}
+message ResetPasswordResponse   {}
 
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 service UserService {
-  rpc CreateUser     (CreateUserRequest)       returns (CreateUserResponse);
-  rpc GetUser        (GetUserRequest)          returns (GetUserResponse);
-  rpc GetUserByEmail (GetUserByEmailRequest)   returns (GetUserByEmailResponse);
-  rpc UpdateUser     (UpdateUserRequest)       returns (UpdateUserResponse);
-  rpc DeleteUser     (DeleteUserRequest)       returns (DeleteUserResponse);
-  rpc ListUsers      (ListUsersRequest)        returns (ListUsersResponse);
+  rpc CreateUser      (CreateUserRequest)      returns (CreateUserResponse);
+  rpc GetUser         (GetUserRequest)         returns (GetUserResponse);
+  rpc UpdateUser      (UpdateUserRequest)      returns (UpdateUserResponse);
+  rpc DeleteUser      (DeleteUserRequest)      returns (DeleteUserResponse);
+  rpc ListUsers       (ListUsersRequest)       returns (ListUsersResponse);
   rpc SendVerifyEmail (SendVerifyEmailRequest) returns (SendVerifyEmailResponse);
-  rpc VerifyAccount   (VerifyAccountRequest) returns (VerifyAccountResponse);
-  rpc ForgotPassword  (ForgotPasswordRequest)   returns (ForgotPasswordResponse);
-  rpc ResetPassword   (ResetPasswordRequest)    returns (ResetPasswordResponse);
+  rpc VerifyAccount   (VerifyAccountRequest)   returns (VerifyAccountResponse);
+  rpc ForgotPassword  (ForgotPasswordRequest)  returns (ForgotPasswordResponse);
+  rpc ResetPassword   (ResetPasswordRequest)   returns (ResetPasswordResponse);
 }

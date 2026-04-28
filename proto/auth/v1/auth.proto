@@ -5,14 +5,13 @@ package auth.v1;
 option go_package = "microservice-golang/gen/auth/v1;authv1";
 
 import "buf/validate/validate.proto";
-import "user/v1/user.proto";
 
 // ─── Messages ─────────────────────────────────────────────────────────────────
 
 message TokenPair {
   string access_token  = 1;
   string refresh_token = 2;
-  int64  expires_at    = 3; // unix timestamp
+  int64  expires_at    = 3;
 }
 
 // ─── Requests/Responses ───────────────────────────────────────────────────────
@@ -27,8 +26,11 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  TokenPair tokens = 1;
-  user.v1.User  user   = 2;
+  TokenPair tokens        = 1;
+  string    user_id       = 2;
+  string    email         = 3;
+  string    username      = 4;
+  string    active_profile = 5;
 }
 
 message LogoutRequest {
@@ -56,17 +58,18 @@ message ValidateTokenRequest {
 }
 
 message ValidateTokenResponse {
-  string          user_id  = 1;
-  string          email    = 2;
-  string          username = 3;
-  repeated string role_ids = 4;
+  string          user_id        = 1;
+  string          email          = 2;
+  string          username       = 3;
+  repeated string role_ids       = 4;
+  string          active_profile = 5;
 }
 
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 service AuthService {
-  rpc Login         (LoginRequest)         returns (LoginResponse);
-  rpc Logout        (LogoutRequest)        returns (LogoutResponse);
-  rpc RefreshToken  (RefreshTokenRequest)  returns (RefreshTokenResponse);
+  rpc Login         (LoginRequest)        returns (LoginResponse);
+  rpc Logout        (LogoutRequest)       returns (LogoutResponse);
+  rpc RefreshToken  (RefreshTokenRequest) returns (RefreshTokenResponse);
   rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
 }

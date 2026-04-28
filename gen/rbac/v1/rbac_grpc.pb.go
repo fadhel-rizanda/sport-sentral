@@ -19,603 +19,215 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RBACService_CreateRole_FullMethodName               = "/rbac.v1.RBACService/CreateRole"
-	RBACService_GetRole_FullMethodName                  = "/rbac.v1.RBACService/GetRole"
-	RBACService_UpdateRole_FullMethodName               = "/rbac.v1.RBACService/UpdateRole"
-	RBACService_DeleteRole_FullMethodName               = "/rbac.v1.RBACService/DeleteRole"
-	RBACService_ListRoles_FullMethodName                = "/rbac.v1.RBACService/ListRoles"
-	RBACService_CreatePermission_FullMethodName         = "/rbac.v1.RBACService/CreatePermission"
-	RBACService_GetPermission_FullMethodName            = "/rbac.v1.RBACService/GetPermission"
-	RBACService_DeletePermission_FullMethodName         = "/rbac.v1.RBACService/DeletePermission"
-	RBACService_ListPermissions_FullMethodName          = "/rbac.v1.RBACService/ListPermissions"
-	RBACService_AssignPermissionToRole_FullMethodName   = "/rbac.v1.RBACService/AssignPermissionToRole"
-	RBACService_RevokePermissionFromRole_FullMethodName = "/rbac.v1.RBACService/RevokePermissionFromRole"
-	RBACService_AssignRolesToUser_FullMethodName        = "/rbac.v1.RBACService/AssignRolesToUser"
-	RBACService_RemoveRolesFromUser_FullMethodName      = "/rbac.v1.RBACService/RemoveRolesFromUser"
-	RBACService_CheckPermission_FullMethodName          = "/rbac.v1.RBACService/CheckPermission"
+	RbacService_ApplyProfile_FullMethodName   = "/rbac.v1.RbacService/ApplyProfile"
+	RbacService_ToggleProfile_FullMethodName  = "/rbac.v1.RbacService/ToggleProfile"
+	RbacService_ApproveProfile_FullMethodName = "/rbac.v1.RbacService/ApproveProfile"
+	RbacService_RejectProfile_FullMethodName  = "/rbac.v1.RbacService/RejectProfile"
 )
 
-// RBACServiceClient is the client API for RBACService service.
+// RbacServiceClient is the client API for RbacService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type RBACServiceClient interface {
-	// Role CRUD
-	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*CreateRoleResponse, error)
-	GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*GetRoleResponse, error)
-	UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*UpdateRoleResponse, error)
-	DeleteRole(ctx context.Context, in *DeleteRoleRequest, opts ...grpc.CallOption) (*DeleteRoleResponse, error)
-	ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error)
-	// Permission CRUD
-	CreatePermission(ctx context.Context, in *CreatePermissionRequest, opts ...grpc.CallOption) (*CreatePermissionResponse, error)
-	GetPermission(ctx context.Context, in *GetPermissionRequest, opts ...grpc.CallOption) (*GetPermissionResponse, error)
-	DeletePermission(ctx context.Context, in *DeletePermissionRequest, opts ...grpc.CallOption) (*DeletePermissionResponse, error)
-	ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error)
-	// Assignment
-	AssignPermissionToRole(ctx context.Context, in *AssignPermissionToRoleRequest, opts ...grpc.CallOption) (*AssignPermissionToRoleResponse, error)
-	RevokePermissionFromRole(ctx context.Context, in *RevokePermissionFromRoleRequest, opts ...grpc.CallOption) (*RevokePermissionFromRoleResponse, error)
-	AssignRolesToUser(ctx context.Context, in *AssignRolesToUserRequest, opts ...grpc.CallOption) (*AssignRolesToUserResponse, error)
-	RemoveRolesFromUser(ctx context.Context, in *RemoveRolesFromUserRequest, opts ...grpc.CallOption) (*RemoveRolesFromUserResponse, error)
-	// Authorization check
-	CheckPermission(ctx context.Context, in *CheckPermissionRequest, opts ...grpc.CallOption) (*CheckPermissionResponse, error)
+type RbacServiceClient interface {
+	ApplyProfile(ctx context.Context, in *ApplyProfileRequest, opts ...grpc.CallOption) (*ApplyProfileResponse, error)
+	ToggleProfile(ctx context.Context, in *ToggleProfileRequest, opts ...grpc.CallOption) (*ToggleProfileResponse, error)
+	ApproveProfile(ctx context.Context, in *ApproveProfileRequest, opts ...grpc.CallOption) (*ApproveProfileResponse, error)
+	RejectProfile(ctx context.Context, in *RejectProfileRequest, opts ...grpc.CallOption) (*RejectProfileResponse, error)
 }
 
-type rBACServiceClient struct {
+type rbacServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewRBACServiceClient(cc grpc.ClientConnInterface) RBACServiceClient {
-	return &rBACServiceClient{cc}
+func NewRbacServiceClient(cc grpc.ClientConnInterface) RbacServiceClient {
+	return &rbacServiceClient{cc}
 }
 
-func (c *rBACServiceClient) CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*CreateRoleResponse, error) {
+func (c *rbacServiceClient) ApplyProfile(ctx context.Context, in *ApplyProfileRequest, opts ...grpc.CallOption) (*ApplyProfileResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateRoleResponse)
-	err := c.cc.Invoke(ctx, RBACService_CreateRole_FullMethodName, in, out, cOpts...)
+	out := new(ApplyProfileResponse)
+	err := c.cc.Invoke(ctx, RbacService_ApplyProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rBACServiceClient) GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*GetRoleResponse, error) {
+func (c *rbacServiceClient) ToggleProfile(ctx context.Context, in *ToggleProfileRequest, opts ...grpc.CallOption) (*ToggleProfileResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetRoleResponse)
-	err := c.cc.Invoke(ctx, RBACService_GetRole_FullMethodName, in, out, cOpts...)
+	out := new(ToggleProfileResponse)
+	err := c.cc.Invoke(ctx, RbacService_ToggleProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rBACServiceClient) UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*UpdateRoleResponse, error) {
+func (c *rbacServiceClient) ApproveProfile(ctx context.Context, in *ApproveProfileRequest, opts ...grpc.CallOption) (*ApproveProfileResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateRoleResponse)
-	err := c.cc.Invoke(ctx, RBACService_UpdateRole_FullMethodName, in, out, cOpts...)
+	out := new(ApproveProfileResponse)
+	err := c.cc.Invoke(ctx, RbacService_ApproveProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rBACServiceClient) DeleteRole(ctx context.Context, in *DeleteRoleRequest, opts ...grpc.CallOption) (*DeleteRoleResponse, error) {
+func (c *rbacServiceClient) RejectProfile(ctx context.Context, in *RejectProfileRequest, opts ...grpc.CallOption) (*RejectProfileResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteRoleResponse)
-	err := c.cc.Invoke(ctx, RBACService_DeleteRole_FullMethodName, in, out, cOpts...)
+	out := new(RejectProfileResponse)
+	err := c.cc.Invoke(ctx, RbacService_RejectProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rBACServiceClient) ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListRolesResponse)
-	err := c.cc.Invoke(ctx, RBACService_ListRoles_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *rBACServiceClient) CreatePermission(ctx context.Context, in *CreatePermissionRequest, opts ...grpc.CallOption) (*CreatePermissionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreatePermissionResponse)
-	err := c.cc.Invoke(ctx, RBACService_CreatePermission_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *rBACServiceClient) GetPermission(ctx context.Context, in *GetPermissionRequest, opts ...grpc.CallOption) (*GetPermissionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetPermissionResponse)
-	err := c.cc.Invoke(ctx, RBACService_GetPermission_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *rBACServiceClient) DeletePermission(ctx context.Context, in *DeletePermissionRequest, opts ...grpc.CallOption) (*DeletePermissionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeletePermissionResponse)
-	err := c.cc.Invoke(ctx, RBACService_DeletePermission_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *rBACServiceClient) ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListPermissionsResponse)
-	err := c.cc.Invoke(ctx, RBACService_ListPermissions_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *rBACServiceClient) AssignPermissionToRole(ctx context.Context, in *AssignPermissionToRoleRequest, opts ...grpc.CallOption) (*AssignPermissionToRoleResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AssignPermissionToRoleResponse)
-	err := c.cc.Invoke(ctx, RBACService_AssignPermissionToRole_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *rBACServiceClient) RevokePermissionFromRole(ctx context.Context, in *RevokePermissionFromRoleRequest, opts ...grpc.CallOption) (*RevokePermissionFromRoleResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RevokePermissionFromRoleResponse)
-	err := c.cc.Invoke(ctx, RBACService_RevokePermissionFromRole_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *rBACServiceClient) AssignRolesToUser(ctx context.Context, in *AssignRolesToUserRequest, opts ...grpc.CallOption) (*AssignRolesToUserResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AssignRolesToUserResponse)
-	err := c.cc.Invoke(ctx, RBACService_AssignRolesToUser_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *rBACServiceClient) RemoveRolesFromUser(ctx context.Context, in *RemoveRolesFromUserRequest, opts ...grpc.CallOption) (*RemoveRolesFromUserResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RemoveRolesFromUserResponse)
-	err := c.cc.Invoke(ctx, RBACService_RemoveRolesFromUser_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *rBACServiceClient) CheckPermission(ctx context.Context, in *CheckPermissionRequest, opts ...grpc.CallOption) (*CheckPermissionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CheckPermissionResponse)
-	err := c.cc.Invoke(ctx, RBACService_CheckPermission_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// RBACServiceServer is the server API for RBACService service.
-// All implementations must embed UnimplementedRBACServiceServer
+// RbacServiceServer is the server API for RbacService service.
+// All implementations must embed UnimplementedRbacServiceServer
 // for forward compatibility.
-type RBACServiceServer interface {
-	// Role CRUD
-	CreateRole(context.Context, *CreateRoleRequest) (*CreateRoleResponse, error)
-	GetRole(context.Context, *GetRoleRequest) (*GetRoleResponse, error)
-	UpdateRole(context.Context, *UpdateRoleRequest) (*UpdateRoleResponse, error)
-	DeleteRole(context.Context, *DeleteRoleRequest) (*DeleteRoleResponse, error)
-	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
-	// Permission CRUD
-	CreatePermission(context.Context, *CreatePermissionRequest) (*CreatePermissionResponse, error)
-	GetPermission(context.Context, *GetPermissionRequest) (*GetPermissionResponse, error)
-	DeletePermission(context.Context, *DeletePermissionRequest) (*DeletePermissionResponse, error)
-	ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error)
-	// Assignment
-	AssignPermissionToRole(context.Context, *AssignPermissionToRoleRequest) (*AssignPermissionToRoleResponse, error)
-	RevokePermissionFromRole(context.Context, *RevokePermissionFromRoleRequest) (*RevokePermissionFromRoleResponse, error)
-	AssignRolesToUser(context.Context, *AssignRolesToUserRequest) (*AssignRolesToUserResponse, error)
-	RemoveRolesFromUser(context.Context, *RemoveRolesFromUserRequest) (*RemoveRolesFromUserResponse, error)
-	// Authorization check
-	CheckPermission(context.Context, *CheckPermissionRequest) (*CheckPermissionResponse, error)
-	mustEmbedUnimplementedRBACServiceServer()
+type RbacServiceServer interface {
+	ApplyProfile(context.Context, *ApplyProfileRequest) (*ApplyProfileResponse, error)
+	ToggleProfile(context.Context, *ToggleProfileRequest) (*ToggleProfileResponse, error)
+	ApproveProfile(context.Context, *ApproveProfileRequest) (*ApproveProfileResponse, error)
+	RejectProfile(context.Context, *RejectProfileRequest) (*RejectProfileResponse, error)
+	mustEmbedUnimplementedRbacServiceServer()
 }
 
-// UnimplementedRBACServiceServer must be embedded to have
+// UnimplementedRbacServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedRBACServiceServer struct{}
+type UnimplementedRbacServiceServer struct{}
 
-func (UnimplementedRBACServiceServer) CreateRole(context.Context, *CreateRoleRequest) (*CreateRoleResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method CreateRole not implemented")
+func (UnimplementedRbacServiceServer) ApplyProfile(context.Context, *ApplyProfileRequest) (*ApplyProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ApplyProfile not implemented")
 }
-func (UnimplementedRBACServiceServer) GetRole(context.Context, *GetRoleRequest) (*GetRoleResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetRole not implemented")
+func (UnimplementedRbacServiceServer) ToggleProfile(context.Context, *ToggleProfileRequest) (*ToggleProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ToggleProfile not implemented")
 }
-func (UnimplementedRBACServiceServer) UpdateRole(context.Context, *UpdateRoleRequest) (*UpdateRoleResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method UpdateRole not implemented")
+func (UnimplementedRbacServiceServer) ApproveProfile(context.Context, *ApproveProfileRequest) (*ApproveProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ApproveProfile not implemented")
 }
-func (UnimplementedRBACServiceServer) DeleteRole(context.Context, *DeleteRoleRequest) (*DeleteRoleResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method DeleteRole not implemented")
+func (UnimplementedRbacServiceServer) RejectProfile(context.Context, *RejectProfileRequest) (*RejectProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RejectProfile not implemented")
 }
-func (UnimplementedRBACServiceServer) ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListRoles not implemented")
-}
-func (UnimplementedRBACServiceServer) CreatePermission(context.Context, *CreatePermissionRequest) (*CreatePermissionResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method CreatePermission not implemented")
-}
-func (UnimplementedRBACServiceServer) GetPermission(context.Context, *GetPermissionRequest) (*GetPermissionResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetPermission not implemented")
-}
-func (UnimplementedRBACServiceServer) DeletePermission(context.Context, *DeletePermissionRequest) (*DeletePermissionResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method DeletePermission not implemented")
-}
-func (UnimplementedRBACServiceServer) ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListPermissions not implemented")
-}
-func (UnimplementedRBACServiceServer) AssignPermissionToRole(context.Context, *AssignPermissionToRoleRequest) (*AssignPermissionToRoleResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method AssignPermissionToRole not implemented")
-}
-func (UnimplementedRBACServiceServer) RevokePermissionFromRole(context.Context, *RevokePermissionFromRoleRequest) (*RevokePermissionFromRoleResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method RevokePermissionFromRole not implemented")
-}
-func (UnimplementedRBACServiceServer) AssignRolesToUser(context.Context, *AssignRolesToUserRequest) (*AssignRolesToUserResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method AssignRolesToUser not implemented")
-}
-func (UnimplementedRBACServiceServer) RemoveRolesFromUser(context.Context, *RemoveRolesFromUserRequest) (*RemoveRolesFromUserResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method RemoveRolesFromUser not implemented")
-}
-func (UnimplementedRBACServiceServer) CheckPermission(context.Context, *CheckPermissionRequest) (*CheckPermissionResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method CheckPermission not implemented")
-}
-func (UnimplementedRBACServiceServer) mustEmbedUnimplementedRBACServiceServer() {}
-func (UnimplementedRBACServiceServer) testEmbeddedByValue()                     {}
+func (UnimplementedRbacServiceServer) mustEmbedUnimplementedRbacServiceServer() {}
+func (UnimplementedRbacServiceServer) testEmbeddedByValue()                     {}
 
-// UnsafeRBACServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to RBACServiceServer will
+// UnsafeRbacServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to RbacServiceServer will
 // result in compilation errors.
-type UnsafeRBACServiceServer interface {
-	mustEmbedUnimplementedRBACServiceServer()
+type UnsafeRbacServiceServer interface {
+	mustEmbedUnimplementedRbacServiceServer()
 }
 
-func RegisterRBACServiceServer(s grpc.ServiceRegistrar, srv RBACServiceServer) {
-	// If the following call panics, it indicates UnimplementedRBACServiceServer was
+func RegisterRbacServiceServer(s grpc.ServiceRegistrar, srv RbacServiceServer) {
+	// If the following call panics, it indicates UnimplementedRbacServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&RBACService_ServiceDesc, srv)
+	s.RegisterService(&RbacService_ServiceDesc, srv)
 }
 
-func _RBACService_CreateRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateRoleRequest)
+func _RbacService_ApplyProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApplyProfileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RBACServiceServer).CreateRole(ctx, in)
+		return srv.(RbacServiceServer).ApplyProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RBACService_CreateRole_FullMethodName,
+		FullMethod: RbacService_ApplyProfile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).CreateRole(ctx, req.(*CreateRoleRequest))
+		return srv.(RbacServiceServer).ApplyProfile(ctx, req.(*ApplyProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RBACService_GetRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRoleRequest)
+func _RbacService_ToggleProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ToggleProfileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RBACServiceServer).GetRole(ctx, in)
+		return srv.(RbacServiceServer).ToggleProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RBACService_GetRole_FullMethodName,
+		FullMethod: RbacService_ToggleProfile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).GetRole(ctx, req.(*GetRoleRequest))
+		return srv.(RbacServiceServer).ToggleProfile(ctx, req.(*ToggleProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RBACService_UpdateRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateRoleRequest)
+func _RbacService_ApproveProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApproveProfileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RBACServiceServer).UpdateRole(ctx, in)
+		return srv.(RbacServiceServer).ApproveProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RBACService_UpdateRole_FullMethodName,
+		FullMethod: RbacService_ApproveProfile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).UpdateRole(ctx, req.(*UpdateRoleRequest))
+		return srv.(RbacServiceServer).ApproveProfile(ctx, req.(*ApproveProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RBACService_DeleteRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteRoleRequest)
+func _RbacService_RejectProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RejectProfileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RBACServiceServer).DeleteRole(ctx, in)
+		return srv.(RbacServiceServer).RejectProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RBACService_DeleteRole_FullMethodName,
+		FullMethod: RbacService_RejectProfile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).DeleteRole(ctx, req.(*DeleteRoleRequest))
+		return srv.(RbacServiceServer).RejectProfile(ctx, req.(*RejectProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RBACService_ListRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListRolesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RBACServiceServer).ListRoles(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RBACService_ListRoles_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).ListRoles(ctx, req.(*ListRolesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RBACService_CreatePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreatePermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RBACServiceServer).CreatePermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RBACService_CreatePermission_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).CreatePermission(ctx, req.(*CreatePermissionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RBACService_GetPermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RBACServiceServer).GetPermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RBACService_GetPermission_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).GetPermission(ctx, req.(*GetPermissionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RBACService_DeletePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeletePermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RBACServiceServer).DeletePermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RBACService_DeletePermission_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).DeletePermission(ctx, req.(*DeletePermissionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RBACService_ListPermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListPermissionsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RBACServiceServer).ListPermissions(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RBACService_ListPermissions_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).ListPermissions(ctx, req.(*ListPermissionsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RBACService_AssignPermissionToRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AssignPermissionToRoleRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RBACServiceServer).AssignPermissionToRole(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RBACService_AssignPermissionToRole_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).AssignPermissionToRole(ctx, req.(*AssignPermissionToRoleRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RBACService_RevokePermissionFromRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RevokePermissionFromRoleRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RBACServiceServer).RevokePermissionFromRole(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RBACService_RevokePermissionFromRole_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).RevokePermissionFromRole(ctx, req.(*RevokePermissionFromRoleRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RBACService_AssignRolesToUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AssignRolesToUserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RBACServiceServer).AssignRolesToUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RBACService_AssignRolesToUser_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).AssignRolesToUser(ctx, req.(*AssignRolesToUserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RBACService_RemoveRolesFromUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveRolesFromUserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RBACServiceServer).RemoveRolesFromUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RBACService_RemoveRolesFromUser_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).RemoveRolesFromUser(ctx, req.(*RemoveRolesFromUserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RBACService_CheckPermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CheckPermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RBACServiceServer).CheckPermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RBACService_CheckPermission_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RBACServiceServer).CheckPermission(ctx, req.(*CheckPermissionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// RBACService_ServiceDesc is the grpc.ServiceDesc for RBACService service.
+// RbacService_ServiceDesc is the grpc.ServiceDesc for RbacService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var RBACService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "rbac.v1.RBACService",
-	HandlerType: (*RBACServiceServer)(nil),
+var RbacService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "rbac.v1.RbacService",
+	HandlerType: (*RbacServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateRole",
-			Handler:    _RBACService_CreateRole_Handler,
+			MethodName: "ApplyProfile",
+			Handler:    _RbacService_ApplyProfile_Handler,
 		},
 		{
-			MethodName: "GetRole",
-			Handler:    _RBACService_GetRole_Handler,
+			MethodName: "ToggleProfile",
+			Handler:    _RbacService_ToggleProfile_Handler,
 		},
 		{
-			MethodName: "UpdateRole",
-			Handler:    _RBACService_UpdateRole_Handler,
+			MethodName: "ApproveProfile",
+			Handler:    _RbacService_ApproveProfile_Handler,
 		},
 		{
-			MethodName: "DeleteRole",
-			Handler:    _RBACService_DeleteRole_Handler,
-		},
-		{
-			MethodName: "ListRoles",
-			Handler:    _RBACService_ListRoles_Handler,
-		},
-		{
-			MethodName: "CreatePermission",
-			Handler:    _RBACService_CreatePermission_Handler,
-		},
-		{
-			MethodName: "GetPermission",
-			Handler:    _RBACService_GetPermission_Handler,
-		},
-		{
-			MethodName: "DeletePermission",
-			Handler:    _RBACService_DeletePermission_Handler,
-		},
-		{
-			MethodName: "ListPermissions",
-			Handler:    _RBACService_ListPermissions_Handler,
-		},
-		{
-			MethodName: "AssignPermissionToRole",
-			Handler:    _RBACService_AssignPermissionToRole_Handler,
-		},
-		{
-			MethodName: "RevokePermissionFromRole",
-			Handler:    _RBACService_RevokePermissionFromRole_Handler,
-		},
-		{
-			MethodName: "AssignRolesToUser",
-			Handler:    _RBACService_AssignRolesToUser_Handler,
-		},
-		{
-			MethodName: "RemoveRolesFromUser",
-			Handler:    _RBACService_RemoveRolesFromUser_Handler,
-		},
-		{
-			MethodName: "CheckPermission",
-			Handler:    _RBACService_CheckPermission_Handler,
+			MethodName: "RejectProfile",
+			Handler:    _RbacService_RejectProfile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

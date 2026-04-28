@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"time"
 )
 
 func GetEnv(key, defaultVal string) string {
@@ -19,4 +21,30 @@ func MustGetEnv(key string) string {
 		panic(fmt.Sprintf("required env variable %s is not set", key))
 	}
 	return v
+}
+
+func GetEnvInt(key string, defaultVal int) int {
+	val := os.Getenv(key)
+	if val == "" {
+		return defaultVal
+	}
+	i, err := strconv.Atoi(val)
+	if err != nil {
+		return defaultVal
+	}
+	return i
+}
+
+func GetEnvDuration(key string, defaultVal time.Duration) time.Duration {
+	val := os.Getenv(key)
+	if val == "" {
+		return defaultVal
+	}
+
+	d, err := time.ParseDuration(val)
+	if err != nil {
+		return defaultVal
+	}
+
+	return d
 }
