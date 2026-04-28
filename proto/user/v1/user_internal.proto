@@ -4,20 +4,19 @@ package user.v1;
 
 option go_package = "microservice-golang/gen/user/v1;userv1";
 
-import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
-import "rbac/v1/role.proto";
 
-// ─── Message ──────────────────────────────────────────────────────────────────
+// ─── Messages ─────────────────────────────────────────────────────────────────
 
 message UserInternal {
-  string id                = 1;
-  string email             = 2;
-  string username          = 3;
-  string full_name         = 4;
-  repeated rbac.v1.Role roles = 5;
-  string hashed_password   = 6;
-  google.protobuf.Timestamp verified_at = 7;
+  string id              = 1;
+  string email           = 2;
+  string username        = 3;
+  string full_name       = 4;
+  string hashed_password = 5;
+  string status          = 6;
+  string active_profile  = 7;
+  repeated string role_ids = 8;
 }
 
 // ─── Requests/Responses ───────────────────────────────────────────────────────
@@ -30,8 +29,17 @@ message GetUserByEmailInternalResponse {
   UserInternal user = 1;
 }
 
+message GetUserByIDInternalRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetUserByIDInternalResponse {
+  UserInternal user = 1;
+}
+
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 service UserInternalService {
   rpc GetUserByEmailInternal (GetUserByEmailInternalRequest) returns (GetUserByEmailInternalResponse);
+  rpc GetUserByIDInternal    (GetUserByIDInternalRequest)    returns (GetUserByIDInternalResponse);
 }

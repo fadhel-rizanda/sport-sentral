@@ -10,8 +10,6 @@ import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
-	v1 "microservice-golang/gen/rbac/v1"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -30,9 +28,10 @@ type UserInternal struct {
 	Email          string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	Username       string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
 	FullName       string                 `protobuf:"bytes,4,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
-	Roles          []*v1.Role             `protobuf:"bytes,5,rep,name=roles,proto3" json:"roles,omitempty"`
-	HashedPassword string                 `protobuf:"bytes,6,opt,name=hashed_password,json=hashedPassword,proto3" json:"hashed_password,omitempty"`
-	VerifiedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=verified_at,json=verifiedAt,proto3" json:"verified_at,omitempty"`
+	HashedPassword string                 `protobuf:"bytes,5,opt,name=hashed_password,json=hashedPassword,proto3" json:"hashed_password,omitempty"`
+	Status         string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	ActiveProfile  string                 `protobuf:"bytes,7,opt,name=active_profile,json=activeProfile,proto3" json:"active_profile,omitempty"`
+	RoleIds        []string               `protobuf:"bytes,8,rep,name=role_ids,json=roleIds,proto3" json:"role_ids,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -95,13 +94,6 @@ func (x *UserInternal) GetFullName() string {
 	return ""
 }
 
-func (x *UserInternal) GetRoles() []*v1.Role {
-	if x != nil {
-		return x.Roles
-	}
-	return nil
-}
-
 func (x *UserInternal) GetHashedPassword() string {
 	if x != nil {
 		return x.HashedPassword
@@ -109,9 +101,23 @@ func (x *UserInternal) GetHashedPassword() string {
 	return ""
 }
 
-func (x *UserInternal) GetVerifiedAt() *timestamppb.Timestamp {
+func (x *UserInternal) GetStatus() string {
 	if x != nil {
-		return x.VerifiedAt
+		return x.Status
+	}
+	return ""
+}
+
+func (x *UserInternal) GetActiveProfile() string {
+	if x != nil {
+		return x.ActiveProfile
+	}
+	return ""
+}
+
+func (x *UserInternal) GetRoleIds() []string {
+	if x != nil {
+		return x.RoleIds
 	}
 	return nil
 }
@@ -204,26 +210,119 @@ func (x *GetUserByEmailInternalResponse) GetUser() *UserInternal {
 	return nil
 }
 
+type GetUserByIDInternalRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserByIDInternalRequest) Reset() {
+	*x = GetUserByIDInternalRequest{}
+	mi := &file_user_v1_user_internal_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserByIDInternalRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserByIDInternalRequest) ProtoMessage() {}
+
+func (x *GetUserByIDInternalRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_internal_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserByIDInternalRequest.ProtoReflect.Descriptor instead.
+func (*GetUserByIDInternalRequest) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_internal_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetUserByIDInternalRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type GetUserByIDInternalResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *UserInternal          `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserByIDInternalResponse) Reset() {
+	*x = GetUserByIDInternalResponse{}
+	mi := &file_user_v1_user_internal_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserByIDInternalResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserByIDInternalResponse) ProtoMessage() {}
+
+func (x *GetUserByIDInternalResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_internal_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserByIDInternalResponse.ProtoReflect.Descriptor instead.
+func (*GetUserByIDInternalResponse) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_internal_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetUserByIDInternalResponse) GetUser() *UserInternal {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
 var File_user_v1_user_internal_proto protoreflect.FileDescriptor
 
 const file_user_v1_user_internal_proto_rawDesc = "" +
 	"\n" +
-	"\x1buser/v1/user_internal.proto\x12\auser.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\x1a\x12rbac/v1/role.proto\"\xf8\x01\n" +
+	"\x1buser/v1/user_internal.proto\x12\auser.v1\x1a\x1bbuf/validate/validate.proto\"\xf0\x01\n" +
 	"\fUserInternal\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
 	"\busername\x18\x03 \x01(\tR\busername\x12\x1b\n" +
-	"\tfull_name\x18\x04 \x01(\tR\bfullName\x12#\n" +
-	"\x05roles\x18\x05 \x03(\v2\r.rbac.v1.RoleR\x05roles\x12'\n" +
-	"\x0fhashed_password\x18\x06 \x01(\tR\x0ehashedPassword\x12;\n" +
-	"\vverified_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"verifiedAt\">\n" +
+	"\tfull_name\x18\x04 \x01(\tR\bfullName\x12'\n" +
+	"\x0fhashed_password\x18\x05 \x01(\tR\x0ehashedPassword\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12%\n" +
+	"\x0eactive_profile\x18\a \x01(\tR\ractiveProfile\x12\x19\n" +
+	"\brole_ids\x18\b \x03(\tR\aroleIds\">\n" +
 	"\x1dGetUserByEmailInternalRequest\x12\x1d\n" +
 	"\x05email\x18\x01 \x01(\tB\a\xbaH\x04r\x02`\x01R\x05email\"K\n" +
 	"\x1eGetUserByEmailInternalResponse\x12)\n" +
-	"\x04user\x18\x01 \x01(\v2\x15.user.v1.UserInternalR\x04user2\x80\x01\n" +
+	"\x04user\x18\x01 \x01(\v2\x15.user.v1.UserInternalR\x04user\"6\n" +
+	"\x1aGetUserByIDInternalRequest\x12\x18\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"H\n" +
+	"\x1bGetUserByIDInternalResponse\x12)\n" +
+	"\x04user\x18\x01 \x01(\v2\x15.user.v1.UserInternalR\x04user2\xe2\x01\n" +
 	"\x13UserInternalService\x12i\n" +
-	"\x16GetUserByEmailInternal\x12&.user.v1.GetUserByEmailInternalRequest\x1a'.user.v1.GetUserByEmailInternalResponseB(Z&microservice-golang/gen/user/v1;userv1b\x06proto3"
+	"\x16GetUserByEmailInternal\x12&.user.v1.GetUserByEmailInternalRequest\x1a'.user.v1.GetUserByEmailInternalResponse\x12`\n" +
+	"\x13GetUserByIDInternal\x12#.user.v1.GetUserByIDInternalRequest\x1a$.user.v1.GetUserByIDInternalResponseB(Z&microservice-golang/gen/user/v1;userv1b\x06proto3"
 
 var (
 	file_user_v1_user_internal_proto_rawDescOnce sync.Once
@@ -237,25 +336,26 @@ func file_user_v1_user_internal_proto_rawDescGZIP() []byte {
 	return file_user_v1_user_internal_proto_rawDescData
 }
 
-var file_user_v1_user_internal_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_user_v1_user_internal_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_user_v1_user_internal_proto_goTypes = []any{
 	(*UserInternal)(nil),                   // 0: user.v1.UserInternal
 	(*GetUserByEmailInternalRequest)(nil),  // 1: user.v1.GetUserByEmailInternalRequest
 	(*GetUserByEmailInternalResponse)(nil), // 2: user.v1.GetUserByEmailInternalResponse
-	(*v1.Role)(nil),                        // 3: rbac.v1.Role
-	(*timestamppb.Timestamp)(nil),          // 4: google.protobuf.Timestamp
+	(*GetUserByIDInternalRequest)(nil),     // 3: user.v1.GetUserByIDInternalRequest
+	(*GetUserByIDInternalResponse)(nil),    // 4: user.v1.GetUserByIDInternalResponse
 }
 var file_user_v1_user_internal_proto_depIdxs = []int32{
-	3, // 0: user.v1.UserInternal.roles:type_name -> rbac.v1.Role
-	4, // 1: user.v1.UserInternal.verified_at:type_name -> google.protobuf.Timestamp
-	0, // 2: user.v1.GetUserByEmailInternalResponse.user:type_name -> user.v1.UserInternal
-	1, // 3: user.v1.UserInternalService.GetUserByEmailInternal:input_type -> user.v1.GetUserByEmailInternalRequest
+	0, // 0: user.v1.GetUserByEmailInternalResponse.user:type_name -> user.v1.UserInternal
+	0, // 1: user.v1.GetUserByIDInternalResponse.user:type_name -> user.v1.UserInternal
+	1, // 2: user.v1.UserInternalService.GetUserByEmailInternal:input_type -> user.v1.GetUserByEmailInternalRequest
+	3, // 3: user.v1.UserInternalService.GetUserByIDInternal:input_type -> user.v1.GetUserByIDInternalRequest
 	2, // 4: user.v1.UserInternalService.GetUserByEmailInternal:output_type -> user.v1.GetUserByEmailInternalResponse
-	4, // [4:5] is the sub-list for method output_type
-	3, // [3:4] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	4, // 5: user.v1.UserInternalService.GetUserByIDInternal:output_type -> user.v1.GetUserByIDInternalResponse
+	4, // [4:6] is the sub-list for method output_type
+	2, // [2:4] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_user_v1_user_internal_proto_init() }
@@ -269,7 +369,7 @@ func file_user_v1_user_internal_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_v1_user_internal_proto_rawDesc), len(file_user_v1_user_internal_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

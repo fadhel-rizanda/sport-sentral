@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	UserInternalService_GetUserByEmailInternal_FullMethodName = "/user.v1.UserInternalService/GetUserByEmailInternal"
+	UserInternalService_GetUserByIDInternal_FullMethodName    = "/user.v1.UserInternalService/GetUserByIDInternal"
 )
 
 // UserInternalServiceClient is the client API for UserInternalService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserInternalServiceClient interface {
 	GetUserByEmailInternal(ctx context.Context, in *GetUserByEmailInternalRequest, opts ...grpc.CallOption) (*GetUserByEmailInternalResponse, error)
+	GetUserByIDInternal(ctx context.Context, in *GetUserByIDInternalRequest, opts ...grpc.CallOption) (*GetUserByIDInternalResponse, error)
 }
 
 type userInternalServiceClient struct {
@@ -47,11 +49,22 @@ func (c *userInternalServiceClient) GetUserByEmailInternal(ctx context.Context, 
 	return out, nil
 }
 
+func (c *userInternalServiceClient) GetUserByIDInternal(ctx context.Context, in *GetUserByIDInternalRequest, opts ...grpc.CallOption) (*GetUserByIDInternalResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserByIDInternalResponse)
+	err := c.cc.Invoke(ctx, UserInternalService_GetUserByIDInternal_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserInternalServiceServer is the server API for UserInternalService service.
 // All implementations must embed UnimplementedUserInternalServiceServer
 // for forward compatibility.
 type UserInternalServiceServer interface {
 	GetUserByEmailInternal(context.Context, *GetUserByEmailInternalRequest) (*GetUserByEmailInternalResponse, error)
+	GetUserByIDInternal(context.Context, *GetUserByIDInternalRequest) (*GetUserByIDInternalResponse, error)
 	mustEmbedUnimplementedUserInternalServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedUserInternalServiceServer struct{}
 
 func (UnimplementedUserInternalServiceServer) GetUserByEmailInternal(context.Context, *GetUserByEmailInternalRequest) (*GetUserByEmailInternalResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUserByEmailInternal not implemented")
+}
+func (UnimplementedUserInternalServiceServer) GetUserByIDInternal(context.Context, *GetUserByIDInternalRequest) (*GetUserByIDInternalResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetUserByIDInternal not implemented")
 }
 func (UnimplementedUserInternalServiceServer) mustEmbedUnimplementedUserInternalServiceServer() {}
 func (UnimplementedUserInternalServiceServer) testEmbeddedByValue()                             {}
@@ -104,6 +120,24 @@ func _UserInternalService_GetUserByEmailInternal_Handler(srv interface{}, ctx co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserInternalService_GetUserByIDInternal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserByIDInternalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserInternalServiceServer).GetUserByIDInternal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserInternalService_GetUserByIDInternal_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserInternalServiceServer).GetUserByIDInternal(ctx, req.(*GetUserByIDInternalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserInternalService_ServiceDesc is the grpc.ServiceDesc for UserInternalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var UserInternalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserByEmailInternal",
 			Handler:    _UserInternalService_GetUserByEmailInternal_Handler,
+		},
+		{
+			MethodName: "GetUserByIDInternal",
+			Handler:    _UserInternalService_GetUserByIDInternal_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

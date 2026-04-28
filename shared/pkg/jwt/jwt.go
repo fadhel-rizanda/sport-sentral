@@ -14,10 +14,11 @@ type Config struct {
 }
 
 type Claims struct {
-	UserID   string   `json:"user_id"`
-	Email    string   `json:"email"`
-	Username string   `json:"username"`
-	Roles    []string `json:"roles"`
+	UserID        string   `json:"user_id"`
+	Email         string   `json:"email"`
+	Username      string   `json:"username"`
+	Roles         []string `json:"roles"`
+	ActiveProfile string   `json:"active_profile"`
 	jwt.RegisteredClaims
 }
 
@@ -43,17 +44,17 @@ func (m *Manager) ValidateRefresh(tokenStr string) (*Claims, error) {
 	return m.validate(tokenStr, m.cfg.RefreshSecret)
 }
 
-func (m *Manager) GenerateTokenPair(userID, email, username string, roles []string) (*TokenPair, error) {
+func (m *Manager) GenerateTokenPair(userID, email, username string, roles []string, activeProfile string) (*TokenPair, error) {
 	now := time.Now()
 	accessExp := now.Add(m.cfg.AccessTTL)
 	refreshExp := now.Add(m.cfg.RefreshTTL)
 
-	accessToken, err := m.generate(userID, email, username, roles, accessExp, m.cfg.AccessSecret)
+	accessToken, err := m.generate(userID, email, username, roles, activeProfile, accessExp, m.cfg.AccessSecret)
 	if err != nil {
 		return nil, fmt.Errorf("generate access token: %w", err)
 	}
 
-	refreshToken, err := m.generate(userID, email, username, roles, refreshExp, m.cfg.RefreshSecret)
+	refreshToken, err := m.generate(userID, email, username, roles, activeProfile, refreshExp, m.cfg.RefreshSecret)
 	if err != nil {
 		return nil, fmt.Errorf("generate refresh token: %w", err)
 	}
@@ -65,7 +66,7 @@ func (m *Manager) GenerateTokenPair(userID, email, username string, roles []stri
 	}, nil
 }
 
-func (m *Manager) generate(userID, email, username string, roles []string, exp time.Time, secret string) (string, error) {
+func (m *Manager) generate(userID, email, username string, roles []string, activeProfile string, exp time.Time, secret string) (string, error) {
 	claims := Claims{
 		UserID:   userID,
 		Email:    email,
@@ -76,6 +77,7 @@ func (m *Manager) generate(userID, email, username string, roles []string, exp t
 			ExpiresAt: jwt.NewNumericDate(exp),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
+		ActiveProfile: activeProfile,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
