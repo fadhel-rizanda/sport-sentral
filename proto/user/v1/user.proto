@@ -83,7 +83,7 @@ message SendVerifyEmailRequest {
 }
 
 message VerifyAccountRequest {
-  string token = 1 [(buf.validate.field).string.min_len = 1];
+  string token = 1 [(buf.validate.field).string.len = 36];
 }
 
 message ForgotPasswordRequest {
@@ -91,7 +91,7 @@ message ForgotPasswordRequest {
 }
 
 message ResetPasswordRequest {
-  string token = 1 [(buf.validate.field).string.min_len = 1];
+  string token = 1 [(buf.validate.field).string.len = 36];
   string password = 2 [
     (buf.validate.field).string.min_len = 8,
     (buf.validate.field).string.max_len = 72

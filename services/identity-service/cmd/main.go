@@ -93,7 +93,7 @@ func main() {
 
 	// ── Usecases ──────────────────────────────────────────────────────────────
 	authUC := usecase.NewAuthUseCase(userRepo, userRoleRepo, jwtManager, redisClient, cfg.JWT.RefreshTTL)
-	userUC := usecase.NewUserUseCase(userRepo, userRoleRepo, roleRepo, statusRepo, mailerClient, redisWrapper, cfg.AppURL)
+	userUC := usecase.NewUserUseCase(userRepo, userRoleRepo, roleRepo, statusRepo, mailerClient, redisWrapper, cfg.AppURL, log)
 	profileUC := usecase.NewProfileUseCase(userRepo, userRoleRepo, roleRepo, statusRepo)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────

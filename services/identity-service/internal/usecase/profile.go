@@ -75,7 +75,10 @@ func (uc *profileUseCase) ApplyProfile(ctx context.Context, req ApplyProfileRequ
 		return apperr.NotFound("role")
 	}
 
-	existing, _ := uc.userRoleRepo.GetByUserIDAndRoleID(ctx, user.ID, targetRole.ID)
+	existing, err := uc.userRoleRepo.GetByUserIDAndRoleID(ctx, user.ID, targetRole.ID)
+	if err != nil && !postgres.IsNotFound(err) {
+		return apperr.Internal(err)
+	}
 	if existing != nil {
 		return apperr.Conflict("profile already applied or active")
 	}

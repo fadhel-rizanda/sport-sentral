@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"go.uber.org/zap"
-	"log"
 	"microservice-golang/shared/pkg/redisclient"
 	"time"
 
@@ -39,6 +38,7 @@ type userUseCase struct {
 	mailer       *mailer.Mailer
 	redis        redisclient.Client
 	AppURL       string
+	logger       *zap.Logger
 }
 
 func NewUserUseCase(
@@ -49,6 +49,7 @@ func NewUserUseCase(
 	mailer *mailer.Mailer,
 	redis redisclient.Client,
 	AppURL string,
+	logger *zap.Logger,
 ) UserUseCase {
 	return &userUseCase{
 		userRepo:     userRepo,
@@ -58,6 +59,7 @@ func NewUserUseCase(
 		mailer:       mailer,
 		redis:        redis,
 		AppURL:       AppURL,
+		logger:       logger,
 	}
 }
 
@@ -129,7 +131,7 @@ func (uc *userUseCase) Create(ctx context.Context, req CreateUserRequest) (*User
 	}
 
 	if err := uc.sendVerifyEmailInternal(ctx, user); err != nil {
-		log.Println("failed to send verify email", zap.Error(err))
+		uc.logger.Error("failed to send verify email", zap.Error(err))
 	}
 
 	return uc.GetByID(ctx, user.ID)
@@ -224,7 +226,7 @@ func (uc *userUseCase) SendVerifyEmail(ctx context.Context, email string) error 
 	}
 
 	if err := uc.sendVerifyEmailInternal(ctx, user); err != nil {
-		log.Println("failed to send verify email", zap.Error(err))
+		uc.logger.Error("failed to send verify email", zap.Error(err))
 	}
 
 	return nil
@@ -282,7 +284,7 @@ func (uc *userUseCase) ForgotPassword(ctx context.Context, email string) error {
 		defer cancel()
 
 		if err := uc.mailer.Send(user.Email, "Reset your SportCentral password", body); err != nil {
-			log.Println("failed to send reset password email", zap.Error(err))
+			uc.logger.Error("failed to send reset password email", zap.Error(err))
 		}
 	}()
 	return nil
@@ -351,7 +353,7 @@ func (uc *userUseCase) sendVerifyEmailInternal(ctx context.Context, user *entity
 		defer cancel()
 
 		if err := uc.mailer.Send(user.Email, "Verify your SportCentral account", body); err != nil {
-			log.Println("failed to send verify email", zap.Error(err))
+			uc.logger.Error("failed to send verify email", zap.Error(err))
 		}
 	}()
 	return nil
