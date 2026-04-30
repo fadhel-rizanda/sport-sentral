@@ -2,6 +2,8 @@ go 1.25.0
 
 use (
 	./gen
+	./proto
+	./services/gateway
 	./services/identity-service
 	./shared
 )

@@ -42,8 +42,13 @@ type CreateUserRequest struct {
 
 type UpdateUserRequest struct {
 	ID       uuid.UUID
-	FullName string
-	Username string
+	FullName *string
+	Username *string
+}
+
+type DeleteUserRequest struct {
+	ID       uuid.UUID
+	Password string
 }
 
 type UserResponse struct {

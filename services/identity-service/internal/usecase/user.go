@@ -22,7 +22,7 @@ type UserUseCase interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*UserResponse, error)
 	GetByEmail(ctx context.Context, email string) (*UserResponse, error)
 	Update(ctx context.Context, req UpdateUserRequest) (*UserResponse, error)
-	SoftDelete(ctx context.Context, id uuid.UUID) error
+	SoftDelete(ctx context.Context, req DeleteUserRequest) error
 	List(ctx context.Context, req ListUsersRequest) (*ListUsersResponse, error)
 	SendVerifyEmail(ctx context.Context, email string) error
 	VerifyAccount(ctx context.Context, tokenStr string) error
@@ -110,10 +110,10 @@ func (uc *userUseCase) Create(ctx context.Context, req CreateUserRequest) (*User
 	}
 
 	if err := uc.userRepo.Create(ctx, user); err != nil {
-		if postgres.IsUniqueConstraint(err, "users_email_key") {
+		if postgres.IsUniqueConstraint(err, "idx_users_email") {
 			return nil, apperr.Conflict("email")
 		}
-		if postgres.IsUniqueConstraint(err, "users_username_key") {
+		if postgres.IsUniqueConstraint(err, "idx_users_username") {
 			return nil, apperr.Conflict("username")
 		}
 		return nil, apperr.Internal(err)
@@ -157,11 +157,12 @@ func (uc *userUseCase) Update(ctx context.Context, req UpdateUserRequest) (*User
 		return nil, apperr.Internal(err)
 	}
 
-	if req.FullName != "" {
-		user.FullName = req.FullName
+	if req.FullName != nil {
+		user.FullName = *req.FullName
 	}
-	if req.Username != "" {
-		user.Username = req.Username
+
+	if req.Username != nil {
+		user.Username = *req.Username
 	}
 
 	if err := uc.userRepo.Update(ctx, user); err != nil {
@@ -174,15 +175,20 @@ func (uc *userUseCase) Update(ctx context.Context, req UpdateUserRequest) (*User
 	return ToUserResponse(user), nil
 }
 
-func (uc *userUseCase) SoftDelete(ctx context.Context, id uuid.UUID) error {
-	_, err := uc.userRepo.GetByID(ctx, id)
+func (uc *userUseCase) SoftDelete(ctx context.Context, req DeleteUserRequest) error {
+	user, err := uc.userRepo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
 			return apperr.NotFound("user")
 		}
 		return apperr.Internal(err)
 	}
-	return uc.userRepo.SoftDelete(ctx, id)
+
+	if !user.CheckPassword(req.Password) {
+		return apperr.Unauthorized("invalid email or password")
+	}
+
+	return uc.userRepo.SoftDelete(ctx, req.ID)
 }
 
 func (uc *userUseCase) List(ctx context.Context, req ListUsersRequest) (*ListUsersResponse, error) {

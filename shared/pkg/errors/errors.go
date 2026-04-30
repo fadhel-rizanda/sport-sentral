@@ -3,6 +3,7 @@ package errors
 import (
 	"errors"
 	"fmt"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -96,20 +97,52 @@ func ToGRPC(err error) error {
 	var internal *InternalError
 
 	switch {
+	case errors.As(err, &conflict):
+		st := status.New(codes.AlreadyExists, conflict.Error())
+		br := &errdetails.BadRequest{
+			FieldViolations: []*errdetails.BadRequest_FieldViolation{
+				{
+					Field:       conflict.Resource,
+					Description: fmt.Sprintf("%s is already taken", conflict.Resource),
+				},
+			},
+		}
+		if ds, e := st.WithDetails(br); e == nil {
+			return ds.Err()
+		}
+		return st.Err()
+
+	case errors.As(err, &validation):
+		st := status.New(codes.InvalidArgument, "validation failed")
+		br := &errdetails.BadRequest{
+			FieldViolations: []*errdetails.BadRequest_FieldViolation{
+				{
+					Field:       validation.Field,
+					Description: validation.Reason,
+				},
+			},
+		}
+		if ds, e := st.WithDetails(br); e == nil {
+			return ds.Err()
+		}
+		return st.Err()
+
 	case errors.As(err, &notFound):
 		return status.Errorf(codes.NotFound, err.Error())
-	case errors.As(err, &conflict):
-		return status.Errorf(codes.AlreadyExists, err.Error())
-	case errors.As(err, &validation):
-		return status.Errorf(codes.InvalidArgument, err.Error())
-	case errors.As(err, &invalidArg):
-		return status.Errorf(codes.InvalidArgument, err.Error())
-	case errors.As(err, &unauthorized):
-		return status.Errorf(codes.Unauthenticated, err.Error())
+
 	case errors.As(err, &forbidden):
 		return status.Errorf(codes.PermissionDenied, err.Error())
+
+	case errors.As(err, &unauthorized):
+		return status.Errorf(codes.Unauthenticated, err.Error())
+
+	case errors.As(err, &invalidArg):
+		return status.Errorf(codes.InvalidArgument, err.Error())
+
 	case errors.As(err, &internal):
+
 		return status.Errorf(codes.Internal, "internal server error")
+
 	default:
 		return status.Errorf(codes.Internal, "internal server error")
 	}

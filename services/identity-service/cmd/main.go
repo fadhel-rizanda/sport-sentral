@@ -1,6 +1,7 @@
 package main
 
 import (
+	"buf.build/go/protovalidate"
 	"errors"
 	"fmt"
 	"microservice-golang/shared/pkg/redisclient"
@@ -31,7 +32,7 @@ func main() {
 	// ── Env ───────────────────────────────────────────────────────────────────
 	_ = godotenv.Load()
 	env := envConfig.GetEnv("APP_ENV", "development")
-	appName := envConfig.GetEnv("APP_NAME", "sportcentral")
+	appName := envConfig.GetEnv("APP_NAME", "sport-sentral")
 	appVersion := envConfig.GetEnv("APP_VERSION", "0.0.1")
 	serviceName := envConfig.GetEnv("SERVICE_NAME", "identity-service")
 	serviceVersion := envConfig.GetEnv("SERVICE_VERSION", "0.0.1")
@@ -103,10 +104,16 @@ func main() {
 	userInternalHandler := handler.NewUserInternalHandler(userUC)
 
 	// ── gRPC Server ───────────────────────────────────────────────────────────
+	v, err := protovalidate.New()
+	if err != nil {
+		log.Fatal("failed to initialize validator", zap.Error(err))
+	}
+
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			interceptor.UnaryLogger(log),
 			interceptor.UnaryRecovery(log),
+			interceptor.UnaryValidator(v),
 		),
 	)
 

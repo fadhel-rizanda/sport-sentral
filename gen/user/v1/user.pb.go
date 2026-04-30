@@ -330,8 +330,8 @@ func (x *GetUserRequest) GetId() string {
 type UpdateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	FullName      string                 `protobuf:"bytes,2,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
-	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
+	FullName      *string                `protobuf:"bytes,2,opt,name=full_name,json=fullName,proto3,oneof" json:"full_name,omitempty"`
+	Username      *string                `protobuf:"bytes,3,opt,name=username,proto3,oneof" json:"username,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -374,15 +374,15 @@ func (x *UpdateUserRequest) GetId() string {
 }
 
 func (x *UpdateUserRequest) GetFullName() string {
-	if x != nil {
-		return x.FullName
+	if x != nil && x.FullName != nil {
+		return *x.FullName
 	}
 	return ""
 }
 
 func (x *UpdateUserRequest) GetUsername() string {
-	if x != nil {
-		return x.Username
+	if x != nil && x.Username != nil {
+		return *x.Username
 	}
 	return ""
 }
@@ -390,6 +390,7 @@ func (x *UpdateUserRequest) GetUsername() string {
 type DeleteUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -427,6 +428,13 @@ func (*DeleteUserRequest) Descriptor() ([]byte, []int) {
 func (x *DeleteUserRequest) GetId() string {
 	if x != nil {
 		return x.Id
+	}
+	return ""
+}
+
+func (x *DeleteUserRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
 	}
 	return ""
 }
@@ -1080,24 +1088,28 @@ const file_user_v1_user_proto_rawDesc = "" +
 	"\bpassword\x18\x04 \x01(\tB\t\xbaH\x06r\x04\x10\b\x18HR\bpassword\x12$\n" +
 	"\trole_name\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\broleName\"*\n" +
 	"\x0eGetUserRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\x89\x01\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\xb0\x01\n" +
 	"\x11UpdateUserRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12$\n" +
-	"\tfull_name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x18dR\bfullName\x124\n" +
-	"\busername\x18\x03 \x01(\tB\x18\xbaH\x15r\x13\x1822\x0f^[a-zA-Z0-9_]*$R\busername\"-\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12)\n" +
+	"\tfull_name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x18dH\x00R\bfullName\x88\x01\x01\x12;\n" +
+	"\busername\x18\x03 \x01(\tB\x1a\xbaH\x17r\x15\x10\x03\x1822\x0f^[a-zA-Z0-9_]*$H\x01R\busername\x88\x01\x01B\f\n" +
+	"\n" +
+	"_full_nameB\v\n" +
+	"\t_username\"R\n" +
 	"\x11DeleteUserRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"W\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12#\n" +
+	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\"W\n" +
 	"\x10ListUsersRequest\x12\x1b\n" +
 	"\x04page\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\x04page\x12&\n" +
 	"\tpage_size\x18\x02 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01R\bpageSize\"7\n" +
 	"\x16SendVerifyEmailRequest\x12\x1d\n" +
-	"\x05email\x18\x01 \x01(\tB\a\xbaH\x04r\x02`\x01R\x05email\"5\n" +
-	"\x14VerifyAccountRequest\x12\x1d\n" +
-	"\x05token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05token\"6\n" +
+	"\x05email\x18\x01 \x01(\tB\a\xbaH\x04r\x02`\x01R\x05email\"6\n" +
+	"\x14VerifyAccountRequest\x12\x1e\n" +
+	"\x05token\x18\x01 \x01(\tB\b\xbaH\x05r\x03\x98\x01$R\x05token\"6\n" +
 	"\x15ForgotPasswordRequest\x12\x1d\n" +
-	"\x05email\x18\x01 \x01(\tB\a\xbaH\x04r\x02`\x01R\x05email\"\\\n" +
-	"\x14ResetPasswordRequest\x12\x1d\n" +
-	"\x05token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05token\x12%\n" +
+	"\x05email\x18\x01 \x01(\tB\a\xbaH\x04r\x02`\x01R\x05email\"]\n" +
+	"\x14ResetPasswordRequest\x12\x1e\n" +
+	"\x05token\x18\x01 \x01(\tB\b\xbaH\x05r\x03\x98\x01$R\x05token\x12%\n" +
 	"\bpassword\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\b\x18HR\bpassword\"7\n" +
 	"\x12CreateUserResponse\x12!\n" +
 	"\x04user\x18\x01 \x01(\v2\r.user.v1.UserR\x04user\"4\n" +
@@ -1204,6 +1216,7 @@ func file_user_v1_user_proto_init() {
 	if File_user_v1_user_proto != nil {
 		return
 	}
+	file_user_v1_user_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

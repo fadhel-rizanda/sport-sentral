@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"golang.org/x/crypto/bcrypt"
-
 	"microservice-golang/services/identity-service/internal/repository"
 	apperr "microservice-golang/shared/pkg/errors"
 	"microservice-golang/shared/pkg/jwt"
@@ -17,7 +15,7 @@ type AuthUseCase interface {
 	Login(ctx context.Context, req LoginRequest) (*LoginResponse, error)
 	Logout(ctx context.Context, refreshToken string) error
 	RefreshToken(ctx context.Context, refreshToken string) (*RefreshTokenResponse, error)
-	ValidateToken(ctx context.Context, accessToken string) (*jwt.Claims, error)
+	ValidateToken(_ context.Context, accessToken string) (*jwt.Claims, error)
 }
 
 type authUseCase struct {
@@ -58,7 +56,7 @@ func (uc *authUseCase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 		return nil, apperr.Unauthorized("account is " + user.Status.Name)
 	}
 
-	if !checkPassword(user.HashedPassword, req.Password) {
+	if !user.CheckPassword(req.Password) {
 		return nil, apperr.Unauthorized("invalid email or password")
 	}
 
@@ -155,7 +153,7 @@ func (uc *authUseCase) RefreshToken(ctx context.Context, refreshToken string) (*
 	}, nil
 }
 
-func (uc *authUseCase) ValidateToken(ctx context.Context, accessToken string) (*jwt.Claims, error) {
+func (uc *authUseCase) ValidateToken(_ context.Context, accessToken string) (*jwt.Claims, error) {
 	claims, err := uc.jwtManager.ValidateAccess(accessToken)
 	if err != nil {
 		return nil, apperr.Unauthorized("invalid or expired token")
@@ -167,8 +165,4 @@ func (uc *authUseCase) ValidateToken(ctx context.Context, accessToken string) (*
 
 func refreshTokenKey(userID, token string) string {
 	return fmt.Sprintf("refresh:%s:%s", userID, token)
-}
-
-func checkPassword(hashedPassword, plainPassword string) bool {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword)) == nil
 }

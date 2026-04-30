@@ -78,7 +78,10 @@ func (h *UserHandler) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequ
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid user id"))
 	}
 
-	if err := h.uc.SoftDelete(ctx, id); err != nil {
+	if err := h.uc.SoftDelete(ctx, usecase.DeleteUserRequest{
+		ID:       id,
+		Password: req.Password,
+	}); err != nil {
 		return nil, apperr.ToGRPC(err)
 	}
 

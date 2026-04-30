@@ -1,0 +1,27 @@
+package router
+
+import (
+	"github.com/gofiber/fiber/v2"
+	authv1 "microservice-golang/gen/auth/v1"
+	"microservice-golang/services/gateway/internal/handler"
+	"microservice-golang/services/gateway/internal/middleware"
+)
+
+func Setup(
+	app *fiber.App,
+	authHandler *handler.AuthHandler,
+	userHandler *handler.UserHandler,
+	profileHandler *handler.ProfileHandler,
+	authClient authv1.AuthServiceClient,
+) {
+	api := app.Group("/api/v1")
+
+	// define middleware sekali di sini
+	auth := middleware.Auth(authClient)
+	adminOnly := middleware.RequireRole("platform_admin")
+
+	authHandler.Routes(api)
+	userHandler.Routes(api, auth)
+	authHandler.MeRoutes(api, auth)
+	profileHandler.Routes(api, auth, adminOnly)
+}
