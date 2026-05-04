@@ -2,19 +2,13 @@ package config
 
 import (
 	"fmt"
-	"time"
-
 	envConfig "microservice-golang/shared/pkg/config"
-	"microservice-golang/shared/pkg/mailer"
 )
 
 type Config struct {
 	GRPC     GRPCConfig
 	Database DatabaseConfig
 	Redis    RedisConfig
-	JWT      JWTConfig
-	Mailer   mailer.Config
-	AppURL   string
 }
 
 type GRPCConfig struct {
@@ -50,19 +44,12 @@ type RedisConfig struct {
 	DB       int
 }
 
-type JWTConfig struct {
-	AccessSecret  string
-	RefreshSecret string
-	AccessTTL     time.Duration
-	RefreshTTL    time.Duration
-}
-
 func Load() (*Config, error) {
 	redisHost := envConfig.GetEnv("REDIS_HOST", "localhost")
 	redisPort := envConfig.GetEnvInt("REDIS_PORT", 6379)
 	return &Config{
 		GRPC: GRPCConfig{
-			Port: envConfig.GetEnvInt("GRPC_PORT", 50051),
+			Port: envConfig.GetEnvInt("GRPC_PORT", 50052),
 		},
 		Database: DatabaseConfig{
 			Host:     envConfig.GetEnv("DB_HOST", "localhost"),
@@ -75,21 +62,7 @@ func Load() (*Config, error) {
 		Redis: RedisConfig{
 			Address:  fmt.Sprintf("%s:%d", redisHost, redisPort),
 			Password: envConfig.GetEnv("REDIS_PASSWORD", ""),
-			DB:       envConfig.GetEnvInt("REDIS_DB", 0),
+			DB:       envConfig.GetEnvInt("REDIS_DB", 1),
 		},
-		JWT: JWTConfig{
-			AccessSecret:  envConfig.GetEnv("JWT_ACCESS_SECRET", ""),
-			RefreshSecret: envConfig.GetEnv("JWT_REFRESH_SECRET", ""),
-			AccessTTL:     envConfig.GetEnvDuration("JWT_ACCESS_TTL", 15*time.Minute),
-			RefreshTTL:    envConfig.GetEnvDuration("JWT_REFRESH_TTL", 7*24*time.Hour),
-		},
-		Mailer: mailer.Config{
-			Host:     envConfig.GetEnv("MAILER_HOST", ""),
-			Port:     envConfig.GetEnvInt("MAILER_PORT", 587),
-			Username: envConfig.GetEnv("MAILER_USERNAME", ""),
-			Password: envConfig.GetEnv("MAILER_PASSWORD", ""),
-			From:     envConfig.GetEnv("MAILER_FROM", ""),
-		},
-		AppURL: envConfig.MustGetEnv("APP_URL"),
 	}, nil
 }

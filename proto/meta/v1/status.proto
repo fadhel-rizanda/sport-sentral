@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+package meta.v1;
+
+option go_package = "microservice-golang/gen/meta/v1;metav1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+message Status {
+  string id      = 1;
+  string type    = 2;
+  string name    = 3;
+  string created_by = 4;
+  string updated_by = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+// ─── Requests ────────────────────────────────────────────────────────────────
+
+message CreateStatusRequest {
+  string type = 1 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  string name = 2 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  string created_by = 3 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message GetStatusRequest {
+  string type = 1 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  string name = 2 [
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message GetStatusByIDRequest {
+  string id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message ListStatusesByTypeRequest {
+  string type = 1 [
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message UpdateStatusRequest {
+  string id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+  optional string type = 2 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  optional string name = 3 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  string updated_by = 4 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeleteStatusRequest {
+  string id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+  string deleted_by = 2 [
+    (buf.validate.field).string.uuid = true
+  ];
+  bool is_permanent = 3;
+}
+
+// ─── Responses ────────────────────────────────────────────────────────────────
+
+message CreateStatusResponse {
+  Status status = 1;
+}
+
+message GetStatusResponse {
+  Status status = 1;
+}
+
+message GetStatusByIDResponse {
+  Status status = 1;
+}
+
+message ListStatusesByTypeResponse {
+  repeated Status statuses = 1;
+}
+
+message UpdateStatusResponse {
+  Status status = 1;
+}
+
+message DeleteStatusResponse {
+  string id = 1;
+}
+
+// ─── Services ────────────────────────────────────────────────────────────────
+
+service StatusService {
+  rpc CreateStatus(CreateStatusRequest) returns (CreateStatusResponse);
+  rpc GetStatus(GetStatusRequest) returns (GetStatusResponse);
+  rpc GetStatusByID(GetStatusByIDRequest) returns (GetStatusByIDResponse);
+  rpc ListStatusesByType(ListStatusesByTypeRequest) returns (ListStatusesByTypeResponse);
+  rpc UpdateStatus(UpdateStatusRequest) returns (UpdateStatusResponse);
+  rpc DeleteStatus(DeleteStatusRequest) returns (DeleteStatusResponse);
+}

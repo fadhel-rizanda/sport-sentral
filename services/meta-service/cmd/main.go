@@ -10,16 +10,14 @@ import (
 	"google.golang.org/grpc/reflection"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"microservice-golang/services/identity-service/internal/config"
-	"microservice-golang/services/identity-service/internal/database"
-	"microservice-golang/services/identity-service/internal/handler"
-	"microservice-golang/services/identity-service/internal/repository"
-	"microservice-golang/services/identity-service/internal/usecase"
+	"microservice-golang/services/meta-service/internal/config"
+	"microservice-golang/services/meta-service/internal/database"
+	"microservice-golang/services/meta-service/internal/handler"
+	"microservice-golang/services/meta-service/internal/repository"
+	"microservice-golang/services/meta-service/internal/usecase"
 	envConfig "microservice-golang/shared/pkg/config"
 	"microservice-golang/shared/pkg/grpc/interceptor"
-	"microservice-golang/shared/pkg/jwt"
 	"microservice-golang/shared/pkg/logger"
-	"microservice-golang/shared/pkg/mailer"
 	"microservice-golang/shared/pkg/redisclient"
 	"net"
 )
@@ -30,15 +28,15 @@ func main() {
 	env := envConfig.GetEnv("APP_ENV", "development")
 	appName := envConfig.GetEnv("APP_NAME", "sport-sentral")
 	appVersion := envConfig.GetEnv("APP_VERSION", "0.0.1")
-	serviceName := envConfig.GetEnv("SERVICE_NAME", "identity-service")
+	serviceName := envConfig.GetEnv("SERVICE_NAME", "meta-service")
 	serviceVersion := envConfig.GetEnv("SERVICE_VERSION", "0.0.1")
 
 	// ── Logger ────────────────────────────────────────────────────────────────
 	log := logger.New(env).With(
-		zap.String("app_name", appName),
-		zap.String("app_version", appVersion),
-		zap.String("service", serviceName),
-		zap.String("service_version", serviceVersion),
+		zap.String("appName", appName),
+		zap.String("appVersion", appVersion),
+		zap.String("serviceName", serviceName),
+		zap.String("serviceVersion", serviceVersion),
 		zap.String("env", env),
 	)
 	defer log.Sync()
@@ -46,7 +44,7 @@ func main() {
 	// ── Config ────────────────────────────────────────────────────────────────
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatal("failed to load config", zap.Error(err))
+		log.Fatal("load config failed", zap.Error(err))
 	}
 
 	// ── Database ──────────────────────────────────────────────────────────────
@@ -55,10 +53,10 @@ func main() {
 		log.Fatal("connect to database failed", zap.Error(err))
 	}
 
-	log.Info("Database URL check", zap.String("url", cfg.Database.PgDSN()))
 	if err := database.RunExternalMigrations(cfg.Database.PgDSN()); err != nil {
 		log.Fatal("database migration failed", zap.Error(err))
 	}
+
 	if err := database.Migrate(db); err != nil {
 		log.Fatal("migrate failed", zap.Error(err))
 	}
@@ -73,35 +71,20 @@ func main() {
 		Password: cfg.Redis.Password,
 		DB:       cfg.Redis.DB,
 	})
-	redisWrapper := redisclient.New(redisClient)
+	// TODO integrasiin redis
+	_ = redisclient.New(redisClient)
 
-	// ── JWT ───────────────────────────────────────────────────────────────────
-	jwtManager := jwt.NewManager(jwt.Config{
-		AccessSecret:  cfg.JWT.AccessSecret,
-		RefreshSecret: cfg.JWT.RefreshSecret,
-		AccessTTL:     cfg.JWT.AccessTTL,
-		RefreshTTL:    cfg.JWT.RefreshTTL,
-	})
-
-	// ── Mailer ────────────────────────────────────────────────────────────────
-	mailerClient := mailer.New(cfg.Mailer)
-
-	// ── Repositories ─────────────────────────────────────────────────────────
-	userRepo := repository.NewUserRepository(db)
-	userRoleRepo := repository.NewUserRoleRepository(db)
-	roleRepo := repository.NewRoleRepository(db)
+	// ── Repository ────────────────────────────────────────────────────────────
 	statusRepo := repository.NewStatusRepository(db)
+	tagRepo := repository.NewTagRepository(db)
 
-	// ── Usecases ──────────────────────────────────────────────────────────────
-	authUC := usecase.NewAuthUseCase(userRepo, userRoleRepo, jwtManager, redisClient, cfg.JWT.RefreshTTL)
-	userUC := usecase.NewUserUseCase(userRepo, userRoleRepo, roleRepo, statusRepo, mailerClient, redisWrapper, cfg.AppURL, log)
-	profileUC := usecase.NewProfileUseCase(userRepo, userRoleRepo, roleRepo, statusRepo)
+	// ── UseCase ───────────────────────────────────────────────────────────────
+	statusUC := usecase.NewStatusUseCase(statusRepo)
+	tagUC := usecase.NewTagUseCase(tagRepo)
 
-	// ── Handlers ──────────────────────────────────────────────────────────────
-	authHandler := handler.NewAuthHandler(authUC)
-	userHandler := handler.NewUserHandler(userUC)
-	profileHandler := handler.NewProfileHandler(profileUC)
-	userInternalHandler := handler.NewUserInternalHandler(userUC)
+	// ── Handler ───────────────────────────────────────────────────────────────
+	statusHandler := handler.NewStatusHandler(statusUC)
+	tagHandler := handler.NewTagHandler(tagUC)
 
 	// ── gRPC Server ───────────────────────────────────────────────────────────
 	v, err := protovalidate.New()
@@ -117,10 +100,8 @@ func main() {
 		),
 	)
 
-	authHandler.RegisterGRPC(grpcServer)
-	userHandler.RegisterGRPC(grpcServer)
-	profileHandler.RegisterGRPC(grpcServer)
-	userInternalHandler.RegisterGRPC(grpcServer)
+	statusHandler.RegisterGRPC(grpcServer)
+	tagHandler.RegisterGRPC(grpcServer)
 
 	reflection.Register(grpcServer)
 
@@ -130,7 +111,7 @@ func main() {
 		log.Fatal("failed to listen", zap.Error(err))
 	}
 
-	log.Info("identity-service gRPC listening", zap.Int("port", cfg.GRPC.Port))
+	log.Info("grpc server listening", zap.Int("port", cfg.GRPC.Port))
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatal("failed to serve", zap.Error(err))

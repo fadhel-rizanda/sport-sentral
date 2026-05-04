@@ -63,6 +63,7 @@ func NewUserUseCase(
 	}
 }
 
+// TODO tambahin transaction
 func (uc *userUseCase) Create(ctx context.Context, req CreateUserRequest) (*UserResponse, error) {
 	// validate role — tidak boleh assign admin-only role saat register
 	if entity.RolesAdminAssignOnly[req.RoleName] {
@@ -100,8 +101,13 @@ func (uc *userUseCase) Create(ctx context.Context, req CreateUserRequest) (*User
 		return nil, apperr.Internal(err)
 	}
 
+	id, err := uuid.NewV7()
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+
 	user := &entity.User{
-		ID:             uuid.New(),
+		ID:             id,
 		Email:          req.Email,
 		Username:       req.Username,
 		FullName:       req.FullName,

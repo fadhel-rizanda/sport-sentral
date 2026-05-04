@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"time"
 
 	envConfig "microservice-golang/shared/pkg/config"
@@ -34,6 +35,8 @@ type RateLimitConfig struct {
 }
 
 func Load() (*Config, error) {
+	redisHost := envConfig.GetEnv("REDIS_HOST", "localhost")
+	redisPort := envConfig.GetEnvInt("REDIS_PORT", 6379)
 	return &Config{
 		App: AppConfig{
 			Port: envConfig.GetEnvInt("APP_PORT", 8080),
@@ -43,7 +46,7 @@ func Load() (*Config, error) {
 			IdentityAddress: envConfig.GetEnv("IDENTITY_SERVICE_ADDRESS", "localhost:50051"),
 		},
 		Redis: RedisConfig{
-			Address:  envConfig.GetEnv("REDIS_ADDRESS", "localhost:6379"),
+			Address:  fmt.Sprintf("%s:%d", redisHost, redisPort),
 			Password: envConfig.GetEnv("REDIS_PASSWORD", ""),
 			DB:       envConfig.GetEnvInt("REDIS_DB", 0),
 		},

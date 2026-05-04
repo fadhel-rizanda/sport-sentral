@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// TODO kurang audit kaya tag/status
 type Role struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name        string    `gorm:"uniqueIndex;not null"`

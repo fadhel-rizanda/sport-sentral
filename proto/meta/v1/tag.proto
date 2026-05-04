@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package meta.v1;
+
+option go_package = "microservice-golang/gen/meta/v1;metav1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+message Tag {
+  string id         = 1;
+  string type       = 2;
+  string name       = 3;
+  string slug       = 4;
+  string created_by = 5;
+  string updated_by = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+// ─── Requests ────────────────────────────────────────────────────────────────
+
+message CreateTagRequest {
+  string type = 1 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  string name = 2 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  optional string slug = 3 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  string created_by = 4 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message GetTagRequest {
+  string type = 1 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  string name = 2 [
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message GetTagByIDRequest {
+  string id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message ListTagsByTypeRequest {
+  string type = 1 [
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message UpdateTagRequest {
+  string id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+  optional string type = 2 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  optional string name = 3 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  optional string slug = 4 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  string updated_by = 5 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeleteTagRequest {
+  string id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+  string deleted_by = 2 [
+    (buf.validate.field).string.uuid = true
+  ];
+  bool is_permanent = 3;
+}
+
+// ─── Responses ────────────────────────────────────────────────────────────────
+
+message CreateTagResponse {
+  Tag tag = 1;
+}
+
+message GetTagResponse {
+  Tag tag = 1;
+}
+
+message ListTagsByTypeResponse {
+  repeated Tag tags = 1;
+}
+
+message UpdateTagResponse {
+  Tag tag = 1;
+}
+
+message DeleteTagResponse {}
+
+// ─── Service ──────────────────────────────────────────────────────────────────
+
+service TagService {
+  rpc CreateTag(CreateTagRequest) returns (CreateTagResponse);
+  rpc GetTag(GetTagRequest) returns (GetTagResponse);
+  rpc GetTagByID(GetTagByIDRequest) returns (GetTagResponse);
+  rpc ListTagsByType(ListTagsByTypeRequest) returns (ListTagsByTypeResponse);
+  rpc UpdateTag(UpdateTagRequest) returns (UpdateTagResponse);
+  rpc DeleteTag(DeleteTagRequest) returns (DeleteTagResponse);
+}
