@@ -1,13 +1,11 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"microservice-golang/services/gateway/internal/client"
 	"microservice-golang/services/gateway/internal/config"
 	"microservice-golang/services/gateway/internal/handler"
 	"microservice-golang/services/gateway/internal/middleware"
-	"microservice-golang/services/gateway/internal/response"
 	"microservice-golang/services/gateway/internal/router"
 	"strconv"
 
@@ -48,12 +46,18 @@ func main() {
 		log.Fatal("failed to load config", zap.Error(err))
 	}
 
-	// ── Identity gRPC Client ──────────────────────────────────────────────────
+	// ── gRPC Client ──────────────────────────────────────────────────
 	identityClient, err := client.NewIdentityClient(cfg.GRPC.IdentityAddress)
 	if err != nil {
 		log.Fatal("failed to connect to identity-service", zap.Error(err))
 	}
 	defer identityClient.Close()
+
+	metaClient, err := client.NewMetaClient(cfg.GRPC.MetaAddress)
+	if err != nil {
+		log.Fatal("failed to connect to meta-service", zap.Error(err))
+	}
+	defer metaClient.Close()
 
 	// ── Redis ─────────────────────────────────────────────────────────────────
 	redisClient := redis.NewClient(&redis.Options{
@@ -66,16 +70,12 @@ func main() {
 	authHandler := handler.NewAuthHandler(identityClient.Auth, identityClient.User)
 	userHandler := handler.NewUserHandler(identityClient.User)
 	profileHandler := handler.NewProfileHandler(identityClient.RBAC)
+	statusHandler := handler.NewStatusHandler(metaClient.Status)
+	tagHandler := handler.NewTagHandler(metaClient.Tag)
 
 	// ── Fiber ─────────────────────────────────────────────────────────────────
 	app := fiber.New(fiber.Config{
-		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			var e *fiber.Error
-			if errors.As(err, &e) {
-				return response.Error(c, e.Code, e.Message)
-			}
-			return response.Error(c, fiber.StatusInternalServerError, "internal server error")
-		},
+		ErrorHandler: handler.ErrorHandler(log),
 	})
 
 	// ── Global Middleware ─────────────────────────────────────────────────────
@@ -91,6 +91,8 @@ func main() {
 		userHandler,
 		profileHandler,
 		identityClient.Auth,
+		statusHandler,
+		tagHandler,
 	)
 
 	// ── Start ─────────────────────────────────────────────────────────────────

@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	ContextUserID        = "user_id"
-	ContextEmail         = "email"
-	ContextUsername      = "username"
-	ContextActiveProfile = "active_profile"
-	ContextRoleIDs       = "role_ids"
+	ContextUserID         = "user_id"
+	ContextEmail          = "email"
+	ContextUsername       = "username"
+	ContextActiveRoleName = "active_role_name"
+	ContextRoleIDs        = "role_ids"
 )
 
 func Auth(authClient authv1.AuthServiceClient) fiber.Handler {
@@ -39,7 +39,7 @@ func Auth(authClient authv1.AuthServiceClient) fiber.Handler {
 		c.Locals(ContextUserID, resp.UserId)
 		c.Locals(ContextEmail, resp.Email)
 		c.Locals(ContextUsername, resp.Username)
-		c.Locals(ContextActiveProfile, resp.ActiveProfile)
+		c.Locals(ContextActiveRoleName, resp.ActiveRoleName)
 		c.Locals(ContextRoleIDs, resp.RoleIds)
 
 		return c.Next()
@@ -48,13 +48,13 @@ func Auth(authClient authv1.AuthServiceClient) fiber.Handler {
 
 func RequireRole(roles ...string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		activeProfile, ok := c.Locals(ContextActiveProfile).(string)
-		if !ok || activeProfile == "" {
+		activeRoleName, ok := c.Locals(ContextActiveRoleName).(string)
+		if !ok || activeRoleName == "" {
 			return response.Error(c, fiber.StatusForbidden, "forbidden")
 		}
 
 		for _, role := range roles {
-			if role == activeProfile {
+			if role == activeRoleName {
 				return c.Next()
 			}
 		}

@@ -4,91 +4,95 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"microservice-golang/services/meta-service/internal/entity"
 )
 
-// ─── Status ───────────────────────────────────────────────────────────────────
+// ─── Statuses ───────────────────────────────────────────────────────────────────
+
+type ListStatusesRequest struct {
+	Type     *string
+	Page     int
+	PageSize int
+}
+
+type ListStatusesResponse struct {
+	Statuses []*StatusResponse
+	Total    int64
+	Page     int
+	PageSize int
+}
 
 type CreateStatusRequest struct {
-	Type      string
-	Name      string
-	CreatedBy uuid.UUID
+	Type        string
+	Name        string
+	CreatedByID uuid.UUID
 }
 
 type UpdateStatusRequest struct {
-	Type      *string
-	Name      *string
-	UpdatedBy uuid.UUID
+	Type        *string
+	Name        *string
+	UpdatedByID uuid.UUID
 }
 
 type DeleteStatusRequest struct {
-	ID        uuid.UUID
-	DeletedBy uuid.UUID
+	ID          uuid.UUID
+	DeletedByID uuid.UUID
 }
 
 type StatusResponse struct {
-	ID        uuid.UUID
-	Type      string
-	Name      string
-	CreatedBy uuid.UUID
-	UpdatedBy uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-func toStatusResponse(s *entity.Status) *StatusResponse {
-	return &StatusResponse{
-		ID:        s.ID,
-		Type:      s.Type,
-		Name:      s.Name,
-		CreatedBy: s.CreatedBy,
-		UpdatedBy: s.UpdatedBy,
-		CreatedAt: s.CreatedAt,
-		UpdatedAt: s.UpdatedAt,
-	}
+	ID          uuid.UUID
+	Type        string
+	Name        string
+	CreatedByID uuid.UUID
+	UpdatedByID uuid.UUID
+	DeletedByID *uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
 }
 
 // ─── Tag ──────────────────────────────────────────────────────────────────────
 
+type ListTagsRequest struct {
+	Type     *string
+	Page     int
+	PageSize int
+}
+
+type ListTagsResponse struct {
+	Tags     []*TagResponse
+	Total    int64
+	Page     int
+	PageSize int
+}
+
 type CreateTagRequest struct {
-	Type      string
-	Name      string
-	Slug      *string
-	CreatedBy uuid.UUID
+	Type        string
+	Name        string
+	Slug        *string
+	CreatedByID uuid.UUID
 }
 
 type UpdateTagRequest struct {
-	Type      *string
-	Name      *string
-	Slug      *string
-	UpdatedBy uuid.UUID
+	Type        *string
+	Name        *string
+	Slug        *string
+	UpdatedByID uuid.UUID
 }
 
 type DeleteTagRequest struct {
-	ID        uuid.UUID
-	DeletedBy uuid.UUID
+	ID          uuid.UUID
+	DeletedByID uuid.UUID
 }
 
 type TagResponse struct {
-	ID        uuid.UUID
-	Type      string
-	Name      string
-	Slug      string
-	CreatedBy uuid.UUID
-	UpdatedBy uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-func toTagResponse(t *entity.Tag) *TagResponse {
-	return &TagResponse{
-		ID:        t.ID,
-		Type:      t.Type,
-		Name:      t.Name,
-		Slug:      t.Slug,
-		CreatedBy: t.CreatedBy,
-		UpdatedBy: t.UpdatedBy,
-		CreatedAt: t.CreatedAt,
-		UpdatedAt: t.UpdatedAt,
-	}
+	ID          uuid.UUID
+	Type        string
+	Name        string
+	Slug        string
+	CreatedByID uuid.UUID
+	UpdatedByID uuid.UUID
+	DeletedByID *uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
 }

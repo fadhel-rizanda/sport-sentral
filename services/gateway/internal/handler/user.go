@@ -41,7 +41,7 @@ func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 		Id: id,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OK(c, fiber.Map{"user": toUserResponse(resp.User)})
@@ -64,7 +64,7 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 		Username: body.Username,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OK(c, fiber.Map{"user": toUserResponse(resp.User)})
@@ -79,7 +79,7 @@ func (h *UserHandler) ListUsers(c *fiber.Ctx) error {
 		PageSize: int32(pageSize),
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	users := make([]UserResponse, len(resp.Users))
@@ -109,7 +109,7 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 		Password: body.Password,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OKWithMessage(c, "user deleted")
@@ -118,33 +118,38 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 type UserResponse struct {
-	ID            string            `json:"id"`
-	Email         string            `json:"email"`
-	Username      string            `json:"username"`
-	FullName      string            `json:"full_name"`
-	Status        string            `json:"status"`
-	ActiveProfile string            `json:"active_profile"`
-	Profiles      []ProfileResponse `json:"profiles"`
-	VerifiedAt    *string           `json:"verified_at"`
-	CreatedAt     string            `json:"created_at"`
-	UpdatedAt     string            `json:"updated_at"`
+	ID             string         `json:"id"`
+	Email          string         `json:"email"`
+	Username       string         `json:"username"`
+	FullName       string         `json:"full_name"`
+	StatusName     string         `json:"status_name"`
+	StatusID       string         `json:"status_id"`
+	ActiveRoleName string         `json:"active_role_name"`
+	ActiveRoleID   string         `json:"active_role_id"`
+	Roles          []RoleResponse `json:"roles"`
+	VerifiedAt     *string        `json:"verified_at"`
+	CreatedAt      string         `json:"created_at"`
+	UpdatedAt      string         `json:"updated_at"`
+	DeletedAt      *string        `json:"deletedAt"`
 }
 
-type ProfileResponse struct {
-	RoleID   string `json:"role_id"`
-	RoleName string `json:"role_name"`
-	IsActive bool   `json:"is_active"`
-	Status   string `json:"status"`
+type RoleResponse struct {
+	RoleID     string `json:"role_id"`
+	RoleName   string `json:"role_name"`
+	IsActive   bool   `json:"is_active"`
+	StatusName string `json:"status_name"`
+	StatusID   string `json:"status_id"`
 }
 
 func toUserResponse(u *userv1.User) UserResponse {
-	profiles := make([]ProfileResponse, len(u.Profiles))
-	for i, p := range u.Profiles {
-		profiles[i] = ProfileResponse{
-			RoleID:   p.RoleId,
-			RoleName: p.RoleName,
-			IsActive: p.IsActive,
-			Status:   p.Status,
+	roles := make([]RoleResponse, len(u.Roles))
+	for i, p := range u.Roles {
+		roles[i] = RoleResponse{
+			RoleID:     p.RoleId,
+			RoleName:   p.RoleName,
+			IsActive:   p.IsActive,
+			StatusID:   p.StatusId,
+			StatusName: p.StatusName,
 		}
 	}
 
@@ -154,16 +159,23 @@ func toUserResponse(u *userv1.User) UserResponse {
 		verifiedAt = &t
 	}
 
-	return UserResponse{
-		ID:            u.Id,
-		Email:         u.Email,
-		Username:      u.Username,
-		FullName:      u.FullName,
-		Status:        u.Status,
-		ActiveProfile: u.ActiveProfile,
-		Profiles:      profiles,
-		VerifiedAt:    verifiedAt,
-		CreatedAt:     u.CreatedAt.AsTime().UTC().Format(time.RFC3339),
-		UpdatedAt:     u.UpdatedAt.AsTime().UTC().Format(time.RFC3339),
+	res := UserResponse{
+		ID:             u.Id,
+		Email:          u.Email,
+		Username:       u.Username,
+		FullName:       u.FullName,
+		StatusName:     u.StatusName,
+		StatusID:       u.StatusId,
+		ActiveRoleName: u.ActiveRoleName,
+		ActiveRoleID:   u.ActiveRoleId,
+		Roles:          roles,
+		VerifiedAt:     verifiedAt,
+		CreatedAt:      u.CreatedAt.AsTime().UTC().Format(time.RFC3339),
+		UpdatedAt:      u.UpdatedAt.AsTime().UTC().Format(time.RFC3339),
 	}
+	if u.DeletedAt != nil {
+		formattedDate := u.DeletedAt.AsTime().Format(time.RFC3339)
+		res.DeletedAt = &formattedDate
+	}
+	return res
 }

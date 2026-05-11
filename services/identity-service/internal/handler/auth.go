@@ -37,10 +37,11 @@ func (h *AuthHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 			RefreshToken: res.RefreshToken,
 			ExpiresAt:    res.ExpiresAt.Unix(),
 		},
-		UserId:        res.UserID.String(),
-		Email:         res.Email,
-		Username:      res.Username,
-		ActiveProfile: res.ActiveProfile,
+		UserId:         res.UserID.String(),
+		Email:          res.Email,
+		Username:       res.Username,
+		ActiveRoleName: res.ActiveRoleName,
+		ActiveRoleId:   res.ActiveRoleID.String(),
 	}, nil
 }
 
@@ -73,10 +74,11 @@ func (h *AuthHandler) ValidateToken(ctx context.Context, req *authv1.ValidateTok
 	}
 
 	return &authv1.ValidateTokenResponse{
-		UserId:        claims.UserID,
-		Email:         claims.Email,
-		Username:      claims.Username,
-		RoleIds:       claims.Roles,
-		ActiveProfile: claims.ActiveProfile,
+		UserId:         claims.UserID,
+		Email:          claims.Email,
+		Username:       claims.Username,
+		RoleIds:        claims.Roles,
+		ActiveRoleName: claims.ActiveRoleName,
+		ActiveRoleId:   claims.ActiveRoleID.String(),
 	}, nil
 }

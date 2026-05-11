@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package rbac.v1;
+
+option go_package = "microservice-golang/gen/rbac/v1;rbacv1";
+
+import "google/protobuf/timestamp.proto";
+import "buf/validate/validate.proto";
+import "rbac/v1/permission.proto";
+
+// ─── Message ──────────────────────────────────────────────────────────────────
+
+message Role {
+  string id                       = 1;
+  string name                     = 2;
+  string description              = 3;
+  repeated Permission permissions = 4;
+  string created_by_id = 5;
+  string updated_by_id = 6;
+  optional string deleted_by_id = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  optional google.protobuf.Timestamp deleted_at = 10;
+}
+
+// ─── Requests ─────────────────────────────────────────────────────────────────
+
+message CreateRoleRequest {
+  string name = 1 [
+    (buf.validate.field).string.min_len = 2,
+    (buf.validate.field).string.max_len = 50
+  ];
+  string description = 2 [
+    (buf.validate.field).string.max_len = 255
+  ];
+  repeated string permission_ids = 3;
+  string created_by_id = 4 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message GetRoleRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message UpdateRoleRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  optional string name = 2 [
+    (buf.validate.field).string.max_len = 50
+  ];
+  optional string description = 3 [
+    (buf.validate.field).string.max_len = 255
+  ];
+  repeated string permission_ids = 4;
+  string updated_by_id = 5 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeleteRoleRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string deleted_by_id = 2 [
+    (buf.validate.field).string.uuid = true
+  ];
+  bool is_permanent = 3;
+}
+
+message ListRolesRequest {
+  int32 page = 1 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 2 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message AssignPermissionToRoleRequest {
+  string role_id = 1 [(buf.validate.field).string.uuid = true];
+  repeated string permission_ids = 2 [
+    (buf.validate.field).repeated = {
+      min_items: 1,
+      max_items: 100,
+      items: { string: { uuid: true } }
+    }
+  ];
+}
+
+message RevokePermissionFromRoleRequest {
+  string role_id = 1 [(buf.validate.field).string.uuid = true];
+  repeated string permission_ids = 2 [
+    (buf.validate.field).repeated = {
+      min_items: 1,
+      max_items: 100,
+      items: { string: { uuid: true } }
+    }
+  ];
+}
+
+// ─── Responses ────────────────────────────────────────────────────────────────
+
+message CreateRoleResponse {
+  Role role = 1;
+}
+
+message GetRoleResponse    {
+  Role role = 1;
+}
+
+message UpdateRoleResponse {
+  Role role = 1;
+}
+
+message DeleteRoleResponse {}
+
+message ListRolesResponse {
+  repeated Role roles = 1;
+  int64 total     = 2;
+  int32 page      = 3;
+  int32 page_size = 4;
+}
+
+message AssignPermissionToRoleResponse {}
+
+message RevokePermissionFromRoleResponse {}
+
+// ─── Service ──────────────────────────────────────────────────────────────────
+
+service RoleService {
+  rpc GetRole    (GetRoleRequest)    returns (GetRoleResponse);
+  rpc CreateRole (CreateRoleRequest) returns (CreateRoleResponse);
+  rpc UpdateRole (UpdateRoleRequest) returns (UpdateRoleResponse);
+  rpc DeleteRole (DeleteRoleRequest) returns (DeleteRoleResponse);
+  rpc ListRoles  (ListRolesRequest)  returns (ListRolesResponse);
+
+  rpc AssignPermissionToRole  (AssignPermissionToRoleRequest)  returns (AssignPermissionToRoleResponse);
+  rpc RevokePermissionFromRole(RevokePermissionFromRoleRequest) returns (RevokePermissionFromRoleResponse);
+}

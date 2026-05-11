@@ -33,7 +33,7 @@ func (r *userRoleRepository) Add(ctx context.Context, userRole *entity.UserRole)
 func (r *userRoleRepository) GetActiveByUserID(ctx context.Context, userID uuid.UUID) (*entity.UserRole, error) {
 	var userRole entity.UserRole
 	err := r.db.WithContext(ctx).
-		Preload("Status").
+		Preload("StatusName").
 		Preload("Role").
 		First(&userRole, "user_id = ? AND is_active = true", userID).Error
 	if err != nil {
@@ -45,7 +45,7 @@ func (r *userRoleRepository) GetActiveByUserID(ctx context.Context, userID uuid.
 func (r *userRoleRepository) GetByUserIDAndRoleID(ctx context.Context, userID, roleID uuid.UUID) (*entity.UserRole, error) {
 	var userRole entity.UserRole
 	err := r.db.WithContext(ctx).
-		Preload("Status").
+		Preload("StatusName").
 		Preload("Role").
 		First(&userRole, "user_id = ? AND role_id = ?", userID, roleID).Error
 	if err != nil {
@@ -57,7 +57,7 @@ func (r *userRoleRepository) GetByUserIDAndRoleID(ctx context.Context, userID, r
 func (r *userRoleRepository) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*entity.UserRole, error) {
 	var userRoles []*entity.UserRole
 	err := r.db.WithContext(ctx).
-		Preload("Status").
+		Preload("StatusName").
 		Preload("Role").
 		Find(&userRoles, "user_id = ?", userID).Error
 	if err != nil {

@@ -30,7 +30,8 @@ message LoginResponse {
   string    user_id       = 2;
   string    email         = 3;
   string    username      = 4;
-  string    active_profile = 5;
+  string    active_role_id  = 5;
+  string    active_role_name = 6;
 }
 
 message LogoutRequest {
@@ -62,7 +63,8 @@ message ValidateTokenResponse {
   string          email          = 2;
   string          username       = 3;
   repeated string role_ids       = 4;
-  string          active_profile = 5;
+  string          active_role_id  = 5;
+  string          active_role_name = 6;
 }
 
 // ─── Service ──────────────────────────────────────────────────────────────────

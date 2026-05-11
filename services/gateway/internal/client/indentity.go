@@ -11,7 +11,7 @@ import (
 type IdentityClient struct {
 	Auth authv1.AuthServiceClient
 	User userv1.UserServiceClient
-	RBAC rbacv1.RbacServiceClient
+	RBAC rbacv1.RBACServiceClient
 	conn *grpc.ClientConn
 }
 
@@ -27,7 +27,7 @@ func NewIdentityClient(address string) (*IdentityClient, error) {
 	return &IdentityClient{
 		Auth: authv1.NewAuthServiceClient(conn),
 		User: userv1.NewUserServiceClient(conn),
-		RBAC: rbacv1.NewRbacServiceClient(conn),
+		RBAC: rbacv1.NewRBACServiceClient(conn),
 		conn: conn,
 	}, nil
 }

@@ -29,10 +29,12 @@ type Tag struct {
 	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	Slug          string                 `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug,omitempty"`
-	CreatedBy     string                 `protobuf:"bytes,5,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
-	UpdatedBy     string                 `protobuf:"bytes,6,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CreatedById   string                 `protobuf:"bytes,5,opt,name=created_by_id,json=createdById,proto3" json:"created_by_id,omitempty"`
+	UpdatedById   string                 `protobuf:"bytes,6,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
+	DeletedById   *string                `protobuf:"bytes,7,opt,name=deleted_by_id,json=deletedById,proto3,oneof" json:"deleted_by_id,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -95,16 +97,23 @@ func (x *Tag) GetSlug() string {
 	return ""
 }
 
-func (x *Tag) GetCreatedBy() string {
+func (x *Tag) GetCreatedById() string {
 	if x != nil {
-		return x.CreatedBy
+		return x.CreatedById
 	}
 	return ""
 }
 
-func (x *Tag) GetUpdatedBy() string {
+func (x *Tag) GetUpdatedById() string {
 	if x != nil {
-		return x.UpdatedBy
+		return x.UpdatedById
+	}
+	return ""
+}
+
+func (x *Tag) GetDeletedById() string {
+	if x != nil && x.DeletedById != nil {
+		return *x.DeletedById
 	}
 	return ""
 }
@@ -123,12 +132,19 @@ func (x *Tag) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Tag) GetDeletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DeletedAt
+	}
+	return nil
+}
+
 type CreateTagRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Slug          *string                `protobuf:"bytes,3,opt,name=slug,proto3,oneof" json:"slug,omitempty"`
-	CreatedBy     string                 `protobuf:"bytes,4,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	CreatedById   string                 `protobuf:"bytes,4,opt,name=created_by_id,json=createdById,proto3" json:"created_by_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -184,9 +200,9 @@ func (x *CreateTagRequest) GetSlug() string {
 	return ""
 }
 
-func (x *CreateTagRequest) GetCreatedBy() string {
+func (x *CreateTagRequest) GetCreatedById() string {
 	if x != nil {
-		return x.CreatedBy
+		return x.CreatedById
 	}
 	return ""
 }
@@ -287,27 +303,29 @@ func (x *GetTagByIDRequest) GetId() string {
 	return ""
 }
 
-type ListTagsByTypeRequest struct {
+type ListTagsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Type          *string                `protobuf:"bytes,1,opt,name=type,proto3,oneof" json:"type,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListTagsByTypeRequest) Reset() {
-	*x = ListTagsByTypeRequest{}
+func (x *ListTagsRequest) Reset() {
+	*x = ListTagsRequest{}
 	mi := &file_meta_v1_tag_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListTagsByTypeRequest) String() string {
+func (x *ListTagsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListTagsByTypeRequest) ProtoMessage() {}
+func (*ListTagsRequest) ProtoMessage() {}
 
-func (x *ListTagsByTypeRequest) ProtoReflect() protoreflect.Message {
+func (x *ListTagsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_meta_v1_tag_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -319,16 +337,30 @@ func (x *ListTagsByTypeRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListTagsByTypeRequest.ProtoReflect.Descriptor instead.
-func (*ListTagsByTypeRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListTagsRequest.ProtoReflect.Descriptor instead.
+func (*ListTagsRequest) Descriptor() ([]byte, []int) {
 	return file_meta_v1_tag_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *ListTagsByTypeRequest) GetType() string {
-	if x != nil {
-		return x.Type
+func (x *ListTagsRequest) GetType() string {
+	if x != nil && x.Type != nil {
+		return *x.Type
 	}
 	return ""
+}
+
+func (x *ListTagsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListTagsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
 }
 
 type UpdateTagRequest struct {
@@ -337,7 +369,7 @@ type UpdateTagRequest struct {
 	Type          *string                `protobuf:"bytes,2,opt,name=type,proto3,oneof" json:"type,omitempty"`
 	Name          *string                `protobuf:"bytes,3,opt,name=name,proto3,oneof" json:"name,omitempty"`
 	Slug          *string                `protobuf:"bytes,4,opt,name=slug,proto3,oneof" json:"slug,omitempty"`
-	UpdatedBy     string                 `protobuf:"bytes,5,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
+	UpdatedById   string                 `protobuf:"bytes,5,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -400,9 +432,9 @@ func (x *UpdateTagRequest) GetSlug() string {
 	return ""
 }
 
-func (x *UpdateTagRequest) GetUpdatedBy() string {
+func (x *UpdateTagRequest) GetUpdatedById() string {
 	if x != nil {
-		return x.UpdatedBy
+		return x.UpdatedById
 	}
 	return ""
 }
@@ -410,7 +442,7 @@ func (x *UpdateTagRequest) GetUpdatedBy() string {
 type DeleteTagRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	DeletedBy     string                 `protobuf:"bytes,2,opt,name=deleted_by,json=deletedBy,proto3" json:"deleted_by,omitempty"`
+	DeletedById   string                 `protobuf:"bytes,2,opt,name=deleted_by_id,json=deletedById,proto3" json:"deleted_by_id,omitempty"`
 	IsPermanent   bool                   `protobuf:"varint,3,opt,name=is_permanent,json=isPermanent,proto3" json:"is_permanent,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -453,9 +485,9 @@ func (x *DeleteTagRequest) GetId() string {
 	return ""
 }
 
-func (x *DeleteTagRequest) GetDeletedBy() string {
+func (x *DeleteTagRequest) GetDeletedById() string {
 	if x != nil {
-		return x.DeletedBy
+		return x.DeletedById
 	}
 	return ""
 }
@@ -555,27 +587,30 @@ func (x *GetTagResponse) GetTag() *Tag {
 	return nil
 }
 
-type ListTagsByTypeResponse struct {
+type ListTagsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Tags          []*Tag                 `protobuf:"bytes,1,rep,name=tags,proto3" json:"tags,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListTagsByTypeResponse) Reset() {
-	*x = ListTagsByTypeResponse{}
+func (x *ListTagsResponse) Reset() {
+	*x = ListTagsResponse{}
 	mi := &file_meta_v1_tag_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListTagsByTypeResponse) String() string {
+func (x *ListTagsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListTagsByTypeResponse) ProtoMessage() {}
+func (*ListTagsResponse) ProtoMessage() {}
 
-func (x *ListTagsByTypeResponse) ProtoReflect() protoreflect.Message {
+func (x *ListTagsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_meta_v1_tag_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -587,16 +622,37 @@ func (x *ListTagsByTypeResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListTagsByTypeResponse.ProtoReflect.Descriptor instead.
-func (*ListTagsByTypeResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListTagsResponse.ProtoReflect.Descriptor instead.
+func (*ListTagsResponse) Descriptor() ([]byte, []int) {
 	return file_meta_v1_tag_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *ListTagsByTypeResponse) GetTags() []*Tag {
+func (x *ListTagsResponse) GetTags() []*Tag {
 	if x != nil {
 		return x.Tags
 	}
 	return nil
+}
+
+func (x *ListTagsResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListTagsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListTagsResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
 }
 
 type UpdateTagResponse struct {
@@ -683,65 +739,72 @@ var File_meta_v1_tag_proto protoreflect.FileDescriptor
 
 const file_meta_v1_tag_proto_rawDesc = "" +
 	"\n" +
-	"\x11meta/v1/tag.proto\x12\ameta.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x85\x02\n" +
+	"\x11meta/v1/tag.proto\x12\ameta.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x99\x03\n" +
 	"\x03Tag\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x12\n" +
-	"\x04slug\x18\x04 \x01(\tR\x04slug\x12\x1d\n" +
+	"\x04slug\x18\x04 \x01(\tR\x04slug\x12\"\n" +
+	"\rcreated_by_id\x18\x05 \x01(\tR\vcreatedById\x12\"\n" +
+	"\rupdated_by_id\x18\x06 \x01(\tR\vupdatedById\x12'\n" +
+	"\rdeleted_by_id\x18\a \x01(\tH\x00R\vdeletedById\x88\x01\x01\x129\n" +
 	"\n" +
-	"created_by\x18\x05 \x01(\tR\tcreatedBy\x12\x1d\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_by\x18\x06 \x01(\tR\tupdatedBy\x129\n" +
+	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12>\n" +
 	"\n" +
-	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
-	"\n" +
-	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xa0\x01\n" +
+	"deleted_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampH\x01R\tdeletedAt\x88\x01\x01B\x10\n" +
+	"\x0e_deleted_by_idB\r\n" +
+	"\v_deleted_at\"\xa5\x01\n" +
 	"\x10CreateTagRequest\x12\x1b\n" +
 	"\x04type\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04type\x12\x1b\n" +
 	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12 \n" +
-	"\x04slug\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x00R\x04slug\x88\x01\x01\x12'\n" +
-	"\n" +
-	"created_by\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\tcreatedByB\a\n" +
+	"\x04slug\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x00R\x04slug\x88\x01\x01\x12,\n" +
+	"\rcreated_by_id\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vcreatedByIdB\a\n" +
 	"\x05_slug\"I\n" +
 	"\rGetTagRequest\x12\x1b\n" +
 	"\x04type\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04type\x12\x1b\n" +
 	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\"-\n" +
 	"\x11GetTagByIDRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"4\n" +
-	"\x15ListTagsByTypeRequest\x12\x1b\n" +
-	"\x04type\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04type\"\xd6\x01\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\x81\x01\n" +
+	"\x0fListTagsRequest\x12 \n" +
+	"\x04type\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x00R\x04type\x88\x01\x01\x12\x1b\n" +
+	"\x04page\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\x04page\x12&\n" +
+	"\tpage_size\x18\x03 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01R\bpageSizeB\a\n" +
+	"\x05_type\"\xdb\x01\n" +
 	"\x10UpdateTagRequest\x12\x18\n" +
 	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12 \n" +
 	"\x04type\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x00R\x04type\x88\x01\x01\x12 \n" +
 	"\x04name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x01R\x04name\x88\x01\x01\x12 \n" +
-	"\x04slug\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x02R\x04slug\x88\x01\x01\x12'\n" +
-	"\n" +
-	"updated_by\x18\x05 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\tupdatedByB\a\n" +
+	"\x04slug\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x02R\x04slug\x88\x01\x01\x12,\n" +
+	"\rupdated_by_id\x18\x05 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vupdatedByIdB\a\n" +
 	"\x05_typeB\a\n" +
 	"\x05_nameB\a\n" +
-	"\x05_slug\"x\n" +
+	"\x05_slug\"}\n" +
 	"\x10DeleteTagRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12'\n" +
-	"\n" +
-	"deleted_by\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\tdeletedBy\x12!\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12,\n" +
+	"\rdeleted_by_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vdeletedById\x12!\n" +
 	"\fis_permanent\x18\x03 \x01(\bR\visPermanent\"3\n" +
 	"\x11CreateTagResponse\x12\x1e\n" +
 	"\x03tag\x18\x01 \x01(\v2\f.meta.v1.TagR\x03tag\"0\n" +
 	"\x0eGetTagResponse\x12\x1e\n" +
-	"\x03tag\x18\x01 \x01(\v2\f.meta.v1.TagR\x03tag\":\n" +
-	"\x16ListTagsByTypeResponse\x12 \n" +
-	"\x04tags\x18\x01 \x03(\v2\f.meta.v1.TagR\x04tags\"3\n" +
+	"\x03tag\x18\x01 \x01(\v2\f.meta.v1.TagR\x03tag\"{\n" +
+	"\x10ListTagsResponse\x12 \n" +
+	"\x04tags\x18\x01 \x03(\v2\f.meta.v1.TagR\x04tags\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"3\n" +
 	"\x11UpdateTagResponse\x12\x1e\n" +
 	"\x03tag\x18\x01 \x01(\v2\f.meta.v1.TagR\x03tag\"\x13\n" +
-	"\x11DeleteTagResponse2\xa9\x03\n" +
+	"\x11DeleteTagResponse2\x97\x03\n" +
 	"\n" +
 	"TagService\x12B\n" +
 	"\tCreateTag\x12\x19.meta.v1.CreateTagRequest\x1a\x1a.meta.v1.CreateTagResponse\x129\n" +
 	"\x06GetTag\x12\x16.meta.v1.GetTagRequest\x1a\x17.meta.v1.GetTagResponse\x12A\n" +
 	"\n" +
-	"GetTagByID\x12\x1a.meta.v1.GetTagByIDRequest\x1a\x17.meta.v1.GetTagResponse\x12Q\n" +
-	"\x0eListTagsByType\x12\x1e.meta.v1.ListTagsByTypeRequest\x1a\x1f.meta.v1.ListTagsByTypeResponse\x12B\n" +
+	"GetTagByID\x12\x1a.meta.v1.GetTagByIDRequest\x1a\x17.meta.v1.GetTagResponse\x12?\n" +
+	"\bListTags\x12\x18.meta.v1.ListTagsRequest\x1a\x19.meta.v1.ListTagsResponse\x12B\n" +
 	"\tUpdateTag\x12\x19.meta.v1.UpdateTagRequest\x1a\x1a.meta.v1.UpdateTagResponse\x12B\n" +
 	"\tDeleteTag\x12\x19.meta.v1.DeleteTagRequest\x1a\x1a.meta.v1.DeleteTagResponseB(Z&microservice-golang/gen/meta/v1;metav1b\x06proto3"
 
@@ -759,44 +822,45 @@ func file_meta_v1_tag_proto_rawDescGZIP() []byte {
 
 var file_meta_v1_tag_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_meta_v1_tag_proto_goTypes = []any{
-	(*Tag)(nil),                    // 0: meta.v1.Tag
-	(*CreateTagRequest)(nil),       // 1: meta.v1.CreateTagRequest
-	(*GetTagRequest)(nil),          // 2: meta.v1.GetTagRequest
-	(*GetTagByIDRequest)(nil),      // 3: meta.v1.GetTagByIDRequest
-	(*ListTagsByTypeRequest)(nil),  // 4: meta.v1.ListTagsByTypeRequest
-	(*UpdateTagRequest)(nil),       // 5: meta.v1.UpdateTagRequest
-	(*DeleteTagRequest)(nil),       // 6: meta.v1.DeleteTagRequest
-	(*CreateTagResponse)(nil),      // 7: meta.v1.CreateTagResponse
-	(*GetTagResponse)(nil),         // 8: meta.v1.GetTagResponse
-	(*ListTagsByTypeResponse)(nil), // 9: meta.v1.ListTagsByTypeResponse
-	(*UpdateTagResponse)(nil),      // 10: meta.v1.UpdateTagResponse
-	(*DeleteTagResponse)(nil),      // 11: meta.v1.DeleteTagResponse
-	(*timestamppb.Timestamp)(nil),  // 12: google.protobuf.Timestamp
+	(*Tag)(nil),                   // 0: meta.v1.Tag
+	(*CreateTagRequest)(nil),      // 1: meta.v1.CreateTagRequest
+	(*GetTagRequest)(nil),         // 2: meta.v1.GetTagRequest
+	(*GetTagByIDRequest)(nil),     // 3: meta.v1.GetTagByIDRequest
+	(*ListTagsRequest)(nil),       // 4: meta.v1.ListTagsRequest
+	(*UpdateTagRequest)(nil),      // 5: meta.v1.UpdateTagRequest
+	(*DeleteTagRequest)(nil),      // 6: meta.v1.DeleteTagRequest
+	(*CreateTagResponse)(nil),     // 7: meta.v1.CreateTagResponse
+	(*GetTagResponse)(nil),        // 8: meta.v1.GetTagResponse
+	(*ListTagsResponse)(nil),      // 9: meta.v1.ListTagsResponse
+	(*UpdateTagResponse)(nil),     // 10: meta.v1.UpdateTagResponse
+	(*DeleteTagResponse)(nil),     // 11: meta.v1.DeleteTagResponse
+	(*timestamppb.Timestamp)(nil), // 12: google.protobuf.Timestamp
 }
 var file_meta_v1_tag_proto_depIdxs = []int32{
 	12, // 0: meta.v1.Tag.created_at:type_name -> google.protobuf.Timestamp
 	12, // 1: meta.v1.Tag.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 2: meta.v1.CreateTagResponse.tag:type_name -> meta.v1.Tag
-	0,  // 3: meta.v1.GetTagResponse.tag:type_name -> meta.v1.Tag
-	0,  // 4: meta.v1.ListTagsByTypeResponse.tags:type_name -> meta.v1.Tag
-	0,  // 5: meta.v1.UpdateTagResponse.tag:type_name -> meta.v1.Tag
-	1,  // 6: meta.v1.TagService.CreateTag:input_type -> meta.v1.CreateTagRequest
-	2,  // 7: meta.v1.TagService.GetTag:input_type -> meta.v1.GetTagRequest
-	3,  // 8: meta.v1.TagService.GetTagByID:input_type -> meta.v1.GetTagByIDRequest
-	4,  // 9: meta.v1.TagService.ListTagsByType:input_type -> meta.v1.ListTagsByTypeRequest
-	5,  // 10: meta.v1.TagService.UpdateTag:input_type -> meta.v1.UpdateTagRequest
-	6,  // 11: meta.v1.TagService.DeleteTag:input_type -> meta.v1.DeleteTagRequest
-	7,  // 12: meta.v1.TagService.CreateTag:output_type -> meta.v1.CreateTagResponse
-	8,  // 13: meta.v1.TagService.GetTag:output_type -> meta.v1.GetTagResponse
-	8,  // 14: meta.v1.TagService.GetTagByID:output_type -> meta.v1.GetTagResponse
-	9,  // 15: meta.v1.TagService.ListTagsByType:output_type -> meta.v1.ListTagsByTypeResponse
-	10, // 16: meta.v1.TagService.UpdateTag:output_type -> meta.v1.UpdateTagResponse
-	11, // 17: meta.v1.TagService.DeleteTag:output_type -> meta.v1.DeleteTagResponse
-	12, // [12:18] is the sub-list for method output_type
-	6,  // [6:12] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	12, // 2: meta.v1.Tag.deleted_at:type_name -> google.protobuf.Timestamp
+	0,  // 3: meta.v1.CreateTagResponse.tag:type_name -> meta.v1.Tag
+	0,  // 4: meta.v1.GetTagResponse.tag:type_name -> meta.v1.Tag
+	0,  // 5: meta.v1.ListTagsResponse.tags:type_name -> meta.v1.Tag
+	0,  // 6: meta.v1.UpdateTagResponse.tag:type_name -> meta.v1.Tag
+	1,  // 7: meta.v1.TagService.CreateTag:input_type -> meta.v1.CreateTagRequest
+	2,  // 8: meta.v1.TagService.GetTag:input_type -> meta.v1.GetTagRequest
+	3,  // 9: meta.v1.TagService.GetTagByID:input_type -> meta.v1.GetTagByIDRequest
+	4,  // 10: meta.v1.TagService.ListTags:input_type -> meta.v1.ListTagsRequest
+	5,  // 11: meta.v1.TagService.UpdateTag:input_type -> meta.v1.UpdateTagRequest
+	6,  // 12: meta.v1.TagService.DeleteTag:input_type -> meta.v1.DeleteTagRequest
+	7,  // 13: meta.v1.TagService.CreateTag:output_type -> meta.v1.CreateTagResponse
+	8,  // 14: meta.v1.TagService.GetTag:output_type -> meta.v1.GetTagResponse
+	8,  // 15: meta.v1.TagService.GetTagByID:output_type -> meta.v1.GetTagResponse
+	9,  // 16: meta.v1.TagService.ListTags:output_type -> meta.v1.ListTagsResponse
+	10, // 17: meta.v1.TagService.UpdateTag:output_type -> meta.v1.UpdateTagResponse
+	11, // 18: meta.v1.TagService.DeleteTag:output_type -> meta.v1.DeleteTagResponse
+	13, // [13:19] is the sub-list for method output_type
+	7,  // [7:13] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_meta_v1_tag_proto_init() }
@@ -804,7 +868,9 @@ func file_meta_v1_tag_proto_init() {
 	if File_meta_v1_tag_proto != nil {
 		return
 	}
+	file_meta_v1_tag_proto_msgTypes[0].OneofWrappers = []any{}
 	file_meta_v1_tag_proto_msgTypes[1].OneofWrappers = []any{}
+	file_meta_v1_tag_proto_msgTypes[4].OneofWrappers = []any{}
 	file_meta_v1_tag_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

@@ -19,11 +19,12 @@ type AuthUseCase interface {
 }
 
 type authUseCase struct {
-	userRepo     repository.UserRepository
-	userRoleRepo repository.UserRoleRepository
-	jwtManager   *jwt.Manager
-	redis        *redis.Client
-	refreshTTL   time.Duration
+	userRepo        repository.UserRepository
+	userRoleRepo    repository.UserRoleRepository
+	jwtManager      *jwt.Manager
+	redis           *redis.Client
+	refreshTTL      time.Duration
+	statusCacheRepo repository.StatusCacheRepository
 }
 
 func NewAuthUseCase(
@@ -32,13 +33,15 @@ func NewAuthUseCase(
 	jwtManager *jwt.Manager,
 	redis *redis.Client,
 	refreshTTL time.Duration,
+	statusCacheRepo repository.StatusCacheRepository,
 ) AuthUseCase {
 	return &authUseCase{
-		userRepo:     userRepo,
-		userRoleRepo: userRoleRepo,
-		jwtManager:   jwtManager,
-		redis:        redis,
-		refreshTTL:   refreshTTL,
+		userRepo:        userRepo,
+		userRoleRepo:    userRoleRepo,
+		jwtManager:      jwtManager,
+		redis:           redis,
+		refreshTTL:      refreshTTL,
+		statusCacheRepo: statusCacheRepo,
 	}
 }
 
@@ -52,8 +55,13 @@ func (uc *authUseCase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 		return nil, apperr.Unauthorized("account not verified")
 	}
 
-	if user.Status.Name != "active" {
-		return nil, apperr.Unauthorized("account is " + user.Status.Name)
+	status, err := uc.statusCacheRepo.GetByTypeAndName(ctx, "account", "active")
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	if user.StatusID != status.ID {
+		return nil, apperr.Unauthorized("account is " + status.Name)
 	}
 
 	if !user.CheckPassword(req.Password) {
@@ -76,6 +84,7 @@ func (uc *authUseCase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 		user.Username,
 		roleIDs,
 		activeRole.Role.Name,
+		activeRole.Role.ID,
 	)
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -87,13 +96,13 @@ func (uc *authUseCase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 	}
 
 	return &LoginResponse{
-		AccessToken:   tokens.AccessToken,
-		RefreshToken:  tokens.RefreshToken,
-		ExpiresAt:     tokens.ExpiresAt,
-		UserID:        user.ID,
-		Email:         user.Email,
-		Username:      user.Username,
-		ActiveProfile: activeRole.Role.Name,
+		AccessToken:    tokens.AccessToken,
+		RefreshToken:   tokens.RefreshToken,
+		ExpiresAt:      tokens.ExpiresAt,
+		UserID:         user.ID,
+		Email:          user.Email,
+		Username:       user.Username,
+		ActiveRoleName: activeRole.Role.Name,
 	}, nil
 }
 
@@ -135,7 +144,8 @@ func (uc *authUseCase) RefreshToken(ctx context.Context, refreshToken string) (*
 		claims.Email,
 		claims.Username,
 		claims.Roles,
-		claims.ActiveProfile,
+		claims.ActiveRoleName,
+		claims.ActiveRoleID,
 	)
 	if err != nil {
 		return nil, apperr.Internal(err)

@@ -13,10 +13,12 @@ message Status {
   string id      = 1;
   string type    = 2;
   string name    = 3;
-  string created_by = 4;
-  string updated_by = 5;
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp updated_at = 7;
+  string created_by_id = 4;
+  string updated_by_id = 5;
+  optional string deleted_by_id = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  optional google.protobuf.Timestamp deleted_at = 9;
 }
 
 // ─── Requests ────────────────────────────────────────────────────────────────
@@ -28,7 +30,7 @@ message CreateStatusRequest {
   string name = 2 [
     (buf.validate.field).string.min_len = 1
   ];
-  string created_by = 3 [
+  string created_by_id = 3 [
     (buf.validate.field).string.uuid = true
   ];
 }
@@ -48,9 +50,14 @@ message GetStatusByIDRequest {
   ];
 }
 
-message ListStatusesByTypeRequest {
-  string type = 1 [
+message ListStatusesRequest {
+  optional string type = 1 [
     (buf.validate.field).string.min_len = 1
+  ];
+  int32 page = 2 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 3 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
   ];
 }
 
@@ -64,7 +71,7 @@ message UpdateStatusRequest {
   optional string name = 3 [
     (buf.validate.field).string.min_len = 1
   ];
-  string updated_by = 4 [
+  string updated_by_id = 4 [
     (buf.validate.field).string.uuid = true
   ];
 }
@@ -73,7 +80,7 @@ message DeleteStatusRequest {
   string id = 1 [
     (buf.validate.field).string.uuid = true
   ];
-  string deleted_by = 2 [
+  string deleted_by_id = 2 [
     (buf.validate.field).string.uuid = true
   ];
   bool is_permanent = 3;
@@ -93,8 +100,11 @@ message GetStatusByIDResponse {
   Status status = 1;
 }
 
-message ListStatusesByTypeResponse {
+message ListStatusesResponse {
   repeated Status statuses = 1;
+  int64 total     = 2;
+  int32 page      = 3;
+  int32 page_size = 4;
 }
 
 message UpdateStatusResponse {
@@ -111,7 +121,7 @@ service StatusService {
   rpc CreateStatus(CreateStatusRequest) returns (CreateStatusResponse);
   rpc GetStatus(GetStatusRequest) returns (GetStatusResponse);
   rpc GetStatusByID(GetStatusByIDRequest) returns (GetStatusByIDResponse);
-  rpc ListStatusesByType(ListStatusesByTypeRequest) returns (ListStatusesByTypeResponse);
+  rpc ListStatuses(ListStatusesRequest) returns (ListStatusesResponse);
   rpc UpdateStatus(UpdateStatusRequest) returns (UpdateStatusResponse);
   rpc DeleteStatus(DeleteStatusRequest) returns (DeleteStatusResponse);
 }

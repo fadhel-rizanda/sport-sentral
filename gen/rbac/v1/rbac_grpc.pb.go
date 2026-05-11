@@ -19,215 +19,215 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RbacService_ApplyProfile_FullMethodName   = "/rbac.v1.RbacService/ApplyProfile"
-	RbacService_ToggleProfile_FullMethodName  = "/rbac.v1.RbacService/ToggleProfile"
-	RbacService_ApproveProfile_FullMethodName = "/rbac.v1.RbacService/ApproveProfile"
-	RbacService_RejectProfile_FullMethodName  = "/rbac.v1.RbacService/RejectProfile"
+	RBACService_ApplyProfile_FullMethodName   = "/rbac.v1.RBACService/ApplyProfile"
+	RBACService_ToggleProfile_FullMethodName  = "/rbac.v1.RBACService/ToggleProfile"
+	RBACService_ApproveProfile_FullMethodName = "/rbac.v1.RBACService/ApproveProfile"
+	RBACService_RejectProfile_FullMethodName  = "/rbac.v1.RBACService/RejectProfile"
 )
 
-// RbacServiceClient is the client API for RbacService service.
+// RBACServiceClient is the client API for RBACService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type RbacServiceClient interface {
+type RBACServiceClient interface {
 	ApplyProfile(ctx context.Context, in *ApplyProfileRequest, opts ...grpc.CallOption) (*ApplyProfileResponse, error)
 	ToggleProfile(ctx context.Context, in *ToggleProfileRequest, opts ...grpc.CallOption) (*ToggleProfileResponse, error)
 	ApproveProfile(ctx context.Context, in *ApproveProfileRequest, opts ...grpc.CallOption) (*ApproveProfileResponse, error)
 	RejectProfile(ctx context.Context, in *RejectProfileRequest, opts ...grpc.CallOption) (*RejectProfileResponse, error)
 }
 
-type rbacServiceClient struct {
+type rBACServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewRbacServiceClient(cc grpc.ClientConnInterface) RbacServiceClient {
-	return &rbacServiceClient{cc}
+func NewRBACServiceClient(cc grpc.ClientConnInterface) RBACServiceClient {
+	return &rBACServiceClient{cc}
 }
 
-func (c *rbacServiceClient) ApplyProfile(ctx context.Context, in *ApplyProfileRequest, opts ...grpc.CallOption) (*ApplyProfileResponse, error) {
+func (c *rBACServiceClient) ApplyProfile(ctx context.Context, in *ApplyProfileRequest, opts ...grpc.CallOption) (*ApplyProfileResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ApplyProfileResponse)
-	err := c.cc.Invoke(ctx, RbacService_ApplyProfile_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, RBACService_ApplyProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rbacServiceClient) ToggleProfile(ctx context.Context, in *ToggleProfileRequest, opts ...grpc.CallOption) (*ToggleProfileResponse, error) {
+func (c *rBACServiceClient) ToggleProfile(ctx context.Context, in *ToggleProfileRequest, opts ...grpc.CallOption) (*ToggleProfileResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ToggleProfileResponse)
-	err := c.cc.Invoke(ctx, RbacService_ToggleProfile_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, RBACService_ToggleProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rbacServiceClient) ApproveProfile(ctx context.Context, in *ApproveProfileRequest, opts ...grpc.CallOption) (*ApproveProfileResponse, error) {
+func (c *rBACServiceClient) ApproveProfile(ctx context.Context, in *ApproveProfileRequest, opts ...grpc.CallOption) (*ApproveProfileResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ApproveProfileResponse)
-	err := c.cc.Invoke(ctx, RbacService_ApproveProfile_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, RBACService_ApproveProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rbacServiceClient) RejectProfile(ctx context.Context, in *RejectProfileRequest, opts ...grpc.CallOption) (*RejectProfileResponse, error) {
+func (c *rBACServiceClient) RejectProfile(ctx context.Context, in *RejectProfileRequest, opts ...grpc.CallOption) (*RejectProfileResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RejectProfileResponse)
-	err := c.cc.Invoke(ctx, RbacService_RejectProfile_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, RBACService_RejectProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// RbacServiceServer is the server API for RbacService service.
-// All implementations must embed UnimplementedRbacServiceServer
+// RBACServiceServer is the server API for RBACService service.
+// All implementations must embed UnimplementedRBACServiceServer
 // for forward compatibility.
-type RbacServiceServer interface {
+type RBACServiceServer interface {
 	ApplyProfile(context.Context, *ApplyProfileRequest) (*ApplyProfileResponse, error)
 	ToggleProfile(context.Context, *ToggleProfileRequest) (*ToggleProfileResponse, error)
 	ApproveProfile(context.Context, *ApproveProfileRequest) (*ApproveProfileResponse, error)
 	RejectProfile(context.Context, *RejectProfileRequest) (*RejectProfileResponse, error)
-	mustEmbedUnimplementedRbacServiceServer()
+	mustEmbedUnimplementedRBACServiceServer()
 }
 
-// UnimplementedRbacServiceServer must be embedded to have
+// UnimplementedRBACServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedRbacServiceServer struct{}
+type UnimplementedRBACServiceServer struct{}
 
-func (UnimplementedRbacServiceServer) ApplyProfile(context.Context, *ApplyProfileRequest) (*ApplyProfileResponse, error) {
+func (UnimplementedRBACServiceServer) ApplyProfile(context.Context, *ApplyProfileRequest) (*ApplyProfileResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ApplyProfile not implemented")
 }
-func (UnimplementedRbacServiceServer) ToggleProfile(context.Context, *ToggleProfileRequest) (*ToggleProfileResponse, error) {
+func (UnimplementedRBACServiceServer) ToggleProfile(context.Context, *ToggleProfileRequest) (*ToggleProfileResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ToggleProfile not implemented")
 }
-func (UnimplementedRbacServiceServer) ApproveProfile(context.Context, *ApproveProfileRequest) (*ApproveProfileResponse, error) {
+func (UnimplementedRBACServiceServer) ApproveProfile(context.Context, *ApproveProfileRequest) (*ApproveProfileResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ApproveProfile not implemented")
 }
-func (UnimplementedRbacServiceServer) RejectProfile(context.Context, *RejectProfileRequest) (*RejectProfileResponse, error) {
+func (UnimplementedRBACServiceServer) RejectProfile(context.Context, *RejectProfileRequest) (*RejectProfileResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RejectProfile not implemented")
 }
-func (UnimplementedRbacServiceServer) mustEmbedUnimplementedRbacServiceServer() {}
-func (UnimplementedRbacServiceServer) testEmbeddedByValue()                     {}
+func (UnimplementedRBACServiceServer) mustEmbedUnimplementedRBACServiceServer() {}
+func (UnimplementedRBACServiceServer) testEmbeddedByValue()                     {}
 
-// UnsafeRbacServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to RbacServiceServer will
+// UnsafeRBACServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to RBACServiceServer will
 // result in compilation errors.
-type UnsafeRbacServiceServer interface {
-	mustEmbedUnimplementedRbacServiceServer()
+type UnsafeRBACServiceServer interface {
+	mustEmbedUnimplementedRBACServiceServer()
 }
 
-func RegisterRbacServiceServer(s grpc.ServiceRegistrar, srv RbacServiceServer) {
-	// If the following call panics, it indicates UnimplementedRbacServiceServer was
+func RegisterRBACServiceServer(s grpc.ServiceRegistrar, srv RBACServiceServer) {
+	// If the following call panics, it indicates UnimplementedRBACServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&RbacService_ServiceDesc, srv)
+	s.RegisterService(&RBACService_ServiceDesc, srv)
 }
 
-func _RbacService_ApplyProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RBACService_ApplyProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ApplyProfileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RbacServiceServer).ApplyProfile(ctx, in)
+		return srv.(RBACServiceServer).ApplyProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RbacService_ApplyProfile_FullMethodName,
+		FullMethod: RBACService_ApplyProfile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RbacServiceServer).ApplyProfile(ctx, req.(*ApplyProfileRequest))
+		return srv.(RBACServiceServer).ApplyProfile(ctx, req.(*ApplyProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RbacService_ToggleProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RBACService_ToggleProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ToggleProfileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RbacServiceServer).ToggleProfile(ctx, in)
+		return srv.(RBACServiceServer).ToggleProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RbacService_ToggleProfile_FullMethodName,
+		FullMethod: RBACService_ToggleProfile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RbacServiceServer).ToggleProfile(ctx, req.(*ToggleProfileRequest))
+		return srv.(RBACServiceServer).ToggleProfile(ctx, req.(*ToggleProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RbacService_ApproveProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RBACService_ApproveProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ApproveProfileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RbacServiceServer).ApproveProfile(ctx, in)
+		return srv.(RBACServiceServer).ApproveProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RbacService_ApproveProfile_FullMethodName,
+		FullMethod: RBACService_ApproveProfile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RbacServiceServer).ApproveProfile(ctx, req.(*ApproveProfileRequest))
+		return srv.(RBACServiceServer).ApproveProfile(ctx, req.(*ApproveProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RbacService_RejectProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RBACService_RejectProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RejectProfileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RbacServiceServer).RejectProfile(ctx, in)
+		return srv.(RBACServiceServer).RejectProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RbacService_RejectProfile_FullMethodName,
+		FullMethod: RBACService_RejectProfile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RbacServiceServer).RejectProfile(ctx, req.(*RejectProfileRequest))
+		return srv.(RBACServiceServer).RejectProfile(ctx, req.(*RejectProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// RbacService_ServiceDesc is the grpc.ServiceDesc for RbacService service.
+// RBACService_ServiceDesc is the grpc.ServiceDesc for RBACService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var RbacService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "rbac.v1.RbacService",
-	HandlerType: (*RbacServiceServer)(nil),
+var RBACService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "rbac.v1.RBACService",
+	HandlerType: (*RBACServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "ApplyProfile",
-			Handler:    _RbacService_ApplyProfile_Handler,
+			Handler:    _RBACService_ApplyProfile_Handler,
 		},
 		{
 			MethodName: "ToggleProfile",
-			Handler:    _RbacService_ToggleProfile_Handler,
+			Handler:    _RBACService_ToggleProfile_Handler,
 		},
 		{
 			MethodName: "ApproveProfile",
-			Handler:    _RbacService_ApproveProfile_Handler,
+			Handler:    _RBACService_ApproveProfile_Handler,
 		},
 		{
 			MethodName: "RejectProfile",
-			Handler:    _RbacService_RejectProfile_Handler,
+			Handler:    _RBACService_RejectProfile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

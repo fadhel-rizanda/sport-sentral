@@ -21,6 +21,7 @@ type AppConfig struct {
 
 type GRPCClients struct {
 	IdentityAddress string
+	MetaAddress     string
 }
 
 type RedisConfig struct {
@@ -37,13 +38,21 @@ type RateLimitConfig struct {
 func Load() (*Config, error) {
 	redisHost := envConfig.GetEnv("REDIS_HOST", "localhost")
 	redisPort := envConfig.GetEnvInt("REDIS_PORT", 6379)
+
+	identityHost := envConfig.GetEnv("IDENTITY_SERVICE_HOST", "localhost")
+	identityPort := envConfig.GetEnvInt("IDENTITY_SERVICE_PORT", 50051)
+
+	metaHost := envConfig.GetEnv("META_SERVICE_HOST", "localhost")
+	metaPort := envConfig.GetEnvInt("META_SERVICE_PORT", 50052)
+
 	return &Config{
 		App: AppConfig{
 			Port: envConfig.GetEnvInt("APP_PORT", 8080),
 			Env:  envConfig.GetEnv("APP_ENV", "development"),
 		},
 		GRPC: GRPCClients{
-			IdentityAddress: envConfig.GetEnv("IDENTITY_SERVICE_ADDRESS", "localhost:50051"),
+			IdentityAddress: fmt.Sprintf("%s:%d", identityHost, identityPort),
+			MetaAddress:     fmt.Sprintf("%s:%d", metaHost, metaPort),
 		},
 		Redis: RedisConfig{
 			Address:  fmt.Sprintf("%s:%d", redisHost, redisPort),

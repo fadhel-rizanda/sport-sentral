@@ -14,10 +14,12 @@ message Tag {
   string type       = 2;
   string name       = 3;
   string slug       = 4;
-  string created_by = 5;
-  string updated_by = 6;
-  google.protobuf.Timestamp created_at = 7;
-  google.protobuf.Timestamp updated_at = 8;
+  string created_by_id = 5;
+  string updated_by_id = 6;
+  optional string deleted_by_id = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  optional google.protobuf.Timestamp deleted_at = 10;
 }
 
 // ─── Requests ────────────────────────────────────────────────────────────────
@@ -32,7 +34,7 @@ message CreateTagRequest {
   optional string slug = 3 [
     (buf.validate.field).string.min_len = 1
   ];
-  string created_by = 4 [
+  string created_by_id = 4 [
     (buf.validate.field).string.uuid = true
   ];
 }
@@ -52,9 +54,14 @@ message GetTagByIDRequest {
   ];
 }
 
-message ListTagsByTypeRequest {
-  string type = 1 [
+message ListTagsRequest {
+  optional string type = 1 [
     (buf.validate.field).string.min_len = 1
+  ];
+  int32 page = 2 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 3 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
   ];
 }
 
@@ -71,7 +78,7 @@ message UpdateTagRequest {
   optional string slug = 4 [
     (buf.validate.field).string.min_len = 1
   ];
-  string updated_by = 5 [
+  string updated_by_id = 5 [
     (buf.validate.field).string.uuid = true
   ];
 }
@@ -80,7 +87,7 @@ message DeleteTagRequest {
   string id = 1 [
     (buf.validate.field).string.uuid = true
   ];
-  string deleted_by = 2 [
+  string deleted_by_id = 2 [
     (buf.validate.field).string.uuid = true
   ];
   bool is_permanent = 3;
@@ -96,8 +103,11 @@ message GetTagResponse {
   Tag tag = 1;
 }
 
-message ListTagsByTypeResponse {
+message ListTagsResponse {
   repeated Tag tags = 1;
+  int64 total     = 2;
+  int32 page      = 3;
+  int32 page_size = 4;
 }
 
 message UpdateTagResponse {
@@ -112,7 +122,7 @@ service TagService {
   rpc CreateTag(CreateTagRequest) returns (CreateTagResponse);
   rpc GetTag(GetTagRequest) returns (GetTagResponse);
   rpc GetTagByID(GetTagByIDRequest) returns (GetTagResponse);
-  rpc ListTagsByType(ListTagsByTypeRequest) returns (ListTagsByTypeResponse);
+  rpc ListTags(ListTagsRequest) returns (ListTagsResponse);
   rpc UpdateTag(UpdateTagRequest) returns (UpdateTagResponse);
   rpc DeleteTag(DeleteTagRequest) returns (DeleteTagResponse);
 }

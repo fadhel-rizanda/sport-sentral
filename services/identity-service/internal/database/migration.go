@@ -38,9 +38,10 @@ func RunExternalMigrations(dsn string) error {
 
 func Migrate(db *gorm.DB) error {
 	return db.AutoMigrate(
+		&entity.User{},
 		&entity.Permission{},
 		&entity.Role{},
-		&entity.User{},
 		&entity.UserRole{},
+		&entity.StatusCache{},
 	)
 }

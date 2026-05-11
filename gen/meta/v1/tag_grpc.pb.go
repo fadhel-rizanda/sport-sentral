@@ -19,12 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TagService_CreateTag_FullMethodName      = "/meta.v1.TagService/CreateTag"
-	TagService_GetTag_FullMethodName         = "/meta.v1.TagService/GetTag"
-	TagService_GetTagByID_FullMethodName     = "/meta.v1.TagService/GetTagByID"
-	TagService_ListTagsByType_FullMethodName = "/meta.v1.TagService/ListTagsByType"
-	TagService_UpdateTag_FullMethodName      = "/meta.v1.TagService/UpdateTag"
-	TagService_DeleteTag_FullMethodName      = "/meta.v1.TagService/DeleteTag"
+	TagService_CreateTag_FullMethodName  = "/meta.v1.TagService/CreateTag"
+	TagService_GetTag_FullMethodName     = "/meta.v1.TagService/GetTag"
+	TagService_GetTagByID_FullMethodName = "/meta.v1.TagService/GetTagByID"
+	TagService_ListTags_FullMethodName   = "/meta.v1.TagService/ListTags"
+	TagService_UpdateTag_FullMethodName  = "/meta.v1.TagService/UpdateTag"
+	TagService_DeleteTag_FullMethodName  = "/meta.v1.TagService/DeleteTag"
 )
 
 // TagServiceClient is the client API for TagService service.
@@ -34,7 +34,7 @@ type TagServiceClient interface {
 	CreateTag(ctx context.Context, in *CreateTagRequest, opts ...grpc.CallOption) (*CreateTagResponse, error)
 	GetTag(ctx context.Context, in *GetTagRequest, opts ...grpc.CallOption) (*GetTagResponse, error)
 	GetTagByID(ctx context.Context, in *GetTagByIDRequest, opts ...grpc.CallOption) (*GetTagResponse, error)
-	ListTagsByType(ctx context.Context, in *ListTagsByTypeRequest, opts ...grpc.CallOption) (*ListTagsByTypeResponse, error)
+	ListTags(ctx context.Context, in *ListTagsRequest, opts ...grpc.CallOption) (*ListTagsResponse, error)
 	UpdateTag(ctx context.Context, in *UpdateTagRequest, opts ...grpc.CallOption) (*UpdateTagResponse, error)
 	DeleteTag(ctx context.Context, in *DeleteTagRequest, opts ...grpc.CallOption) (*DeleteTagResponse, error)
 }
@@ -77,10 +77,10 @@ func (c *tagServiceClient) GetTagByID(ctx context.Context, in *GetTagByIDRequest
 	return out, nil
 }
 
-func (c *tagServiceClient) ListTagsByType(ctx context.Context, in *ListTagsByTypeRequest, opts ...grpc.CallOption) (*ListTagsByTypeResponse, error) {
+func (c *tagServiceClient) ListTags(ctx context.Context, in *ListTagsRequest, opts ...grpc.CallOption) (*ListTagsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListTagsByTypeResponse)
-	err := c.cc.Invoke(ctx, TagService_ListTagsByType_FullMethodName, in, out, cOpts...)
+	out := new(ListTagsResponse)
+	err := c.cc.Invoke(ctx, TagService_ListTags_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ type TagServiceServer interface {
 	CreateTag(context.Context, *CreateTagRequest) (*CreateTagResponse, error)
 	GetTag(context.Context, *GetTagRequest) (*GetTagResponse, error)
 	GetTagByID(context.Context, *GetTagByIDRequest) (*GetTagResponse, error)
-	ListTagsByType(context.Context, *ListTagsByTypeRequest) (*ListTagsByTypeResponse, error)
+	ListTags(context.Context, *ListTagsRequest) (*ListTagsResponse, error)
 	UpdateTag(context.Context, *UpdateTagRequest) (*UpdateTagResponse, error)
 	DeleteTag(context.Context, *DeleteTagRequest) (*DeleteTagResponse, error)
 	mustEmbedUnimplementedTagServiceServer()
@@ -136,8 +136,8 @@ func (UnimplementedTagServiceServer) GetTag(context.Context, *GetTagRequest) (*G
 func (UnimplementedTagServiceServer) GetTagByID(context.Context, *GetTagByIDRequest) (*GetTagResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetTagByID not implemented")
 }
-func (UnimplementedTagServiceServer) ListTagsByType(context.Context, *ListTagsByTypeRequest) (*ListTagsByTypeResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListTagsByType not implemented")
+func (UnimplementedTagServiceServer) ListTags(context.Context, *ListTagsRequest) (*ListTagsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTags not implemented")
 }
 func (UnimplementedTagServiceServer) UpdateTag(context.Context, *UpdateTagRequest) (*UpdateTagResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateTag not implemented")
@@ -220,20 +220,20 @@ func _TagService_GetTagByID_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TagService_ListTagsByType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListTagsByTypeRequest)
+func _TagService_ListTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTagsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TagServiceServer).ListTagsByType(ctx, in)
+		return srv.(TagServiceServer).ListTags(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TagService_ListTagsByType_FullMethodName,
+		FullMethod: TagService_ListTags_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TagServiceServer).ListTagsByType(ctx, req.(*ListTagsByTypeRequest))
+		return srv.(TagServiceServer).ListTags(ctx, req.(*ListTagsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -294,8 +294,8 @@ var TagService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TagService_GetTagByID_Handler,
 		},
 		{
-			MethodName: "ListTagsByType",
-			Handler:    _TagService_ListTagsByType_Handler,
+			MethodName: "ListTags",
+			Handler:    _TagService_ListTags_Handler,
 		},
 		{
 			MethodName: "UpdateTag",

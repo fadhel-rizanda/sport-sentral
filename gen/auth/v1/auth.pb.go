@@ -135,14 +135,15 @@ func (x *LoginRequest) GetPassword() string {
 }
 
 type LoginResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Tokens        *TokenPair             `protobuf:"bytes,1,opt,name=tokens,proto3" json:"tokens,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Username      string                 `protobuf:"bytes,4,opt,name=username,proto3" json:"username,omitempty"`
-	ActiveProfile string                 `protobuf:"bytes,5,opt,name=active_profile,json=activeProfile,proto3" json:"active_profile,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Tokens         *TokenPair             `protobuf:"bytes,1,opt,name=tokens,proto3" json:"tokens,omitempty"`
+	UserId         string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Email          string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Username       string                 `protobuf:"bytes,4,opt,name=username,proto3" json:"username,omitempty"`
+	ActiveRoleId   string                 `protobuf:"bytes,5,opt,name=active_role_id,json=activeRoleId,proto3" json:"active_role_id,omitempty"`
+	ActiveRoleName string                 `protobuf:"bytes,6,opt,name=active_role_name,json=activeRoleName,proto3" json:"active_role_name,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *LoginResponse) Reset() {
@@ -203,9 +204,16 @@ func (x *LoginResponse) GetUsername() string {
 	return ""
 }
 
-func (x *LoginResponse) GetActiveProfile() string {
+func (x *LoginResponse) GetActiveRoleId() string {
 	if x != nil {
-		return x.ActiveProfile
+		return x.ActiveRoleId
+	}
+	return ""
+}
+
+func (x *LoginResponse) GetActiveRoleName() string {
+	if x != nil {
+		return x.ActiveRoleName
 	}
 	return ""
 }
@@ -423,14 +431,15 @@ func (x *ValidateTokenRequest) GetAccessToken() string {
 }
 
 type ValidateTokenResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
-	RoleIds       []string               `protobuf:"bytes,4,rep,name=role_ids,json=roleIds,proto3" json:"role_ids,omitempty"`
-	ActiveProfile string                 `protobuf:"bytes,5,opt,name=active_profile,json=activeProfile,proto3" json:"active_profile,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	UserId         string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Email          string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Username       string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
+	RoleIds        []string               `protobuf:"bytes,4,rep,name=role_ids,json=roleIds,proto3" json:"role_ids,omitempty"`
+	ActiveRoleId   string                 `protobuf:"bytes,5,opt,name=active_role_id,json=activeRoleId,proto3" json:"active_role_id,omitempty"`
+	ActiveRoleName string                 `protobuf:"bytes,6,opt,name=active_role_name,json=activeRoleName,proto3" json:"active_role_name,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ValidateTokenResponse) Reset() {
@@ -491,9 +500,16 @@ func (x *ValidateTokenResponse) GetRoleIds() []string {
 	return nil
 }
 
-func (x *ValidateTokenResponse) GetActiveProfile() string {
+func (x *ValidateTokenResponse) GetActiveRoleId() string {
 	if x != nil {
-		return x.ActiveProfile
+		return x.ActiveRoleId
+	}
+	return ""
+}
+
+func (x *ValidateTokenResponse) GetActiveRoleName() string {
+	if x != nil {
+		return x.ActiveRoleName
 	}
 	return ""
 }
@@ -510,13 +526,14 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"expires_at\x18\x03 \x01(\x03R\texpiresAt\"R\n" +
 	"\fLoginRequest\x12\x1d\n" +
 	"\x05email\x18\x01 \x01(\tB\a\xbaH\x04r\x02`\x01R\x05email\x12#\n" +
-	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\"\xad\x01\n" +
+	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\"\xd6\x01\n" +
 	"\rLoginResponse\x12*\n" +
 	"\x06tokens\x18\x01 \x01(\v2\x12.auth.v1.TokenPairR\x06tokens\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12\x1a\n" +
-	"\busername\x18\x04 \x01(\tR\busername\x12%\n" +
-	"\x0eactive_profile\x18\x05 \x01(\tR\ractiveProfile\"=\n" +
+	"\busername\x18\x04 \x01(\tR\busername\x12$\n" +
+	"\x0eactive_role_id\x18\x05 \x01(\tR\factiveRoleId\x12(\n" +
+	"\x10active_role_name\x18\x06 \x01(\tR\x0eactiveRoleName\"=\n" +
 	"\rLogoutRequest\x12,\n" +
 	"\rrefresh_token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\frefreshToken\"\x10\n" +
 	"\x0eLogoutResponse\"C\n" +
@@ -525,13 +542,14 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"\x14RefreshTokenResponse\x12*\n" +
 	"\x06tokens\x18\x01 \x01(\v2\x12.auth.v1.TokenPairR\x06tokens\"B\n" +
 	"\x14ValidateTokenRequest\x12*\n" +
-	"\faccess_token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vaccessToken\"\xa4\x01\n" +
+	"\faccess_token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vaccessToken\"\xcd\x01\n" +
 	"\x15ValidateTokenResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
 	"\busername\x18\x03 \x01(\tR\busername\x12\x19\n" +
-	"\brole_ids\x18\x04 \x03(\tR\aroleIds\x12%\n" +
-	"\x0eactive_profile\x18\x05 \x01(\tR\ractiveProfile2\x9d\x02\n" +
+	"\brole_ids\x18\x04 \x03(\tR\aroleIds\x12$\n" +
+	"\x0eactive_role_id\x18\x05 \x01(\tR\factiveRoleId\x12(\n" +
+	"\x10active_role_name\x18\x06 \x01(\tR\x0eactiveRoleName2\x9d\x02\n" +
 	"\vAuthService\x126\n" +
 	"\x05Login\x12\x15.auth.v1.LoginRequest\x1a\x16.auth.v1.LoginResponse\x129\n" +
 	"\x06Logout\x12\x16.auth.v1.LogoutRequest\x1a\x17.auth.v1.LogoutResponse\x12K\n" +

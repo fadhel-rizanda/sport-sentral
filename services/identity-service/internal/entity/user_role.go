@@ -14,6 +14,6 @@ type UserRole struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	Status Status `gorm:"foreignKey:StatusID"`
-	Role   Role   `gorm:"foreignKey:RoleID"`
+	Status StatusCache `gorm:"-"`
+	Role   Role        `gorm:"foreignKey:RoleID;references:ID"`
 }

@@ -48,30 +48,37 @@ func (h *StatusHandler) GetStatusByID(ctx context.Context, req *metav1.GetStatus
 	}, nil
 }
 
-func (h *StatusHandler) ListStatusesByType(ctx context.Context, req *metav1.ListStatusesByTypeRequest) (*metav1.ListStatusesByTypeResponse, error) {
-	res, err := h.uc.ListByType(ctx, req.GetType())
+func (h *StatusHandler) ListStatuses(ctx context.Context, req *metav1.ListStatusesRequest) (*metav1.ListStatusesResponse, error) {
+	res, err := h.uc.List(ctx, usecase.ListStatusesRequest{
+		Type:     req.Type,
+		Page:     int(req.Page),
+		PageSize: int(req.PageSize),
+	})
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
 	}
 
-	statuses := make([]*metav1.Status, 0, len(res))
-	for _, status := range res {
+	statuses := make([]*metav1.Status, 0, res.Total)
+	for _, status := range res.Statuses {
 		statuses = append(statuses, toProtoStatus(status))
 	}
-	return &metav1.ListStatusesByTypeResponse{
+	return &metav1.ListStatusesResponse{
 		Statuses: statuses,
+		Total:    res.Total,
+		Page:     int32(res.Page),
+		PageSize: int32(res.PageSize),
 	}, nil
 }
 
 func (h *StatusHandler) CreateStatus(ctx context.Context, req *metav1.CreateStatusRequest) (*metav1.CreateStatusResponse, error) {
-	createdBy, err := uuid.Parse(req.GetCreatedBy())
+	createdBy, err := uuid.Parse(req.GetCreatedById())
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid created_by id"))
 	}
 	res, err := h.uc.Create(ctx, usecase.CreateStatusRequest{
-		Type:      req.GetType(),
-		Name:      req.GetName(),
-		CreatedBy: createdBy,
+		Type:        req.GetType(),
+		Name:        req.GetName(),
+		CreatedByID: createdBy,
 	})
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
@@ -86,15 +93,15 @@ func (h *StatusHandler) UpdateStatus(ctx context.Context, req *metav1.UpdateStat
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid status id"))
 	}
-	updatedBy, err := uuid.Parse(req.GetUpdatedBy())
+	updatedBy, err := uuid.Parse(req.GetUpdatedById())
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid updated_by id"))
 	}
 
 	res, err := h.uc.Update(ctx, id, usecase.UpdateStatusRequest{
-		Type:      req.Type,
-		Name:      req.Name,
-		UpdatedBy: updatedBy,
+		Type:        req.Type,
+		Name:        req.Name,
+		UpdatedByID: updatedBy,
 	})
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
@@ -110,19 +117,19 @@ func (h *StatusHandler) DeleteStatus(ctx context.Context, req *metav1.DeleteStat
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid status id"))
 	}
+	deletedBy, err := uuid.Parse(req.GetDeletedById())
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid deleted by"))
+	}
 
 	if req.GetIsPermanent() {
 		err = h.uc.HardDelete(ctx, usecase.DeleteStatusRequest{
 			ID: id,
 		})
 	} else {
-		deletedBy, err := uuid.Parse(req.GetDeletedBy())
-		if err != nil {
-			return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid deleted_by id"))
-		}
 		err = h.uc.SoftDelete(ctx, usecase.DeleteStatusRequest{
-			ID:        id,
-			DeletedBy: deletedBy,
+			ID:          id,
+			DeletedByID: deletedBy,
 		})
 	}
 	if err != nil {
@@ -134,13 +141,19 @@ func (h *StatusHandler) DeleteStatus(ctx context.Context, req *metav1.DeleteStat
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 func toProtoStatus(s *usecase.StatusResponse) *metav1.Status {
-	return &metav1.Status{
-		Id:        s.ID.String(),
-		Type:      s.Type,
-		Name:      s.Name,
-		CreatedBy: s.CreatedBy.String(),
-		UpdatedBy: s.UpdatedBy.String(),
-		CreatedAt: timestamppb.New(s.CreatedAt),
-		UpdatedAt: timestamppb.New(s.UpdatedAt),
+	res := &metav1.Status{
+		Id:          s.ID.String(),
+		Type:        s.Type,
+		Name:        s.Name,
+		CreatedById: s.CreatedByID.String(),
+		UpdatedById: s.UpdatedByID.String(),
+		CreatedAt:   timestamppb.New(s.CreatedAt),
+		UpdatedAt:   timestamppb.New(s.UpdatedAt),
 	}
+	if s.DeletedAt != nil {
+		deletedByID := s.DeletedByID.String()
+		res.DeletedAt = timestamppb.New(*s.DeletedAt)
+		res.DeletedById = &deletedByID
+	}
+	return res
 }

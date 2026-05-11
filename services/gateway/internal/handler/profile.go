@@ -9,10 +9,10 @@ import (
 )
 
 type ProfileHandler struct {
-	rbacClient rbacv1.RbacServiceClient
+	rbacClient rbacv1.RBACServiceClient
 }
 
-func NewProfileHandler(rbacClient rbacv1.RbacServiceClient) *ProfileHandler {
+func NewProfileHandler(rbacClient rbacv1.RBACServiceClient) *ProfileHandler {
 	return &ProfileHandler{
 		rbacClient: rbacClient,
 	}
@@ -44,7 +44,7 @@ func (h *ProfileHandler) ApplyProfile(c *fiber.Ctx) error {
 		RoleName: body.RoleName,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OKWithMessage(c, "profile application submitted")
@@ -65,7 +65,7 @@ func (h *ProfileHandler) ToggleProfile(c *fiber.Ctx) error {
 		RoleName: body.RoleName,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OKWithMessage(c, "profile toggled")
@@ -85,7 +85,7 @@ func (h *ProfileHandler) ApproveProfile(c *fiber.Ctx) error {
 		RoleName: body.RoleName,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OKWithMessage(c, "profile approved")
@@ -105,7 +105,7 @@ func (h *ProfileHandler) RejectProfile(c *fiber.Ctx) error {
 		RoleName: body.RoleName,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OKWithMessage(c, "profile rejected")

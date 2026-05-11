@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"microservice-golang/services/identity-service/internal/entity"
+	"microservice-golang/shared/pkg/constants"
 )
 
 func Seed(db *gorm.DB) error {
@@ -16,12 +17,12 @@ func Seed(db *gorm.DB) error {
 
 func seedRoles(db *gorm.DB) error {
 	roles := []entity.Role{
-		{Name: entity.RoleAthlete, Description: "Default role. Can join academy, competitions, book courts."},
-		{Name: entity.RoleScout, Description: "Talent finder. Freemium access to athlete profiles and leaderboard."},
-		{Name: entity.RoleCourtOwner, Description: "Manages courts. Requires admin verification."},
-		{Name: entity.RoleAcademyAdmin, Description: "Manages academies. Requires admin verification."},
-		{Name: entity.RoleRegulator, Description: "Official sport body. Assigned by platform admin only."},
-		{Name: entity.RolePlatformAdmin, Description: "Internal platform administrator."},
+		{Name: constants.RoleAthlete, Description: "Default role. Can join academy, competitions, book courts."},
+		{Name: constants.RoleScout, Description: "Talent finder. Freemium access to athlete profiles and leaderboard."},
+		{Name: constants.RoleCourtOwner, Description: "Manages courts. Requires admin verification."},
+		{Name: constants.RoleAcademyAdmin, Description: "Manages academies. Requires admin verification."},
+		{Name: constants.RoleRegulator, Description: "Official sport body. Assigned by platform admin only."},
+		{Name: constants.RolePlatformAdmin, Description: "Internal platform administrator."},
 	}
 
 	for _, r := range roles {

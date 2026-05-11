@@ -13,6 +13,8 @@ func Setup(
 	userHandler *handler.UserHandler,
 	profileHandler *handler.ProfileHandler,
 	authClient authv1.AuthServiceClient,
+	statusHandler *handler.StatusHandler,
+	tagHandler *handler.TagHandler,
 ) {
 	api := app.Group("/api/v1")
 
@@ -24,4 +26,6 @@ func Setup(
 	userHandler.Routes(api, auth)
 	authHandler.MeRoutes(api, auth)
 	profileHandler.Routes(api, auth, adminOnly)
+	statusHandler.Routes(api, auth, adminOnly)
+	tagHandler.Routes(api, auth, adminOnly)
 }

@@ -1,64 +1,136 @@
 package database
 
 import (
+	"context"
 	"errors"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"microservice-golang/services/meta-service/internal/entity"
+	"microservice-golang/services/meta-service/internal/usecase"
+	"microservice-golang/shared/pkg/constants"
 )
 
-func Seed(db *gorm.DB) error {
-	return seedStatuses(db)
-}
-
-func seedStatuses(db *gorm.DB) error {
-	statuses := []entity.Status{
+func SeedStatuses(uc usecase.StatusUseCase) error {
+	data := []entity.Status{
 		// user
-		{Type: entity.StatusTypeUser, Name: entity.StatusActive},
-		{Type: entity.StatusTypeUser, Name: entity.StatusPending},
-		{Type: entity.StatusTypeUser, Name: entity.StatusBanned},
+		{Type: constants.StatusTypeUser, Name: constants.StatusActive},
+		{Type: constants.StatusTypeUser, Name: constants.StatusPending},
+		{Type: constants.StatusTypeUser, Name: constants.StatusBanned},
 
 		// user_role
-		{Type: entity.StatusTypeUserRole, Name: entity.StatusActive},
-		{Type: entity.StatusTypeUserRole, Name: entity.StatusPending},
+		{Type: constants.StatusTypeUserRole, Name: constants.StatusActive},
+		{Type: constants.StatusTypeUserRole, Name: constants.StatusPending},
 
 		// academy
-		{Type: entity.StatusTypeAcademy, Name: entity.StatusActive},
-		{Type: entity.StatusTypeAcademy, Name: entity.StatusPending},
-		{Type: entity.StatusTypeAcademy, Name: entity.StatusSuspended},
+		{Type: constants.StatusTypeAcademy, Name: constants.StatusActive},
+		{Type: constants.StatusTypeAcademy, Name: constants.StatusPending},
+		{Type: constants.StatusTypeAcademy, Name: constants.StatusSuspended},
 
 		// academy_member
-		{Type: entity.StatusTypeAcademyMember, Name: entity.StatusActive},
-		{Type: entity.StatusTypeAcademyMember, Name: entity.StatusPending},
-		{Type: entity.StatusTypeAcademyMember, Name: entity.StatusRejected},
-		{Type: entity.StatusTypeAcademyMember, Name: entity.StatusInactive},
+		{Type: constants.StatusTypeAcademyMember, Name: constants.StatusActive},
+		{Type: constants.StatusTypeAcademyMember, Name: constants.StatusPending},
+		{Type: constants.StatusTypeAcademyMember, Name: constants.StatusRejected},
+		{Type: constants.StatusTypeAcademyMember, Name: constants.StatusInactive},
 
 		// court
-		{Type: entity.StatusTypeCourt, Name: entity.StatusActive},
-		{Type: entity.StatusTypeCourt, Name: entity.StatusPending},
-		{Type: entity.StatusTypeCourt, Name: entity.StatusSuspended},
+		{Type: constants.StatusTypeCourt, Name: constants.StatusActive},
+		{Type: constants.StatusTypeCourt, Name: constants.StatusPending},
+		{Type: constants.StatusTypeCourt, Name: constants.StatusSuspended},
 
 		// court_booking
-		{Type: entity.StatusTypeCourtBooking, Name: entity.StatusBooked},
-		{Type: entity.StatusTypeCourtBooking, Name: entity.StatusCancelled},
-		{Type: entity.StatusTypeCourtBooking, Name: entity.StatusCompleted},
+		{Type: constants.StatusTypeCourtBooking, Name: constants.StatusBooked},
+		{Type: constants.StatusTypeCourtBooking, Name: constants.StatusCancelled},
+		{Type: constants.StatusTypeCourtBooking, Name: constants.StatusCompleted},
 
 		// competition
-		{Type: entity.StatusTypeCompetition, Name: entity.StatusActive},
-		{Type: entity.StatusTypeCompetition, Name: entity.StatusPending},
-		{Type: entity.StatusTypeCompetition, Name: entity.StatusCompleted},
-		{Type: entity.StatusTypeCompetition, Name: entity.StatusCancelled},
+		{Type: constants.StatusTypeCompetition, Name: constants.StatusActive},
+		{Type: constants.StatusTypeCompetition, Name: constants.StatusPending},
+		{Type: constants.StatusTypeCompetition, Name: constants.StatusCompleted},
+		{Type: constants.StatusTypeCompetition, Name: constants.StatusCancelled},
 
 		// event
-		{Type: entity.StatusTypeEvent, Name: entity.StatusActive},
-		{Type: entity.StatusTypeEvent, Name: entity.StatusPending},
-		{Type: entity.StatusTypeEvent, Name: entity.StatusCompleted},
-		{Type: entity.StatusTypeEvent, Name: entity.StatusCancelled},
+		{Type: constants.StatusTypeEvent, Name: constants.StatusActive},
+		{Type: constants.StatusTypeEvent, Name: constants.StatusPending},
+		{Type: constants.StatusTypeEvent, Name: constants.StatusCompleted},
+		{Type: constants.StatusTypeEvent, Name: constants.StatusCancelled},
 
 		// participant
-		{Type: entity.StatusTypeParticipant, Name: entity.StatusActive},
-		{Type: entity.StatusTypeParticipant, Name: entity.StatusPending},
-		{Type: entity.StatusTypeParticipant, Name: entity.StatusRejected},
+		{Type: constants.StatusTypeParticipant, Name: constants.StatusActive},
+		{Type: constants.StatusTypeParticipant, Name: constants.StatusPending},
+		{Type: constants.StatusTypeParticipant, Name: constants.StatusRejected},
+	}
+
+	for _, s := range data {
+		ctx := context.Background()
+		_, err := uc.GetByTypeAndName(ctx, s.Type, s.Name)
+
+		if err != nil {
+			_, err := uc.Create(ctx, usecase.CreateStatusRequest{
+				Type:        s.Type,
+				Name:        s.Name,
+				CreatedByID: uuid.MustParse("00000000-0000-0000-0000-000000000000"), // System ID
+			})
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func Seed(db *gorm.DB) error {
+	//return seedStatusesDB(db)
+	return nil
+}
+
+func seedStatusesDB(db *gorm.DB) error {
+	statuses := []entity.Status{
+		// user
+		{Type: constants.StatusTypeUser, Name: constants.StatusActive},
+		{Type: constants.StatusTypeUser, Name: constants.StatusPending},
+		{Type: constants.StatusTypeUser, Name: constants.StatusBanned},
+
+		// user_role
+		{Type: constants.StatusTypeUserRole, Name: constants.StatusActive},
+		{Type: constants.StatusTypeUserRole, Name: constants.StatusPending},
+
+		// academy
+		{Type: constants.StatusTypeAcademy, Name: constants.StatusActive},
+		{Type: constants.StatusTypeAcademy, Name: constants.StatusPending},
+		{Type: constants.StatusTypeAcademy, Name: constants.StatusSuspended},
+
+		// academy_member
+		{Type: constants.StatusTypeAcademyMember, Name: constants.StatusActive},
+		{Type: constants.StatusTypeAcademyMember, Name: constants.StatusPending},
+		{Type: constants.StatusTypeAcademyMember, Name: constants.StatusRejected},
+		{Type: constants.StatusTypeAcademyMember, Name: constants.StatusInactive},
+
+		// court
+		{Type: constants.StatusTypeCourt, Name: constants.StatusActive},
+		{Type: constants.StatusTypeCourt, Name: constants.StatusPending},
+		{Type: constants.StatusTypeCourt, Name: constants.StatusSuspended},
+
+		// court_booking
+		{Type: constants.StatusTypeCourtBooking, Name: constants.StatusBooked},
+		{Type: constants.StatusTypeCourtBooking, Name: constants.StatusCancelled},
+		{Type: constants.StatusTypeCourtBooking, Name: constants.StatusCompleted},
+
+		// competition
+		{Type: constants.StatusTypeCompetition, Name: constants.StatusActive},
+		{Type: constants.StatusTypeCompetition, Name: constants.StatusPending},
+		{Type: constants.StatusTypeCompetition, Name: constants.StatusCompleted},
+		{Type: constants.StatusTypeCompetition, Name: constants.StatusCancelled},
+
+		// event
+		{Type: constants.StatusTypeEvent, Name: constants.StatusActive},
+		{Type: constants.StatusTypeEvent, Name: constants.StatusPending},
+		{Type: constants.StatusTypeEvent, Name: constants.StatusCompleted},
+		{Type: constants.StatusTypeEvent, Name: constants.StatusCancelled},
+
+		// participant
+		{Type: constants.StatusTypeParticipant, Name: constants.StatusActive},
+		{Type: constants.StatusTypeParticipant, Name: constants.StatusPending},
+		{Type: constants.StatusTypeParticipant, Name: constants.StatusRejected},
 	}
 
 	for _, s := range statuses {

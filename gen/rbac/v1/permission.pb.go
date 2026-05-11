@@ -29,8 +29,12 @@ type Permission struct {
 	Resource      string                 `protobuf:"bytes,2,opt,name=resource,proto3" json:"resource,omitempty"`
 	Action        string                 `protobuf:"bytes,3,opt,name=action,proto3" json:"action,omitempty"`
 	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CreatedById   string                 `protobuf:"bytes,5,opt,name=created_by_id,json=createdById,proto3" json:"created_by_id,omitempty"`
+	UpdatedById   string                 `protobuf:"bytes,6,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
+	DeletedById   *string                `protobuf:"bytes,7,opt,name=deleted_by_id,json=deletedById,proto3,oneof" json:"deleted_by_id,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -93,6 +97,27 @@ func (x *Permission) GetDescription() string {
 	return ""
 }
 
+func (x *Permission) GetCreatedById() string {
+	if x != nil {
+		return x.CreatedById
+	}
+	return ""
+}
+
+func (x *Permission) GetUpdatedById() string {
+	if x != nil {
+		return x.UpdatedById
+	}
+	return ""
+}
+
+func (x *Permission) GetDeletedById() string {
+	if x != nil && x.DeletedById != nil {
+		return *x.DeletedById
+	}
+	return ""
+}
+
 func (x *Permission) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
@@ -107,11 +132,19 @@ func (x *Permission) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Permission) GetDeletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DeletedAt
+	}
+	return nil
+}
+
 type CreatePermissionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Resource      string                 `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
 	Action        string                 `protobuf:"bytes,2,opt,name=action,proto3" json:"action,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	CreatedById   string                 `protobuf:"bytes,4,opt,name=created_by_id,json=createdById,proto3" json:"created_by_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -167,6 +200,97 @@ func (x *CreatePermissionRequest) GetDescription() string {
 	return ""
 }
 
+func (x *CreatePermissionRequest) GetCreatedById() string {
+	if x != nil {
+		return x.CreatedById
+	}
+	return ""
+}
+
+type UpdatePermissionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          *string                `protobuf:"bytes,2,opt,name=name,proto3,oneof" json:"name,omitempty"`
+	Resource      *string                `protobuf:"bytes,3,opt,name=resource,proto3,oneof" json:"resource,omitempty"`
+	Action        *string                `protobuf:"bytes,4,opt,name=action,proto3,oneof" json:"action,omitempty"`
+	Description   *string                `protobuf:"bytes,5,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	UpdatedById   string                 `protobuf:"bytes,6,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdatePermissionRequest) Reset() {
+	*x = UpdatePermissionRequest{}
+	mi := &file_rbac_v1_permission_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdatePermissionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdatePermissionRequest) ProtoMessage() {}
+
+func (x *UpdatePermissionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rbac_v1_permission_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdatePermissionRequest.ProtoReflect.Descriptor instead.
+func (*UpdatePermissionRequest) Descriptor() ([]byte, []int) {
+	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UpdatePermissionRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdatePermissionRequest) GetName() string {
+	if x != nil && x.Name != nil {
+		return *x.Name
+	}
+	return ""
+}
+
+func (x *UpdatePermissionRequest) GetResource() string {
+	if x != nil && x.Resource != nil {
+		return *x.Resource
+	}
+	return ""
+}
+
+func (x *UpdatePermissionRequest) GetAction() string {
+	if x != nil && x.Action != nil {
+		return *x.Action
+	}
+	return ""
+}
+
+func (x *UpdatePermissionRequest) GetDescription() string {
+	if x != nil && x.Description != nil {
+		return *x.Description
+	}
+	return ""
+}
+
+func (x *UpdatePermissionRequest) GetUpdatedById() string {
+	if x != nil {
+		return x.UpdatedById
+	}
+	return ""
+}
+
 type GetPermissionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -176,7 +300,7 @@ type GetPermissionRequest struct {
 
 func (x *GetPermissionRequest) Reset() {
 	*x = GetPermissionRequest{}
-	mi := &file_rbac_v1_permission_proto_msgTypes[2]
+	mi := &file_rbac_v1_permission_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -188,7 +312,7 @@ func (x *GetPermissionRequest) String() string {
 func (*GetPermissionRequest) ProtoMessage() {}
 
 func (x *GetPermissionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rbac_v1_permission_proto_msgTypes[2]
+	mi := &file_rbac_v1_permission_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -201,7 +325,7 @@ func (x *GetPermissionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPermissionRequest.ProtoReflect.Descriptor instead.
 func (*GetPermissionRequest) Descriptor() ([]byte, []int) {
-	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{2}
+	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetPermissionRequest) GetId() string {
@@ -214,13 +338,15 @@ func (x *GetPermissionRequest) GetId() string {
 type DeletePermissionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	DeletedById   string                 `protobuf:"bytes,2,opt,name=deleted_by_id,json=deletedById,proto3" json:"deleted_by_id,omitempty"`
+	IsPermanent   bool                   `protobuf:"varint,3,opt,name=is_permanent,json=isPermanent,proto3" json:"is_permanent,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeletePermissionRequest) Reset() {
 	*x = DeletePermissionRequest{}
-	mi := &file_rbac_v1_permission_proto_msgTypes[3]
+	mi := &file_rbac_v1_permission_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -232,7 +358,7 @@ func (x *DeletePermissionRequest) String() string {
 func (*DeletePermissionRequest) ProtoMessage() {}
 
 func (x *DeletePermissionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rbac_v1_permission_proto_msgTypes[3]
+	mi := &file_rbac_v1_permission_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -245,7 +371,7 @@ func (x *DeletePermissionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePermissionRequest.ProtoReflect.Descriptor instead.
 func (*DeletePermissionRequest) Descriptor() ([]byte, []int) {
-	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{3}
+	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *DeletePermissionRequest) GetId() string {
@@ -255,17 +381,32 @@ func (x *DeletePermissionRequest) GetId() string {
 	return ""
 }
 
+func (x *DeletePermissionRequest) GetDeletedById() string {
+	if x != nil {
+		return x.DeletedById
+	}
+	return ""
+}
+
+func (x *DeletePermissionRequest) GetIsPermanent() bool {
+	if x != nil {
+		return x.IsPermanent
+	}
+	return false
+}
+
 type ListPermissionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	RoleId        *string                `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3,oneof" json:"role_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListPermissionsRequest) Reset() {
 	*x = ListPermissionsRequest{}
-	mi := &file_rbac_v1_permission_proto_msgTypes[4]
+	mi := &file_rbac_v1_permission_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -277,7 +418,7 @@ func (x *ListPermissionsRequest) String() string {
 func (*ListPermissionsRequest) ProtoMessage() {}
 
 func (x *ListPermissionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rbac_v1_permission_proto_msgTypes[4]
+	mi := &file_rbac_v1_permission_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -290,7 +431,7 @@ func (x *ListPermissionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPermissionsRequest.ProtoReflect.Descriptor instead.
 func (*ListPermissionsRequest) Descriptor() ([]byte, []int) {
-	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{4}
+	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListPermissionsRequest) GetPage() int32 {
@@ -307,6 +448,73 @@ func (x *ListPermissionsRequest) GetPageSize() int32 {
 	return 0
 }
 
+func (x *ListPermissionsRequest) GetRoleId() string {
+	if x != nil && x.RoleId != nil {
+		return *x.RoleId
+	}
+	return ""
+}
+
+type CheckPermissionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Resource      string                 `protobuf:"bytes,2,opt,name=resource,proto3" json:"resource,omitempty"`
+	Action        string                 `protobuf:"bytes,3,opt,name=action,proto3" json:"action,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckPermissionRequest) Reset() {
+	*x = CheckPermissionRequest{}
+	mi := &file_rbac_v1_permission_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckPermissionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckPermissionRequest) ProtoMessage() {}
+
+func (x *CheckPermissionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rbac_v1_permission_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckPermissionRequest.ProtoReflect.Descriptor instead.
+func (*CheckPermissionRequest) Descriptor() ([]byte, []int) {
+	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *CheckPermissionRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *CheckPermissionRequest) GetResource() string {
+	if x != nil {
+		return x.Resource
+	}
+	return ""
+}
+
+func (x *CheckPermissionRequest) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
 type CreatePermissionResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Permission    *Permission            `protobuf:"bytes,1,opt,name=permission,proto3" json:"permission,omitempty"`
@@ -316,7 +524,7 @@ type CreatePermissionResponse struct {
 
 func (x *CreatePermissionResponse) Reset() {
 	*x = CreatePermissionResponse{}
-	mi := &file_rbac_v1_permission_proto_msgTypes[5]
+	mi := &file_rbac_v1_permission_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -328,7 +536,7 @@ func (x *CreatePermissionResponse) String() string {
 func (*CreatePermissionResponse) ProtoMessage() {}
 
 func (x *CreatePermissionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rbac_v1_permission_proto_msgTypes[5]
+	mi := &file_rbac_v1_permission_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -341,10 +549,54 @@ func (x *CreatePermissionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePermissionResponse.ProtoReflect.Descriptor instead.
 func (*CreatePermissionResponse) Descriptor() ([]byte, []int) {
-	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{5}
+	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *CreatePermissionResponse) GetPermission() *Permission {
+	if x != nil {
+		return x.Permission
+	}
+	return nil
+}
+
+type UpdatePermissionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Permission    *Permission            `protobuf:"bytes,1,opt,name=permission,proto3" json:"permission,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdatePermissionResponse) Reset() {
+	*x = UpdatePermissionResponse{}
+	mi := &file_rbac_v1_permission_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdatePermissionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdatePermissionResponse) ProtoMessage() {}
+
+func (x *UpdatePermissionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rbac_v1_permission_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdatePermissionResponse.ProtoReflect.Descriptor instead.
+func (*UpdatePermissionResponse) Descriptor() ([]byte, []int) {
+	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UpdatePermissionResponse) GetPermission() *Permission {
 	if x != nil {
 		return x.Permission
 	}
@@ -360,7 +612,7 @@ type GetPermissionResponse struct {
 
 func (x *GetPermissionResponse) Reset() {
 	*x = GetPermissionResponse{}
-	mi := &file_rbac_v1_permission_proto_msgTypes[6]
+	mi := &file_rbac_v1_permission_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -372,7 +624,7 @@ func (x *GetPermissionResponse) String() string {
 func (*GetPermissionResponse) ProtoMessage() {}
 
 func (x *GetPermissionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rbac_v1_permission_proto_msgTypes[6]
+	mi := &file_rbac_v1_permission_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -385,7 +637,7 @@ func (x *GetPermissionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPermissionResponse.ProtoReflect.Descriptor instead.
 func (*GetPermissionResponse) Descriptor() ([]byte, []int) {
-	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{6}
+	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetPermissionResponse) GetPermission() *Permission {
@@ -403,7 +655,7 @@ type DeletePermissionResponse struct {
 
 func (x *DeletePermissionResponse) Reset() {
 	*x = DeletePermissionResponse{}
-	mi := &file_rbac_v1_permission_proto_msgTypes[7]
+	mi := &file_rbac_v1_permission_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -415,7 +667,7 @@ func (x *DeletePermissionResponse) String() string {
 func (*DeletePermissionResponse) ProtoMessage() {}
 
 func (x *DeletePermissionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rbac_v1_permission_proto_msgTypes[7]
+	mi := &file_rbac_v1_permission_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -428,7 +680,7 @@ func (x *DeletePermissionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePermissionResponse.ProtoReflect.Descriptor instead.
 func (*DeletePermissionResponse) Descriptor() ([]byte, []int) {
-	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{7}
+	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{10}
 }
 
 type ListPermissionsResponse struct {
@@ -443,7 +695,7 @@ type ListPermissionsResponse struct {
 
 func (x *ListPermissionsResponse) Reset() {
 	*x = ListPermissionsResponse{}
-	mi := &file_rbac_v1_permission_proto_msgTypes[8]
+	mi := &file_rbac_v1_permission_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -455,7 +707,7 @@ func (x *ListPermissionsResponse) String() string {
 func (*ListPermissionsResponse) ProtoMessage() {}
 
 func (x *ListPermissionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rbac_v1_permission_proto_msgTypes[8]
+	mi := &file_rbac_v1_permission_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -468,7 +720,7 @@ func (x *ListPermissionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPermissionsResponse.ProtoReflect.Descriptor instead.
 func (*ListPermissionsResponse) Descriptor() ([]byte, []int) {
-	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{8}
+	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ListPermissionsResponse) GetPermissions() []*Permission {
@@ -499,33 +751,110 @@ func (x *ListPermissionsResponse) GetPageSize() int32 {
 	return 0
 }
 
+type CheckPermissionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Allowed       bool                   `protobuf:"varint,1,opt,name=allowed,proto3" json:"allowed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckPermissionResponse) Reset() {
+	*x = CheckPermissionResponse{}
+	mi := &file_rbac_v1_permission_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckPermissionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckPermissionResponse) ProtoMessage() {}
+
+func (x *CheckPermissionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rbac_v1_permission_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckPermissionResponse.ProtoReflect.Descriptor instead.
+func (*CheckPermissionResponse) Descriptor() ([]byte, []int) {
+	return file_rbac_v1_permission_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *CheckPermissionResponse) GetAllowed() bool {
+	if x != nil {
+		return x.Allowed
+	}
+	return false
+}
+
 var File_rbac_v1_permission_proto protoreflect.FileDescriptor
 
 const file_rbac_v1_permission_proto_rawDesc = "" +
 	"\n" +
-	"\x18rbac/v1/permission.proto\x12\arbac.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\"\xe8\x01\n" +
+	"\x18rbac/v1/permission.proto\x12\arbac.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\"\xba\x03\n" +
 	"\n" +
 	"Permission\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\bresource\x18\x02 \x01(\tR\bresource\x12\x16\n" +
 	"\x06action\x18\x03 \x01(\tR\x06action\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\x129\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\"\n" +
+	"\rcreated_by_id\x18\x05 \x01(\tR\vcreatedById\x12\"\n" +
+	"\rupdated_by_id\x18\x06 \x01(\tR\vupdatedById\x12'\n" +
+	"\rdeleted_by_id\x18\a \x01(\tH\x00R\vdeletedById\x88\x01\x01\x129\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x8f\x01\n" +
+	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12>\n" +
+	"\n" +
+	"deleted_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampH\x01R\tdeletedAt\x88\x01\x01B\x10\n" +
+	"\x0e_deleted_by_idB\r\n" +
+	"\v_deleted_at\"\xbd\x01\n" +
 	"\x17CreatePermissionRequest\x12%\n" +
 	"\bresource\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182R\bresource\x12!\n" +
 	"\x06action\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182R\x06action\x12*\n" +
-	"\vdescription\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01R\vdescription\"0\n" +
+	"\vdescription\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01R\vdescription\x12,\n" +
+	"\rcreated_by_id\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vcreatedById\"\xb9\x02\n" +
+	"\x17UpdatePermissionRequest\x12\x18\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12 \n" +
+	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x182H\x00R\x04name\x88\x01\x01\x12*\n" +
+	"\bresource\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182H\x01R\bresource\x88\x01\x01\x12&\n" +
+	"\x06action\x18\x04 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182H\x02R\x06action\x88\x01\x01\x12/\n" +
+	"\vdescription\x18\x05 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01H\x03R\vdescription\x88\x01\x01\x12,\n" +
+	"\rupdated_by_id\x18\x06 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vupdatedByIdB\a\n" +
+	"\x05_nameB\v\n" +
+	"\t_resourceB\t\n" +
+	"\a_actionB\x0e\n" +
+	"\f_description\"0\n" +
 	"\x14GetPermissionRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"3\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\x84\x01\n" +
 	"\x17DeletePermissionRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"]\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12,\n" +
+	"\rdeleted_by_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vdeletedById\x12!\n" +
+	"\fis_permanent\x18\x03 \x01(\bR\visPermanent\"\x91\x01\n" +
 	"\x16ListPermissionsRequest\x12\x1b\n" +
 	"\x04page\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\x04page\x12&\n" +
-	"\tpage_size\x18\x02 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01R\bpageSize\"O\n" +
+	"\tpage_size\x18\x02 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01R\bpageSize\x12&\n" +
+	"\arole_id\x18\x03 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01H\x00R\x06roleId\x88\x01\x01B\n" +
+	"\n" +
+	"\b_role_id\"\x81\x01\n" +
+	"\x16CheckPermissionRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12#\n" +
+	"\bresource\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bresource\x12\x1f\n" +
+	"\x06action\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06action\"O\n" +
 	"\x18CreatePermissionResponse\x123\n" +
+	"\n" +
+	"permission\x18\x01 \x01(\v2\x13.rbac.v1.PermissionR\n" +
+	"permission\"O\n" +
+	"\x18UpdatePermissionResponse\x123\n" +
 	"\n" +
 	"permission\x18\x01 \x01(\v2\x13.rbac.v1.PermissionR\n" +
 	"permission\"L\n" +
@@ -538,7 +867,16 @@ const file_rbac_v1_permission_proto_rawDesc = "" +
 	"\vpermissions\x18\x01 \x03(\v2\x13.rbac.v1.PermissionR\vpermissions\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\bpageSizeB(Z&microservice-golang/gen/rbac/v1;rbacv1b\x06proto3"
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"3\n" +
+	"\x17CheckPermissionResponse\x12\x18\n" +
+	"\aallowed\x18\x01 \x01(\bR\aallowed2\x9a\x04\n" +
+	"\x11PermissionService\x12W\n" +
+	"\x10CreatePermission\x12 .rbac.v1.CreatePermissionRequest\x1a!.rbac.v1.CreatePermissionResponse\x12N\n" +
+	"\rGetPermission\x12\x1d.rbac.v1.GetPermissionRequest\x1a\x1e.rbac.v1.GetPermissionResponse\x12W\n" +
+	"\x10UpdatePermission\x12 .rbac.v1.UpdatePermissionRequest\x1a!.rbac.v1.UpdatePermissionResponse\x12W\n" +
+	"\x10DeletePermission\x12 .rbac.v1.DeletePermissionRequest\x1a!.rbac.v1.DeletePermissionResponse\x12T\n" +
+	"\x0fListPermissions\x12\x1f.rbac.v1.ListPermissionsRequest\x1a .rbac.v1.ListPermissionsResponse\x12T\n" +
+	"\x0fCheckPermission\x12\x1f.rbac.v1.CheckPermissionRequest\x1a .rbac.v1.CheckPermissionResponseB(Z&microservice-golang/gen/rbac/v1;rbacv1b\x06proto3"
 
 var (
 	file_rbac_v1_permission_proto_rawDescOnce sync.Once
@@ -552,30 +890,48 @@ func file_rbac_v1_permission_proto_rawDescGZIP() []byte {
 	return file_rbac_v1_permission_proto_rawDescData
 }
 
-var file_rbac_v1_permission_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_rbac_v1_permission_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_rbac_v1_permission_proto_goTypes = []any{
 	(*Permission)(nil),               // 0: rbac.v1.Permission
 	(*CreatePermissionRequest)(nil),  // 1: rbac.v1.CreatePermissionRequest
-	(*GetPermissionRequest)(nil),     // 2: rbac.v1.GetPermissionRequest
-	(*DeletePermissionRequest)(nil),  // 3: rbac.v1.DeletePermissionRequest
-	(*ListPermissionsRequest)(nil),   // 4: rbac.v1.ListPermissionsRequest
-	(*CreatePermissionResponse)(nil), // 5: rbac.v1.CreatePermissionResponse
-	(*GetPermissionResponse)(nil),    // 6: rbac.v1.GetPermissionResponse
-	(*DeletePermissionResponse)(nil), // 7: rbac.v1.DeletePermissionResponse
-	(*ListPermissionsResponse)(nil),  // 8: rbac.v1.ListPermissionsResponse
-	(*timestamppb.Timestamp)(nil),    // 9: google.protobuf.Timestamp
+	(*UpdatePermissionRequest)(nil),  // 2: rbac.v1.UpdatePermissionRequest
+	(*GetPermissionRequest)(nil),     // 3: rbac.v1.GetPermissionRequest
+	(*DeletePermissionRequest)(nil),  // 4: rbac.v1.DeletePermissionRequest
+	(*ListPermissionsRequest)(nil),   // 5: rbac.v1.ListPermissionsRequest
+	(*CheckPermissionRequest)(nil),   // 6: rbac.v1.CheckPermissionRequest
+	(*CreatePermissionResponse)(nil), // 7: rbac.v1.CreatePermissionResponse
+	(*UpdatePermissionResponse)(nil), // 8: rbac.v1.UpdatePermissionResponse
+	(*GetPermissionResponse)(nil),    // 9: rbac.v1.GetPermissionResponse
+	(*DeletePermissionResponse)(nil), // 10: rbac.v1.DeletePermissionResponse
+	(*ListPermissionsResponse)(nil),  // 11: rbac.v1.ListPermissionsResponse
+	(*CheckPermissionResponse)(nil),  // 12: rbac.v1.CheckPermissionResponse
+	(*timestamppb.Timestamp)(nil),    // 13: google.protobuf.Timestamp
 }
 var file_rbac_v1_permission_proto_depIdxs = []int32{
-	9, // 0: rbac.v1.Permission.created_at:type_name -> google.protobuf.Timestamp
-	9, // 1: rbac.v1.Permission.updated_at:type_name -> google.protobuf.Timestamp
-	0, // 2: rbac.v1.CreatePermissionResponse.permission:type_name -> rbac.v1.Permission
-	0, // 3: rbac.v1.GetPermissionResponse.permission:type_name -> rbac.v1.Permission
-	0, // 4: rbac.v1.ListPermissionsResponse.permissions:type_name -> rbac.v1.Permission
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	13, // 0: rbac.v1.Permission.created_at:type_name -> google.protobuf.Timestamp
+	13, // 1: rbac.v1.Permission.updated_at:type_name -> google.protobuf.Timestamp
+	13, // 2: rbac.v1.Permission.deleted_at:type_name -> google.protobuf.Timestamp
+	0,  // 3: rbac.v1.CreatePermissionResponse.permission:type_name -> rbac.v1.Permission
+	0,  // 4: rbac.v1.UpdatePermissionResponse.permission:type_name -> rbac.v1.Permission
+	0,  // 5: rbac.v1.GetPermissionResponse.permission:type_name -> rbac.v1.Permission
+	0,  // 6: rbac.v1.ListPermissionsResponse.permissions:type_name -> rbac.v1.Permission
+	1,  // 7: rbac.v1.PermissionService.CreatePermission:input_type -> rbac.v1.CreatePermissionRequest
+	3,  // 8: rbac.v1.PermissionService.GetPermission:input_type -> rbac.v1.GetPermissionRequest
+	2,  // 9: rbac.v1.PermissionService.UpdatePermission:input_type -> rbac.v1.UpdatePermissionRequest
+	4,  // 10: rbac.v1.PermissionService.DeletePermission:input_type -> rbac.v1.DeletePermissionRequest
+	5,  // 11: rbac.v1.PermissionService.ListPermissions:input_type -> rbac.v1.ListPermissionsRequest
+	6,  // 12: rbac.v1.PermissionService.CheckPermission:input_type -> rbac.v1.CheckPermissionRequest
+	7,  // 13: rbac.v1.PermissionService.CreatePermission:output_type -> rbac.v1.CreatePermissionResponse
+	9,  // 14: rbac.v1.PermissionService.GetPermission:output_type -> rbac.v1.GetPermissionResponse
+	8,  // 15: rbac.v1.PermissionService.UpdatePermission:output_type -> rbac.v1.UpdatePermissionResponse
+	10, // 16: rbac.v1.PermissionService.DeletePermission:output_type -> rbac.v1.DeletePermissionResponse
+	11, // 17: rbac.v1.PermissionService.ListPermissions:output_type -> rbac.v1.ListPermissionsResponse
+	12, // 18: rbac.v1.PermissionService.CheckPermission:output_type -> rbac.v1.CheckPermissionResponse
+	13, // [13:19] is the sub-list for method output_type
+	7,  // [7:13] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_rbac_v1_permission_proto_init() }
@@ -583,15 +939,18 @@ func file_rbac_v1_permission_proto_init() {
 	if File_rbac_v1_permission_proto != nil {
 		return
 	}
+	file_rbac_v1_permission_proto_msgTypes[0].OneofWrappers = []any{}
+	file_rbac_v1_permission_proto_msgTypes[2].OneofWrappers = []any{}
+	file_rbac_v1_permission_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_rbac_v1_permission_proto_rawDesc), len(file_rbac_v1_permission_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   13,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_rbac_v1_permission_proto_goTypes,
 		DependencyIndexes: file_rbac_v1_permission_proto_depIdxs,

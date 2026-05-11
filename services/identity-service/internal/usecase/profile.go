@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"microservice-golang/shared/pkg/constants"
 
 	"microservice-golang/services/identity-service/internal/entity"
 	"microservice-golang/services/identity-service/internal/repository"
@@ -17,23 +18,23 @@ type ProfileUseCase interface {
 }
 
 type profileUseCase struct {
-	userRepo     repository.UserRepository
-	userRoleRepo repository.UserRoleRepository
-	roleRepo     repository.RoleRepository
-	statusRepo   repository.StatusRepository
+	userRepo        repository.UserRepository
+	userRoleRepo    repository.UserRoleRepository
+	roleRepo        repository.RoleRepository
+	statusCacheRepo repository.StatusCacheRepository
 }
 
 func NewProfileUseCase(
 	userRepo repository.UserRepository,
 	userRoleRepo repository.UserRoleRepository,
 	roleRepo repository.RoleRepository,
-	statusRepo repository.StatusRepository,
+	statusCacheRepo repository.StatusCacheRepository,
 ) ProfileUseCase {
 	return &profileUseCase{
-		userRepo:     userRepo,
-		userRoleRepo: userRoleRepo,
-		roleRepo:     roleRepo,
-		statusRepo:   statusRepo,
+		userRepo:        userRepo,
+		userRoleRepo:    userRoleRepo,
+		roleRepo:        roleRepo,
+		statusCacheRepo: statusCacheRepo,
 	}
 }
 
@@ -84,20 +85,20 @@ func (uc *profileUseCase) ApplyProfile(ctx context.Context, req ApplyProfileRequ
 	}
 
 	// scout → langsung active, lainnya → pending
-	statusName := entity.UserRoleStatusPending
-	if req.RoleName == entity.RoleScout {
-		statusName = entity.UserRoleStatusActive
+	statusName := constants.StatusPending
+	if req.RoleName == constants.RoleScout {
+		statusName = constants.StatusActive
 	}
 
-	status, err := uc.statusRepo.GetByTypeAndName(ctx, entity.StatusTypeUserRole, statusName)
+	status, err := uc.statusCacheRepo.GetByTypeAndName(ctx, constants.StatusTypeUserRole, statusName)
 	if err != nil {
-		return apperr.Internal(err)
+		return err
 	}
 
 	userRole := &entity.UserRole{
 		UserID:   user.ID,
 		RoleID:   targetRole.ID,
-		IsActive: false, // tidak langsung active, user harus toggle manual
+		IsActive: false,
 		StatusID: status.ID,
 	}
 
@@ -124,7 +125,7 @@ func (uc *profileUseCase) ToggleProfile(ctx context.Context, req ToggleProfileRe
 	}
 
 	// hanya bisa toggle jika status active
-	if userRole.Status.Name != entity.UserRoleStatusActive {
+	if userRole.Status.Name != constants.StatusActive {
 		return apperr.Forbidden("profile is not yet approved")
 	}
 
@@ -142,17 +143,16 @@ func (uc *profileUseCase) ApproveProfile(ctx context.Context, req ApproveProfile
 		return apperr.NotFound("profile")
 	}
 
-	if userRole.Status.Name != entity.UserRoleStatusPending {
+	if userRole.Status.Name != constants.StatusPending {
 		return apperr.InvalidArgument("profile is not pending approval")
 	}
 
-	activeStatus, err := uc.statusRepo.GetByTypeAndName(ctx, entity.StatusTypeUserRole, entity.UserRoleStatusActive)
+	activeStatus, err := uc.statusCacheRepo.GetByTypeAndName(ctx, constants.StatusTypeUserRole, constants.StatusActive)
 	if err != nil {
-		return apperr.Internal(err)
+		return err
 	}
 
 	userRole.StatusID = activeStatus.ID
-	userRole.Status = *activeStatus
 	return uc.userRoleRepo.Update(ctx, userRole)
 }
 
@@ -167,7 +167,7 @@ func (uc *profileUseCase) RejectProfile(ctx context.Context, req ApproveProfileR
 		return apperr.NotFound("profile")
 	}
 
-	if userRole.Status.Name != entity.UserRoleStatusPending {
+	if userRole.Status.Name != constants.StatusPending {
 		return apperr.InvalidArgument("profile is not pending approval")
 	}
 

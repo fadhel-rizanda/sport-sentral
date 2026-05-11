@@ -62,7 +62,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		RoleName: body.RoleName,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.Created(c, fiber.Map{"user": toUserResponse(resp.User)})
@@ -82,15 +82,16 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		Password: body.Password,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OK(c, fiber.Map{
-		"tokens":         resp.Tokens,
-		"user_id":        resp.UserId,
-		"email":          resp.Email,
-		"username":       resp.Username,
-		"active_profile": resp.ActiveProfile,
+		"tokens":           resp.Tokens,
+		"user_id":          resp.UserId,
+		"email":            resp.Email,
+		"username":         resp.Username,
+		"active_role_name": resp.ActiveRoleName,
+		"active_role_id":   resp.ActiveRoleId,
 	})
 }
 
@@ -106,7 +107,7 @@ func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 		RefreshToken: body.RefreshToken,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OKWithMessage(c, "logged out")
@@ -124,7 +125,7 @@ func (h *AuthHandler) RefreshToken(c *fiber.Ctx) error {
 		RefreshToken: body.RefreshToken,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OK(c, fiber.Map{
@@ -144,7 +145,7 @@ func (h *AuthHandler) SendVerifyEmail(c *fiber.Ctx) error {
 		Email: body.Email,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OKWithMessage(c, "verification email sent")
@@ -160,7 +161,7 @@ func (h *AuthHandler) VerifyAccount(c *fiber.Ctx) error {
 		Token: token,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OKWithMessage(c, "account verified")
@@ -178,7 +179,7 @@ func (h *AuthHandler) ForgotPassword(c *fiber.Ctx) error {
 		Email: body.Email,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OKWithMessage(c, "reset password email sent")
@@ -198,7 +199,7 @@ func (h *AuthHandler) ResetPassword(c *fiber.Ctx) error {
 		Password: body.Password,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OKWithMessage(c, "password reset successful")
@@ -213,7 +214,7 @@ func (h *AuthHandler) Me(c *fiber.Ctx) error {
 		Id: userID,
 	})
 	if err != nil {
-		return grpcError(c, err)
+		return err
 	}
 
 	return response.OK(c, fiber.Map{"user": toUserResponse(resp.User)})

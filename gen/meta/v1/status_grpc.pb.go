@@ -19,12 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	StatusService_CreateStatus_FullMethodName       = "/meta.v1.StatusService/CreateStatus"
-	StatusService_GetStatus_FullMethodName          = "/meta.v1.StatusService/GetStatus"
-	StatusService_GetStatusByID_FullMethodName      = "/meta.v1.StatusService/GetStatusByID"
-	StatusService_ListStatusesByType_FullMethodName = "/meta.v1.StatusService/ListStatusesByType"
-	StatusService_UpdateStatus_FullMethodName       = "/meta.v1.StatusService/UpdateStatus"
-	StatusService_DeleteStatus_FullMethodName       = "/meta.v1.StatusService/DeleteStatus"
+	StatusService_CreateStatus_FullMethodName  = "/meta.v1.StatusService/CreateStatus"
+	StatusService_GetStatus_FullMethodName     = "/meta.v1.StatusService/GetStatus"
+	StatusService_GetStatusByID_FullMethodName = "/meta.v1.StatusService/GetStatusByID"
+	StatusService_ListStatuses_FullMethodName  = "/meta.v1.StatusService/ListStatuses"
+	StatusService_UpdateStatus_FullMethodName  = "/meta.v1.StatusService/UpdateStatus"
+	StatusService_DeleteStatus_FullMethodName  = "/meta.v1.StatusService/DeleteStatus"
 )
 
 // StatusServiceClient is the client API for StatusService service.
@@ -34,7 +34,7 @@ type StatusServiceClient interface {
 	CreateStatus(ctx context.Context, in *CreateStatusRequest, opts ...grpc.CallOption) (*CreateStatusResponse, error)
 	GetStatus(ctx context.Context, in *GetStatusRequest, opts ...grpc.CallOption) (*GetStatusResponse, error)
 	GetStatusByID(ctx context.Context, in *GetStatusByIDRequest, opts ...grpc.CallOption) (*GetStatusByIDResponse, error)
-	ListStatusesByType(ctx context.Context, in *ListStatusesByTypeRequest, opts ...grpc.CallOption) (*ListStatusesByTypeResponse, error)
+	ListStatuses(ctx context.Context, in *ListStatusesRequest, opts ...grpc.CallOption) (*ListStatusesResponse, error)
 	UpdateStatus(ctx context.Context, in *UpdateStatusRequest, opts ...grpc.CallOption) (*UpdateStatusResponse, error)
 	DeleteStatus(ctx context.Context, in *DeleteStatusRequest, opts ...grpc.CallOption) (*DeleteStatusResponse, error)
 }
@@ -77,10 +77,10 @@ func (c *statusServiceClient) GetStatusByID(ctx context.Context, in *GetStatusBy
 	return out, nil
 }
 
-func (c *statusServiceClient) ListStatusesByType(ctx context.Context, in *ListStatusesByTypeRequest, opts ...grpc.CallOption) (*ListStatusesByTypeResponse, error) {
+func (c *statusServiceClient) ListStatuses(ctx context.Context, in *ListStatusesRequest, opts ...grpc.CallOption) (*ListStatusesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListStatusesByTypeResponse)
-	err := c.cc.Invoke(ctx, StatusService_ListStatusesByType_FullMethodName, in, out, cOpts...)
+	out := new(ListStatusesResponse)
+	err := c.cc.Invoke(ctx, StatusService_ListStatuses_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ type StatusServiceServer interface {
 	CreateStatus(context.Context, *CreateStatusRequest) (*CreateStatusResponse, error)
 	GetStatus(context.Context, *GetStatusRequest) (*GetStatusResponse, error)
 	GetStatusByID(context.Context, *GetStatusByIDRequest) (*GetStatusByIDResponse, error)
-	ListStatusesByType(context.Context, *ListStatusesByTypeRequest) (*ListStatusesByTypeResponse, error)
+	ListStatuses(context.Context, *ListStatusesRequest) (*ListStatusesResponse, error)
 	UpdateStatus(context.Context, *UpdateStatusRequest) (*UpdateStatusResponse, error)
 	DeleteStatus(context.Context, *DeleteStatusRequest) (*DeleteStatusResponse, error)
 	mustEmbedUnimplementedStatusServiceServer()
@@ -136,8 +136,8 @@ func (UnimplementedStatusServiceServer) GetStatus(context.Context, *GetStatusReq
 func (UnimplementedStatusServiceServer) GetStatusByID(context.Context, *GetStatusByIDRequest) (*GetStatusByIDResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetStatusByID not implemented")
 }
-func (UnimplementedStatusServiceServer) ListStatusesByType(context.Context, *ListStatusesByTypeRequest) (*ListStatusesByTypeResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListStatusesByType not implemented")
+func (UnimplementedStatusServiceServer) ListStatuses(context.Context, *ListStatusesRequest) (*ListStatusesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListStatuses not implemented")
 }
 func (UnimplementedStatusServiceServer) UpdateStatus(context.Context, *UpdateStatusRequest) (*UpdateStatusResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateStatus not implemented")
@@ -220,20 +220,20 @@ func _StatusService_GetStatusByID_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _StatusService_ListStatusesByType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListStatusesByTypeRequest)
+func _StatusService_ListStatuses_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListStatusesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StatusServiceServer).ListStatusesByType(ctx, in)
+		return srv.(StatusServiceServer).ListStatuses(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: StatusService_ListStatusesByType_FullMethodName,
+		FullMethod: StatusService_ListStatuses_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StatusServiceServer).ListStatusesByType(ctx, req.(*ListStatusesByTypeRequest))
+		return srv.(StatusServiceServer).ListStatuses(ctx, req.(*ListStatusesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -294,8 +294,8 @@ var StatusService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _StatusService_GetStatusByID_Handler,
 		},
 		{
-			MethodName: "ListStatusesByType",
-			Handler:    _StatusService_ListStatusesByType_Handler,
+			MethodName: "ListStatuses",
+			Handler:    _StatusService_ListStatuses_Handler,
 		},
 		{
 			MethodName: "UpdateStatus",

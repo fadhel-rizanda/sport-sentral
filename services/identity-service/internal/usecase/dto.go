@@ -4,8 +4,19 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"microservice-golang/services/identity-service/internal/entity"
 )
+
+// ─── General ──────────────────────────────────────────────────────────────────
+
+type ListRequest struct {
+	Page     int
+	PageSize int
+}
+
+type DeleteRequest struct {
+	ID          uuid.UUID
+	DeletedByID uuid.UUID
+}
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -15,13 +26,14 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	AccessToken   string
-	RefreshToken  string
-	ExpiresAt     time.Time
-	UserID        uuid.UUID
-	Email         string
-	Username      string
-	ActiveProfile string
+	AccessToken    string
+	RefreshToken   string
+	ExpiresAt      time.Time
+	UserID         uuid.UUID
+	Email          string
+	Username       string
+	ActiveRoleName string
+	ActiveRoleID   uuid.UUID
 }
 
 type RefreshTokenResponse struct {
@@ -51,29 +63,33 @@ type DeleteUserRequest struct {
 	Password string
 }
 
+type AssignRolesRequest struct {
+	UserID  uuid.UUID
+	RoleIds []uuid.UUID
+}
+
 type UserResponse struct {
-	ID            uuid.UUID
-	Email         string
-	Username      string
-	FullName      string
-	Status        string
-	ActiveProfile string
-	Profiles      []UserRoleResponse
-	VerifiedAt    *time.Time
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID             uuid.UUID
+	Email          string
+	Username       string
+	FullName       string
+	StatusName     string
+	StatusID       uuid.UUID
+	ActiveRoleName string
+	ActiveRoleID   uuid.UUID
+	Roles          []UserRoleResponse
+	VerifiedAt     *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	DeletedAt      *time.Time
 }
 
 type UserRoleResponse struct {
-	RoleID   uuid.UUID
-	RoleName string
-	IsActive bool
-	Status   string
-}
-
-type ListUsersRequest struct {
-	Page     int
-	PageSize int
+	ID         uuid.UUID
+	Name       string
+	IsActive   bool
+	StatusName string
+	StatusID   uuid.UUID
 }
 
 type ListUsersResponse struct {
@@ -100,42 +116,81 @@ type ApproveProfileRequest struct {
 	RoleName string
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Role ─────────────────────────────────────────────────────────────────────
 
-func ToUserResponse(user *entity.User) *UserResponse {
-	profiles := make([]UserRoleResponse, len(user.UserRoles))
-	activeProfile := ""
-
-	for i, ur := range user.UserRoles {
-		profiles[i] = UserRoleResponse{
-			RoleID:   ur.RoleID,
-			RoleName: ur.Role.Name,
-			IsActive: ur.IsActive,
-			Status:   ur.Status.Name,
-		}
-		if ur.IsActive {
-			activeProfile = ur.Role.Name
-		}
-	}
-
-	return &UserResponse{
-		ID:            user.ID,
-		Email:         user.Email,
-		Username:      user.Username,
-		FullName:      user.FullName,
-		Status:        user.Status.Name,
-		ActiveProfile: activeProfile,
-		Profiles:      profiles,
-		VerifiedAt:    user.VerifiedAt,
-		CreatedAt:     user.CreatedAt,
-		UpdatedAt:     user.UpdatedAt,
-	}
+type CreateRoleRequest struct {
+	Name          string
+	Description   string
+	CreatedByID   uuid.UUID
+	PermissionIDs []*uuid.UUID
 }
 
-func (u *UserResponse) RoleIDs() []string {
-	ids := make([]string, len(u.Profiles))
-	for i, p := range u.Profiles {
-		ids[i] = p.RoleID.String()
-	}
-	return ids
+type UpdateRoleRequest struct {
+	ID          uuid.UUID
+	Name        *string
+	Description *string
+	UpdatedByID uuid.UUID
+}
+
+type RoleResponse struct {
+	ID          uuid.UUID
+	Name        string
+	Description string
+	Permissions []PermissionResponse
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
+	CreatedByID uuid.UUID
+	UpdatedByID uuid.UUID
+	DeletedByID *uuid.UUID
+}
+
+type ListRoleResponse struct {
+	Roles    []*RoleResponse
+	Total    int64
+	Page     int
+	PageSize int
+}
+
+// ─── Permission ─────────────────────────────────────────────────────────────────────
+
+type ListPermissionRequest struct {
+	RoleId   *uuid.UUID
+	Page     int
+	PageSize int
+}
+
+type PermissionResponse struct {
+	ID          uuid.UUID
+	Resource    string
+	Action      string
+	Description string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
+	CreatedByID uuid.UUID
+	UpdatedByID uuid.UUID
+	DeletedByID *uuid.UUID
+}
+
+type ListPermissionResponse struct {
+	Permissions []*PermissionResponse
+	Total       int64
+	Page        int
+	PageSize    int
+}
+
+type CreatePermissionRequest struct {
+	Resource    string
+	Action      string
+	Description string
+	CreatedByID uuid.UUID
+}
+
+type UpdatePermissionRequest struct {
+	ID          uuid.UUID
+	Resource    *string
+	Action      *string
+	Description *string
+	UpdatedByID uuid.UUID
 }

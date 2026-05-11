@@ -2,6 +2,7 @@ package main
 
 import (
 	"buf.build/go/protovalidate"
+	"context"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
@@ -12,14 +13,19 @@ import (
 	"gorm.io/gorm"
 	"microservice-golang/services/meta-service/internal/config"
 	"microservice-golang/services/meta-service/internal/database"
+	"microservice-golang/services/meta-service/internal/delivery/nats"
 	"microservice-golang/services/meta-service/internal/handler"
 	"microservice-golang/services/meta-service/internal/repository"
 	"microservice-golang/services/meta-service/internal/usecase"
 	envConfig "microservice-golang/shared/pkg/config"
 	"microservice-golang/shared/pkg/grpc/interceptor"
 	"microservice-golang/shared/pkg/logger"
+	"microservice-golang/shared/pkg/messaging"
 	"microservice-golang/shared/pkg/redisclient"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -56,14 +62,19 @@ func main() {
 	if err := database.RunExternalMigrations(cfg.Database.PgDSN()); err != nil {
 		log.Fatal("database migration failed", zap.Error(err))
 	}
-
 	if err := database.Migrate(db); err != nil {
 		log.Fatal("migrate failed", zap.Error(err))
 	}
-
 	if err := database.Seed(db); err != nil {
 		log.Fatal("failed to seed database", zap.Error(err))
 	}
+
+	// ── Nats ──────────────────────────────────────────────────────────────────
+	natsClient, err := messaging.Connect(messaging.Config(cfg.IdentityNats), log)
+	if err != nil {
+		log.Fatal("failed to connect to nats server", zap.Error(err))
+	}
+	defer natsClient.Drain()
 
 	// ── Redis ─────────────────────────────────────────────────────────────────
 	redisClient := redis.NewClient(&redis.Options{
@@ -71,18 +82,27 @@ func main() {
 		Password: cfg.Redis.Password,
 		DB:       cfg.Redis.DB,
 	})
-	// TODO integrasiin redis
-	_ = redisclient.New(redisClient)
+	redisWrapper := redisclient.New(redisClient)
+
+	// ── Event Publisher ───────────────────────────────────────────────────────
+	eventPublisher := nats.NewStatusEventPublisher(natsClient, log)
 
 	// ── Repository ────────────────────────────────────────────────────────────
-	statusRepo := repository.NewStatusRepository(db)
-	tagRepo := repository.NewTagRepository(db)
+	statusRepo := repository.NewStatusRepository(db, redisWrapper)
+	tagRepo := repository.NewTagRepository(db, redisWrapper)
+	userCacheRepo := repository.NewUserCacheRepository(db)
 
 	// ── UseCase ───────────────────────────────────────────────────────────────
-	statusUC := usecase.NewStatusUseCase(statusRepo)
+	statusUC := usecase.NewStatusUseCase(statusRepo, eventPublisher)
 	tagUC := usecase.NewTagUseCase(tagRepo)
+	userSyncUC := usecase.NewUserSyncUseCase(userCacheRepo, log)
 
-	// ── Handler ───────────────────────────────────────────────────────────────
+	err = database.SeedStatuses(statusUC)
+	if err != nil {
+		return
+	}
+
+	// ── Handlers ──────────────────────────────────────────────────────────────
 	statusHandler := handler.NewStatusHandler(statusUC)
 	tagHandler := handler.NewTagHandler(tagUC)
 
@@ -99,7 +119,6 @@ func main() {
 			interceptor.UnaryValidator(v),
 		),
 	)
-
 	statusHandler.RegisterGRPC(grpcServer)
 	tagHandler.RegisterGRPC(grpcServer)
 
@@ -111,9 +130,28 @@ func main() {
 		log.Fatal("failed to listen", zap.Error(err))
 	}
 
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
+	go func() {
+		log.Info("meta-service gRPC listening", zap.Int("port", cfg.GRPC.Port))
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Error("gRPC server stopped", zap.Error(err))
+			cancel()
+		}
+	}()
+
 	log.Info("grpc server listening", zap.Int("port", cfg.GRPC.Port))
 
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatal("failed to serve", zap.Error(err))
+	// ── NATS Subscriber ────────────────────────────────────────────────────────────────
+	userDurableName := envConfig.GetEnv("USER_DURABLE_NAME", "meta-service-user-sync")
+	userSub := nats.NewUserSubscriber(userSyncUC, natsClient, log, userDurableName)
+
+	log.Info("starting user event consumer")
+	if err := userSub.Listen(ctx); err != nil {
+		log.Error("consumer stopped", zap.Error(err))
 	}
+
+	log.Info("shutting down gracefully")
+	grpcServer.GracefulStop()
 }

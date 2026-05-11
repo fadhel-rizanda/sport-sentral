@@ -89,7 +89,7 @@ func (h *UserHandler) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequ
 }
 
 func (h *UserHandler) ListUsers(ctx context.Context, req *userv1.ListUsersRequest) (*userv1.ListUsersResponse, error) {
-	res, err := h.uc.List(ctx, usecase.ListUsersRequest{
+	res, err := h.uc.List(ctx, usecase.ListRequest{
 		Page:     int(req.Page),
 		PageSize: int(req.PageSize),
 	})
@@ -138,6 +138,20 @@ func (h *UserHandler) ResetPassword(ctx context.Context, req *userv1.ResetPasswo
 	return &userv1.ResetPasswordResponse{}, nil
 }
 
+func (h *UserHandler) AssignRolesToUser(ctx context.Context, req *userv1.AssignRolesToUserRequest) (*userv1.AssignRolesToUserResponse, error) {
+	if err := h.uc.AssignRolesToUser(ctx, req.UserId, req.RoleIds); err != nil {
+		return nil, apperr.ToGRPC(err)
+	}
+	return &userv1.AssignRolesToUserResponse{}, nil
+}
+
+func (h *UserHandler) RemoveRolesFromUser(ctx context.Context, req *userv1.RemoveRolesFromUserRequest) (*userv1.RemoveRolesFromUserResponse, error) {
+	if err := h.uc.RemoveRolesFromUser(ctx, req.UserId, req.RoleIds); err != nil {
+		return nil, apperr.ToGRPC(err)
+	}
+	return &userv1.RemoveRolesFromUserResponse{}, nil
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 func toProtoUser(u *usecase.UserResponse) *userv1.User {
@@ -146,26 +160,33 @@ func toProtoUser(u *usecase.UserResponse) *userv1.User {
 		verifiedAt = timestamppb.New(*u.VerifiedAt)
 	}
 
-	profiles := make([]*userv1.UserProfile, len(u.Profiles))
-	for i, p := range u.Profiles {
-		profiles[i] = &userv1.UserProfile{
-			RoleId:   p.RoleID.String(),
-			RoleName: p.RoleName,
-			IsActive: p.IsActive,
-			Status:   p.Status,
+	profiles := make([]*userv1.UserRole, len(u.Roles))
+	for i, p := range u.Roles {
+		profiles[i] = &userv1.UserRole{
+			RoleId:     p.ID.String(),
+			RoleName:   p.Name,
+			IsActive:   p.IsActive,
+			StatusName: p.StatusName,
+			StatusId:   p.StatusID.String(),
 		}
 	}
 
-	return &userv1.User{
-		Id:            u.ID.String(),
-		Email:         u.Email,
-		Username:      u.Username,
-		FullName:      u.FullName,
-		Status:        u.Status,
-		ActiveProfile: u.ActiveProfile,
-		Profiles:      profiles,
-		CreatedAt:     timestamppb.New(u.CreatedAt),
-		UpdatedAt:     timestamppb.New(u.UpdatedAt),
-		VerifiedAt:    verifiedAt,
+	res := &userv1.User{
+		Id:             u.ID.String(),
+		Email:          u.Email,
+		Username:       u.Username,
+		FullName:       u.FullName,
+		StatusName:     u.StatusName,
+		StatusId:       u.StatusID.String(),
+		ActiveRoleName: u.ActiveRoleName,
+		ActiveRoleId:   u.ActiveRoleID.String(),
+		Roles:          profiles,
+		CreatedAt:      timestamppb.New(u.CreatedAt),
+		UpdatedAt:      timestamppb.New(u.UpdatedAt),
+		VerifiedAt:     verifiedAt,
 	}
+	if u.DeletedAt != nil {
+		res.DeletedAt = timestamppb.New(*u.DeletedAt)
+	}
+	return res
 }

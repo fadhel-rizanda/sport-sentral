@@ -9,11 +9,12 @@ import "buf/validate/validate.proto";
 
 // ─── Messages ─────────────────────────────────────────────────────────────────
 
-message UserProfile {
+message UserRole {
   string role_id   = 1;
   string role_name = 2;
   bool   is_active = 3;
-  string status    = 4;
+  string status_id    = 4;
+  string status_name  = 5;
 }
 
 message User {
@@ -21,12 +22,15 @@ message User {
   string    email          = 2;
   string    username       = 3;
   string    full_name      = 4;
-  string    status         = 5;
-  string    active_profile = 6;
-  repeated UserProfile profiles = 7;
-  google.protobuf.Timestamp created_at  = 8;
-  google.protobuf.Timestamp updated_at  = 9;
-  google.protobuf.Timestamp verified_at = 10;
+  string    status_id         = 5;
+  string    status_name         = 6;
+  string active_role_id  = 7;
+  string active_role_name  = 8;
+  repeated UserRole roles = 9;
+  google.protobuf.Timestamp created_at  = 10;
+  google.protobuf.Timestamp updated_at  = 11;
+  google.protobuf.Timestamp verified_at = 12;
+  optional google.protobuf.Timestamp deleted_at = 13;
 }
 
 // ─── Requests ─────────────────────────────────────────────────────────────────
@@ -102,12 +106,45 @@ message ResetPasswordRequest {
   ];
 }
 
+message AssignRolesToUserRequest {
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  repeated string role_ids = 2 [
+    (buf.validate.field).repeated = {
+      min_items: 1,
+      max_items: 50,
+      items: { string: { uuid: true } }
+    }
+  ];
+}
+
+message RemoveRolesFromUserRequest {
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  repeated string role_ids = 2 [
+    (buf.validate.field).repeated = {
+      min_items: 1,
+      max_items: 50,
+      items: { string: { uuid: true } }
+    }
+  ];
+}
+
 // ─── Responses ────────────────────────────────────────────────────────────────
 
-message CreateUserResponse   { User user = 1; }
-message GetUserResponse      { User user = 1; }
-message UpdateUserResponse   { User user = 1; }
+message CreateUserResponse {
+  User user = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message UpdateUserResponse {
+  User user = 1;
+
+}
+
 message DeleteUserResponse   {}
+
 message ListUsersResponse {
   repeated User users = 1;
   int64 total     = 2;
@@ -115,9 +152,16 @@ message ListUsersResponse {
   int32 page_size = 4;
 }
 message SendVerifyEmailResponse {}
+
 message VerifyAccountResponse   {}
+
 message ForgotPasswordResponse  {}
+
 message ResetPasswordResponse   {}
+
+message AssignRolesToUserResponse {}
+
+message RemoveRolesFromUserResponse {}
 
 // ─── Service ──────────────────────────────────────────────────────────────────
 
@@ -131,4 +175,7 @@ service UserService {
   rpc VerifyAccount   (VerifyAccountRequest)   returns (VerifyAccountResponse);
   rpc ForgotPassword  (ForgotPasswordRequest)  returns (ForgotPasswordResponse);
   rpc ResetPassword   (ResetPasswordRequest)   returns (ResetPasswordResponse);
+
+  rpc AssignRolesToUser  (AssignRolesToUserRequest)  returns (AssignRolesToUserResponse);
+  rpc RemoveRolesFromUser(RemoveRolesFromUserRequest)returns (RemoveRolesFromUserResponse);
 }

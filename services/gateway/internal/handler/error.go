@@ -1,19 +1,37 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"microservice-golang/services/gateway/internal/response"
 )
 
-func grpcError(c *fiber.Ctx, err error) error {
-	st, ok := status.FromError(err)
-	if !ok {
-		return response.Error(c, 500, "internal error")
-	}
+func ErrorHandler(logger *zap.Logger) fiber.ErrorHandler {
+	return func(c *fiber.Ctx, err error) error {
+		logger.Error("request error",
+			zap.String("path", c.Path()),
+			zap.String("method", c.Method()),
+			zap.Error(err),
+		)
 
+		if st, ok := status.FromError(err); ok {
+			return handleGrpcError(c, st)
+		}
+
+		var e *fiber.Error
+		if errors.As(err, &e) {
+			return response.Error(c, e.Code, e.Message)
+		}
+
+		return response.Error(c, fiber.StatusInternalServerError, "internal server error")
+	}
+}
+
+func handleGrpcError(c *fiber.Ctx, st *status.Status) error {
 	for _, detail := range st.Details() {
 		switch t := detail.(type) {
 		case *errdetails.BadRequest:
@@ -28,18 +46,21 @@ func grpcError(c *fiber.Ctx, err error) error {
 		}
 	}
 
+	var httpStatus int
 	switch st.Code() {
 	case codes.NotFound:
-		return response.Error(c, fiber.StatusNotFound, st.Message())
+		httpStatus = fiber.StatusNotFound
 	case codes.AlreadyExists:
-		return response.Error(c, fiber.StatusConflict, st.Message())
-	case codes.InvalidArgument, codes.Unknown:
-		return response.Error(c, fiber.StatusBadRequest, st.Message())
+		httpStatus = fiber.StatusConflict
+	case codes.InvalidArgument:
+		httpStatus = fiber.StatusBadRequest
 	case codes.Unauthenticated:
-		return response.Error(c, fiber.StatusUnauthorized, st.Message())
+		httpStatus = fiber.StatusUnauthorized
 	case codes.PermissionDenied:
-		return response.Error(c, fiber.StatusForbidden, st.Message())
+		httpStatus = fiber.StatusForbidden
 	default:
-		return response.Error(c, fiber.StatusInternalServerError, "internal server error")
+		httpStatus = fiber.StatusInternalServerError
 	}
+
+	return response.Error(c, httpStatus, st.Message())
 }

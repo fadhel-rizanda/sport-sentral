@@ -28,10 +28,12 @@ type Status struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	CreatedBy     string                 `protobuf:"bytes,4,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
-	UpdatedBy     string                 `protobuf:"bytes,5,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CreatedById   string                 `protobuf:"bytes,4,opt,name=created_by_id,json=createdById,proto3" json:"created_by_id,omitempty"`
+	UpdatedById   string                 `protobuf:"bytes,5,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
+	DeletedById   *string                `protobuf:"bytes,6,opt,name=deleted_by_id,json=deletedById,proto3,oneof" json:"deleted_by_id,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -87,16 +89,23 @@ func (x *Status) GetName() string {
 	return ""
 }
 
-func (x *Status) GetCreatedBy() string {
+func (x *Status) GetCreatedById() string {
 	if x != nil {
-		return x.CreatedBy
+		return x.CreatedById
 	}
 	return ""
 }
 
-func (x *Status) GetUpdatedBy() string {
+func (x *Status) GetUpdatedById() string {
 	if x != nil {
-		return x.UpdatedBy
+		return x.UpdatedById
+	}
+	return ""
+}
+
+func (x *Status) GetDeletedById() string {
+	if x != nil && x.DeletedById != nil {
+		return *x.DeletedById
 	}
 	return ""
 }
@@ -115,11 +124,18 @@ func (x *Status) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Status) GetDeletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DeletedAt
+	}
+	return nil
+}
+
 type CreateStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	CreatedBy     string                 `protobuf:"bytes,3,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	CreatedById   string                 `protobuf:"bytes,3,opt,name=created_by_id,json=createdById,proto3" json:"created_by_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -168,9 +184,9 @@ func (x *CreateStatusRequest) GetName() string {
 	return ""
 }
 
-func (x *CreateStatusRequest) GetCreatedBy() string {
+func (x *CreateStatusRequest) GetCreatedById() string {
 	if x != nil {
-		return x.CreatedBy
+		return x.CreatedById
 	}
 	return ""
 }
@@ -271,27 +287,29 @@ func (x *GetStatusByIDRequest) GetId() string {
 	return ""
 }
 
-type ListStatusesByTypeRequest struct {
+type ListStatusesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Type          *string                `protobuf:"bytes,1,opt,name=type,proto3,oneof" json:"type,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListStatusesByTypeRequest) Reset() {
-	*x = ListStatusesByTypeRequest{}
+func (x *ListStatusesRequest) Reset() {
+	*x = ListStatusesRequest{}
 	mi := &file_meta_v1_status_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListStatusesByTypeRequest) String() string {
+func (x *ListStatusesRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListStatusesByTypeRequest) ProtoMessage() {}
+func (*ListStatusesRequest) ProtoMessage() {}
 
-func (x *ListStatusesByTypeRequest) ProtoReflect() protoreflect.Message {
+func (x *ListStatusesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_meta_v1_status_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -303,16 +321,30 @@ func (x *ListStatusesByTypeRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListStatusesByTypeRequest.ProtoReflect.Descriptor instead.
-func (*ListStatusesByTypeRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListStatusesRequest.ProtoReflect.Descriptor instead.
+func (*ListStatusesRequest) Descriptor() ([]byte, []int) {
 	return file_meta_v1_status_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *ListStatusesByTypeRequest) GetType() string {
-	if x != nil {
-		return x.Type
+func (x *ListStatusesRequest) GetType() string {
+	if x != nil && x.Type != nil {
+		return *x.Type
 	}
 	return ""
+}
+
+func (x *ListStatusesRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListStatusesRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
 }
 
 type UpdateStatusRequest struct {
@@ -320,7 +352,7 @@ type UpdateStatusRequest struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Type          *string                `protobuf:"bytes,2,opt,name=type,proto3,oneof" json:"type,omitempty"`
 	Name          *string                `protobuf:"bytes,3,opt,name=name,proto3,oneof" json:"name,omitempty"`
-	UpdatedBy     string                 `protobuf:"bytes,4,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
+	UpdatedById   string                 `protobuf:"bytes,4,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -376,9 +408,9 @@ func (x *UpdateStatusRequest) GetName() string {
 	return ""
 }
 
-func (x *UpdateStatusRequest) GetUpdatedBy() string {
+func (x *UpdateStatusRequest) GetUpdatedById() string {
 	if x != nil {
-		return x.UpdatedBy
+		return x.UpdatedById
 	}
 	return ""
 }
@@ -386,7 +418,7 @@ func (x *UpdateStatusRequest) GetUpdatedBy() string {
 type DeleteStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	DeletedBy     string                 `protobuf:"bytes,2,opt,name=deleted_by,json=deletedBy,proto3" json:"deleted_by,omitempty"`
+	DeletedById   string                 `protobuf:"bytes,2,opt,name=deleted_by_id,json=deletedById,proto3" json:"deleted_by_id,omitempty"`
 	IsPermanent   bool                   `protobuf:"varint,3,opt,name=is_permanent,json=isPermanent,proto3" json:"is_permanent,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -429,9 +461,9 @@ func (x *DeleteStatusRequest) GetId() string {
 	return ""
 }
 
-func (x *DeleteStatusRequest) GetDeletedBy() string {
+func (x *DeleteStatusRequest) GetDeletedById() string {
 	if x != nil {
-		return x.DeletedBy
+		return x.DeletedById
 	}
 	return ""
 }
@@ -575,27 +607,30 @@ func (x *GetStatusByIDResponse) GetStatus() *Status {
 	return nil
 }
 
-type ListStatusesByTypeResponse struct {
+type ListStatusesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Statuses      []*Status              `protobuf:"bytes,1,rep,name=statuses,proto3" json:"statuses,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListStatusesByTypeResponse) Reset() {
-	*x = ListStatusesByTypeResponse{}
+func (x *ListStatusesResponse) Reset() {
+	*x = ListStatusesResponse{}
 	mi := &file_meta_v1_status_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListStatusesByTypeResponse) String() string {
+func (x *ListStatusesResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListStatusesByTypeResponse) ProtoMessage() {}
+func (*ListStatusesResponse) ProtoMessage() {}
 
-func (x *ListStatusesByTypeResponse) ProtoReflect() protoreflect.Message {
+func (x *ListStatusesResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_meta_v1_status_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -607,16 +642,37 @@ func (x *ListStatusesByTypeResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListStatusesByTypeResponse.ProtoReflect.Descriptor instead.
-func (*ListStatusesByTypeResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListStatusesResponse.ProtoReflect.Descriptor instead.
+func (*ListStatusesResponse) Descriptor() ([]byte, []int) {
 	return file_meta_v1_status_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *ListStatusesByTypeResponse) GetStatuses() []*Status {
+func (x *ListStatusesResponse) GetStatuses() []*Status {
 	if x != nil {
 		return x.Statuses
 	}
 	return nil
+}
+
+func (x *ListStatusesResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListStatusesResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListStatusesResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
 }
 
 type UpdateStatusResponse struct {
@@ -711,61 +767,67 @@ var File_meta_v1_status_proto protoreflect.FileDescriptor
 
 const file_meta_v1_status_proto_rawDesc = "" +
 	"\n" +
-	"\x14meta/v1/status.proto\x12\ameta.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf4\x01\n" +
+	"\x14meta/v1/status.proto\x12\ameta.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x88\x03\n" +
 	"\x06Status\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1d\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\"\n" +
+	"\rcreated_by_id\x18\x04 \x01(\tR\vcreatedById\x12\"\n" +
+	"\rupdated_by_id\x18\x05 \x01(\tR\vupdatedById\x12'\n" +
+	"\rdeleted_by_id\x18\x06 \x01(\tH\x00R\vdeletedById\x88\x01\x01\x129\n" +
 	"\n" +
-	"created_by\x18\x04 \x01(\tR\tcreatedBy\x12\x1d\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_by\x18\x05 \x01(\tR\tupdatedBy\x129\n" +
+	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12>\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
-	"\n" +
-	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"x\n" +
+	"deleted_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampH\x01R\tdeletedAt\x88\x01\x01B\x10\n" +
+	"\x0e_deleted_by_idB\r\n" +
+	"\v_deleted_at\"}\n" +
 	"\x13CreateStatusRequest\x12\x1b\n" +
 	"\x04type\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04type\x12\x1b\n" +
-	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12'\n" +
-	"\n" +
-	"created_by\x18\x03 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\tcreatedBy\"L\n" +
+	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12,\n" +
+	"\rcreated_by_id\x18\x03 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vcreatedById\"L\n" +
 	"\x10GetStatusRequest\x12\x1b\n" +
 	"\x04type\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04type\x12\x1b\n" +
 	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\"0\n" +
 	"\x14GetStatusByIDRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"8\n" +
-	"\x19ListStatusesByTypeRequest\x12\x1b\n" +
-	"\x04type\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04type\"\xae\x01\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\x85\x01\n" +
+	"\x13ListStatusesRequest\x12 \n" +
+	"\x04type\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x00R\x04type\x88\x01\x01\x12\x1b\n" +
+	"\x04page\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\x04page\x12&\n" +
+	"\tpage_size\x18\x03 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01R\bpageSizeB\a\n" +
+	"\x05_type\"\xb3\x01\n" +
 	"\x13UpdateStatusRequest\x12\x18\n" +
 	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12 \n" +
 	"\x04type\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x00R\x04type\x88\x01\x01\x12 \n" +
-	"\x04name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x01R\x04name\x88\x01\x01\x12'\n" +
-	"\n" +
-	"updated_by\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\tupdatedByB\a\n" +
+	"\x04name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x01R\x04name\x88\x01\x01\x12,\n" +
+	"\rupdated_by_id\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vupdatedByIdB\a\n" +
 	"\x05_typeB\a\n" +
-	"\x05_name\"{\n" +
+	"\x05_name\"\x80\x01\n" +
 	"\x13DeleteStatusRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12'\n" +
-	"\n" +
-	"deleted_by\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\tdeletedBy\x12!\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12,\n" +
+	"\rdeleted_by_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vdeletedById\x12!\n" +
 	"\fis_permanent\x18\x03 \x01(\bR\visPermanent\"?\n" +
 	"\x14CreateStatusResponse\x12'\n" +
 	"\x06status\x18\x01 \x01(\v2\x0f.meta.v1.StatusR\x06status\"<\n" +
 	"\x11GetStatusResponse\x12'\n" +
 	"\x06status\x18\x01 \x01(\v2\x0f.meta.v1.StatusR\x06status\"@\n" +
 	"\x15GetStatusByIDResponse\x12'\n" +
-	"\x06status\x18\x01 \x01(\v2\x0f.meta.v1.StatusR\x06status\"I\n" +
-	"\x1aListStatusesByTypeResponse\x12+\n" +
-	"\bstatuses\x18\x01 \x03(\v2\x0f.meta.v1.StatusR\bstatuses\"?\n" +
+	"\x06status\x18\x01 \x01(\v2\x0f.meta.v1.StatusR\x06status\"\x8a\x01\n" +
+	"\x14ListStatusesResponse\x12+\n" +
+	"\bstatuses\x18\x01 \x03(\v2\x0f.meta.v1.StatusR\bstatuses\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"?\n" +
 	"\x14UpdateStatusResponse\x12'\n" +
 	"\x06status\x18\x01 \x01(\v2\x0f.meta.v1.StatusR\x06status\"&\n" +
 	"\x14DeleteStatusResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id2\xe9\x03\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id2\xd7\x03\n" +
 	"\rStatusService\x12K\n" +
 	"\fCreateStatus\x12\x1c.meta.v1.CreateStatusRequest\x1a\x1d.meta.v1.CreateStatusResponse\x12B\n" +
 	"\tGetStatus\x12\x19.meta.v1.GetStatusRequest\x1a\x1a.meta.v1.GetStatusResponse\x12N\n" +
-	"\rGetStatusByID\x12\x1d.meta.v1.GetStatusByIDRequest\x1a\x1e.meta.v1.GetStatusByIDResponse\x12]\n" +
-	"\x12ListStatusesByType\x12\".meta.v1.ListStatusesByTypeRequest\x1a#.meta.v1.ListStatusesByTypeResponse\x12K\n" +
+	"\rGetStatusByID\x12\x1d.meta.v1.GetStatusByIDRequest\x1a\x1e.meta.v1.GetStatusByIDResponse\x12K\n" +
+	"\fListStatuses\x12\x1c.meta.v1.ListStatusesRequest\x1a\x1d.meta.v1.ListStatusesResponse\x12K\n" +
 	"\fUpdateStatus\x12\x1c.meta.v1.UpdateStatusRequest\x1a\x1d.meta.v1.UpdateStatusResponse\x12K\n" +
 	"\fDeleteStatus\x12\x1c.meta.v1.DeleteStatusRequest\x1a\x1d.meta.v1.DeleteStatusResponseB(Z&microservice-golang/gen/meta/v1;metav1b\x06proto3"
 
@@ -783,46 +845,47 @@ func file_meta_v1_status_proto_rawDescGZIP() []byte {
 
 var file_meta_v1_status_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_meta_v1_status_proto_goTypes = []any{
-	(*Status)(nil),                     // 0: meta.v1.Status
-	(*CreateStatusRequest)(nil),        // 1: meta.v1.CreateStatusRequest
-	(*GetStatusRequest)(nil),           // 2: meta.v1.GetStatusRequest
-	(*GetStatusByIDRequest)(nil),       // 3: meta.v1.GetStatusByIDRequest
-	(*ListStatusesByTypeRequest)(nil),  // 4: meta.v1.ListStatusesByTypeRequest
-	(*UpdateStatusRequest)(nil),        // 5: meta.v1.UpdateStatusRequest
-	(*DeleteStatusRequest)(nil),        // 6: meta.v1.DeleteStatusRequest
-	(*CreateStatusResponse)(nil),       // 7: meta.v1.CreateStatusResponse
-	(*GetStatusResponse)(nil),          // 8: meta.v1.GetStatusResponse
-	(*GetStatusByIDResponse)(nil),      // 9: meta.v1.GetStatusByIDResponse
-	(*ListStatusesByTypeResponse)(nil), // 10: meta.v1.ListStatusesByTypeResponse
-	(*UpdateStatusResponse)(nil),       // 11: meta.v1.UpdateStatusResponse
-	(*DeleteStatusResponse)(nil),       // 12: meta.v1.DeleteStatusResponse
-	(*timestamppb.Timestamp)(nil),      // 13: google.protobuf.Timestamp
+	(*Status)(nil),                // 0: meta.v1.Status
+	(*CreateStatusRequest)(nil),   // 1: meta.v1.CreateStatusRequest
+	(*GetStatusRequest)(nil),      // 2: meta.v1.GetStatusRequest
+	(*GetStatusByIDRequest)(nil),  // 3: meta.v1.GetStatusByIDRequest
+	(*ListStatusesRequest)(nil),   // 4: meta.v1.ListStatusesRequest
+	(*UpdateStatusRequest)(nil),   // 5: meta.v1.UpdateStatusRequest
+	(*DeleteStatusRequest)(nil),   // 6: meta.v1.DeleteStatusRequest
+	(*CreateStatusResponse)(nil),  // 7: meta.v1.CreateStatusResponse
+	(*GetStatusResponse)(nil),     // 8: meta.v1.GetStatusResponse
+	(*GetStatusByIDResponse)(nil), // 9: meta.v1.GetStatusByIDResponse
+	(*ListStatusesResponse)(nil),  // 10: meta.v1.ListStatusesResponse
+	(*UpdateStatusResponse)(nil),  // 11: meta.v1.UpdateStatusResponse
+	(*DeleteStatusResponse)(nil),  // 12: meta.v1.DeleteStatusResponse
+	(*timestamppb.Timestamp)(nil), // 13: google.protobuf.Timestamp
 }
 var file_meta_v1_status_proto_depIdxs = []int32{
 	13, // 0: meta.v1.Status.created_at:type_name -> google.protobuf.Timestamp
 	13, // 1: meta.v1.Status.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 2: meta.v1.CreateStatusResponse.status:type_name -> meta.v1.Status
-	0,  // 3: meta.v1.GetStatusResponse.status:type_name -> meta.v1.Status
-	0,  // 4: meta.v1.GetStatusByIDResponse.status:type_name -> meta.v1.Status
-	0,  // 5: meta.v1.ListStatusesByTypeResponse.statuses:type_name -> meta.v1.Status
-	0,  // 6: meta.v1.UpdateStatusResponse.status:type_name -> meta.v1.Status
-	1,  // 7: meta.v1.StatusService.CreateStatus:input_type -> meta.v1.CreateStatusRequest
-	2,  // 8: meta.v1.StatusService.GetStatus:input_type -> meta.v1.GetStatusRequest
-	3,  // 9: meta.v1.StatusService.GetStatusByID:input_type -> meta.v1.GetStatusByIDRequest
-	4,  // 10: meta.v1.StatusService.ListStatusesByType:input_type -> meta.v1.ListStatusesByTypeRequest
-	5,  // 11: meta.v1.StatusService.UpdateStatus:input_type -> meta.v1.UpdateStatusRequest
-	6,  // 12: meta.v1.StatusService.DeleteStatus:input_type -> meta.v1.DeleteStatusRequest
-	7,  // 13: meta.v1.StatusService.CreateStatus:output_type -> meta.v1.CreateStatusResponse
-	8,  // 14: meta.v1.StatusService.GetStatus:output_type -> meta.v1.GetStatusResponse
-	9,  // 15: meta.v1.StatusService.GetStatusByID:output_type -> meta.v1.GetStatusByIDResponse
-	10, // 16: meta.v1.StatusService.ListStatusesByType:output_type -> meta.v1.ListStatusesByTypeResponse
-	11, // 17: meta.v1.StatusService.UpdateStatus:output_type -> meta.v1.UpdateStatusResponse
-	12, // 18: meta.v1.StatusService.DeleteStatus:output_type -> meta.v1.DeleteStatusResponse
-	13, // [13:19] is the sub-list for method output_type
-	7,  // [7:13] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	13, // 2: meta.v1.Status.deleted_at:type_name -> google.protobuf.Timestamp
+	0,  // 3: meta.v1.CreateStatusResponse.status:type_name -> meta.v1.Status
+	0,  // 4: meta.v1.GetStatusResponse.status:type_name -> meta.v1.Status
+	0,  // 5: meta.v1.GetStatusByIDResponse.status:type_name -> meta.v1.Status
+	0,  // 6: meta.v1.ListStatusesResponse.statuses:type_name -> meta.v1.Status
+	0,  // 7: meta.v1.UpdateStatusResponse.status:type_name -> meta.v1.Status
+	1,  // 8: meta.v1.StatusService.CreateStatus:input_type -> meta.v1.CreateStatusRequest
+	2,  // 9: meta.v1.StatusService.GetStatus:input_type -> meta.v1.GetStatusRequest
+	3,  // 10: meta.v1.StatusService.GetStatusByID:input_type -> meta.v1.GetStatusByIDRequest
+	4,  // 11: meta.v1.StatusService.ListStatuses:input_type -> meta.v1.ListStatusesRequest
+	5,  // 12: meta.v1.StatusService.UpdateStatus:input_type -> meta.v1.UpdateStatusRequest
+	6,  // 13: meta.v1.StatusService.DeleteStatus:input_type -> meta.v1.DeleteStatusRequest
+	7,  // 14: meta.v1.StatusService.CreateStatus:output_type -> meta.v1.CreateStatusResponse
+	8,  // 15: meta.v1.StatusService.GetStatus:output_type -> meta.v1.GetStatusResponse
+	9,  // 16: meta.v1.StatusService.GetStatusByID:output_type -> meta.v1.GetStatusByIDResponse
+	10, // 17: meta.v1.StatusService.ListStatuses:output_type -> meta.v1.ListStatusesResponse
+	11, // 18: meta.v1.StatusService.UpdateStatus:output_type -> meta.v1.UpdateStatusResponse
+	12, // 19: meta.v1.StatusService.DeleteStatus:output_type -> meta.v1.DeleteStatusResponse
+	14, // [14:20] is the sub-list for method output_type
+	8,  // [8:14] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_meta_v1_status_proto_init() }
@@ -830,6 +893,8 @@ func file_meta_v1_status_proto_init() {
 	if File_meta_v1_status_proto != nil {
 		return
 	}
+	file_meta_v1_status_proto_msgTypes[0].OneofWrappers = []any{}
+	file_meta_v1_status_proto_msgTypes[4].OneofWrappers = []any{}
 	file_meta_v1_status_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

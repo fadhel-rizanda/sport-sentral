@@ -12,7 +12,7 @@ import (
 )
 
 type ProfileHandler struct {
-	rbacv1.UnimplementedRbacServiceServer
+	rbacv1.UnimplementedRBACServiceServer
 	uc usecase.ProfileUseCase
 }
 
@@ -21,7 +21,7 @@ func NewProfileHandler(uc usecase.ProfileUseCase) *ProfileHandler {
 }
 
 func (h *ProfileHandler) RegisterGRPC(s *grpc.Server) {
-	rbacv1.RegisterRbacServiceServer(s, h)
+	rbacv1.RegisterRBACServiceServer(s, h)
 }
 
 func (h *ProfileHandler) ApplyProfile(ctx context.Context, req *rbacv1.ApplyProfileRequest) (*rbacv1.ApplyProfileResponse, error) {

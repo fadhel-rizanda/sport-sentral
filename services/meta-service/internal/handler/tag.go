@@ -24,16 +24,16 @@ func (h *TagHandler) RegisterGRPC(s *grpc.Server) {
 }
 
 func (h *TagHandler) CreateTag(ctx context.Context, req *metav1.CreateTagRequest) (*metav1.CreateTagResponse, error) {
-	createdBy, err := uuid.Parse(req.GetCreatedBy())
+	createdBy, err := uuid.Parse(req.GetCreatedById())
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid created_by id"))
 	}
 
 	res, err := h.uc.Create(ctx, usecase.CreateTagRequest{
-		Type:      req.GetType(),
-		Name:      req.GetName(),
-		Slug:      req.Slug,
-		CreatedBy: createdBy,
+		Type:        req.GetType(),
+		Name:        req.GetName(),
+		Slug:        req.Slug,
+		CreatedByID: createdBy,
 	})
 
 	if err != nil {
@@ -70,18 +70,25 @@ func (h *TagHandler) GetTagByID(ctx context.Context, req *metav1.GetTagByIDReque
 	}, nil
 }
 
-func (h *TagHandler) ListTag(ctx context.Context, req *metav1.ListTagsByTypeRequest) (*metav1.ListTagsByTypeResponse, error) {
-	res, err := h.uc.ListByType(ctx, req.GetType())
+func (h *TagHandler) ListTag(ctx context.Context, req *metav1.ListTagsRequest) (*metav1.ListTagsResponse, error) {
+	res, err := h.uc.List(ctx, usecase.ListTagsRequest{
+		Type:     req.Type,
+		Page:     int(req.Page),
+		PageSize: int(req.PageSize),
+	})
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
 	}
 
-	tags := make([]*metav1.Tag, 0, len(res))
-	for _, tag := range res {
+	tags := make([]*metav1.Tag, 0, res.Total)
+	for _, tag := range res.Tags {
 		tags = append(tags, toProtoTag(tag))
 	}
-	return &metav1.ListTagsByTypeResponse{
-		Tags: tags,
+	return &metav1.ListTagsResponse{
+		Tags:     tags,
+		Total:    res.Total,
+		Page:     int32(res.Page),
+		PageSize: int32(res.PageSize),
 	}, nil
 }
 
@@ -90,16 +97,16 @@ func (h *TagHandler) UpdateTag(ctx context.Context, req *metav1.UpdateTagRequest
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
 	}
-	updatedBy, err := uuid.Parse(req.GetUpdatedBy())
+	updatedBy, err := uuid.Parse(req.GetUpdatedById())
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
 	}
 
 	res, err := h.uc.Update(ctx, id, usecase.UpdateTagRequest{
-		Type:      req.Type,
-		Name:      req.Name,
-		Slug:      req.Slug,
-		UpdatedBy: updatedBy,
+		Type:        req.Type,
+		Name:        req.Name,
+		Slug:        req.Slug,
+		UpdatedByID: updatedBy,
 	})
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
@@ -121,13 +128,13 @@ func (h *TagHandler) DeleteTag(ctx context.Context, req *metav1.DeleteTagRequest
 			ID: id,
 		})
 	} else {
-		deletedBy, err := uuid.Parse(req.GetDeletedBy())
+		deletedBy, err := uuid.Parse(req.GetDeletedById())
 		if err != nil {
 			return nil, apperr.ToGRPC(err)
 		}
 		err = h.uc.SoftDelete(ctx, usecase.DeleteTagRequest{
-			ID:        id,
-			DeletedBy: deletedBy,
+			ID:          id,
+			DeletedByID: deletedBy,
 		})
 	}
 	if err != nil {
@@ -139,14 +146,20 @@ func (h *TagHandler) DeleteTag(ctx context.Context, req *metav1.DeleteTagRequest
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 func toProtoTag(t *usecase.TagResponse) *metav1.Tag {
-	return &metav1.Tag{
-		Id:        t.ID.String(),
-		Type:      t.Type,
-		Name:      t.Name,
-		Slug:      t.Slug,
-		CreatedBy: t.CreatedBy.String(),
-		UpdatedBy: t.UpdatedBy.String(),
-		CreatedAt: timestamppb.New(t.CreatedAt),
-		UpdatedAt: timestamppb.New(t.UpdatedAt),
+	res := &metav1.Tag{
+		Id:          t.ID.String(),
+		Type:        t.Type,
+		Name:        t.Name,
+		Slug:        t.Slug,
+		CreatedById: t.CreatedByID.String(),
+		UpdatedById: t.UpdatedByID.String(),
+		CreatedAt:   timestamppb.New(t.CreatedAt),
+		UpdatedAt:   timestamppb.New(t.UpdatedAt),
 	}
+	if t.DeletedAt != nil {
+		deletedByID := t.DeletedByID.String()
+		res.DeletedAt = timestamppb.New(*t.DeletedAt)
+		res.DeletedById = &deletedByID
+	}
+	return res
 }

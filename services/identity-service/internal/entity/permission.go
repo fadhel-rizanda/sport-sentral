@@ -12,9 +12,14 @@ type Permission struct {
 	Resource    string    `gorm:"not null"`
 	Action      string    `gorm:"not null"`
 	Description string    `gorm:"not null;default:''"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
+
+	CreatedByID uuid.UUID  `gorm:"type:uuid;not null"`
+	UpdatedByID uuid.UUID  `gorm:"type:uuid;not null"`
+	DeletedByID *uuid.UUID `gorm:"type:uuid;not null"`
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 // kalau mau custom nama tabel, bisa pake method TableName() seperti ini, secara default gorm akan buat tabel dengan nama "permissions" (plural dari struct name)
@@ -29,14 +34,6 @@ func (p *Permission) BeforeCreate(_ *gorm.DB) error {
 		p.ID = id
 	}
 	return nil
-}
-
-func NewPermission(resource, action, description string) *Permission {
-	return &Permission{
-		Resource:    resource,
-		Action:      action,
-		Description: description,
-	}
 }
 
 func (p *Permission) String() string {

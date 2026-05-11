@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -18,7 +19,7 @@ type TagUseCase interface {
 	Create(ctx context.Context, req CreateTagRequest) (*TagResponse, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*TagResponse, error)
 	GetByTypeAndName(ctx context.Context, tagType string, name string) (*TagResponse, error)
-	ListByType(ctx context.Context, tagType string) ([]*TagResponse, error)
+	List(ctx context.Context, req ListTagsRequest) (*ListTagsResponse, error)
 	Update(ctx context.Context, id uuid.UUID, req UpdateTagRequest) (*TagResponse, error)
 	SoftDelete(ctx context.Context, req DeleteTagRequest) error
 	HardDelete(ctx context.Context, req DeleteTagRequest) error
@@ -45,7 +46,7 @@ func (uc *tagUseCase) Create(ctx context.Context, req CreateTagRequest) (*TagRes
 		Type:      req.Type,
 		Name:      req.Name,
 		Slug:      slug,
-		CreatedBy: req.CreatedBy,
+		CreatedBy: req.CreatedByID,
 	}
 
 	if err := uc.repo.Create(ctx, tag); err != nil {
@@ -80,16 +81,23 @@ func (uc *tagUseCase) GetByTypeAndName(ctx context.Context, tagType string, name
 	return toTagResponse(tags), nil
 }
 
-func (uc *tagUseCase) ListByType(ctx context.Context, tagType string) ([]*TagResponse, error) {
-	tags, err := uc.repo.ListByType(ctx, tagType)
+func (uc *tagUseCase) List(ctx context.Context, req ListTagsRequest) (*ListTagsResponse, error) {
+	tags, total, err := uc.repo.List(ctx, req.Type, req.Page, req.PageSize)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
+
 	result := make([]*TagResponse, len(tags))
 	for i, t := range tags {
 		result[i] = toTagResponse(t)
 	}
-	return result, nil
+
+	return &ListTagsResponse{
+		Tags:     result,
+		Total:    total,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}, nil
 }
 
 func (uc *tagUseCase) Update(ctx context.Context, id uuid.UUID, req UpdateTagRequest) (*TagResponse, error) {
@@ -114,7 +122,7 @@ func (uc *tagUseCase) Update(ctx context.Context, id uuid.UUID, req UpdateTagReq
 	}
 
 	if req.Type != nil || req.Name != nil || req.Slug != nil {
-		tag.UpdatedBy = req.UpdatedBy
+		tag.UpdatedBy = req.UpdatedByID
 	}
 
 	if err := uc.repo.Update(ctx, *tag); err != nil {
@@ -127,17 +135,25 @@ func (uc *tagUseCase) Update(ctx context.Context, id uuid.UUID, req UpdateTagReq
 }
 
 func (uc *tagUseCase) SoftDelete(ctx context.Context, req DeleteTagRequest) error {
-	if err := uc.repo.SoftDelete(ctx, req.ID, req.DeletedBy); err != nil {
+	tag, err := uc.repo.GetByID(ctx, req.ID)
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return apperr.NotFound("tag")
 		}
 		return apperr.Internal(err)
 	}
+
+	tag.DeletedAt = gorm.DeletedAt{Time: time.Now(), Valid: true}
+	tag.DeletedBy = &req.DeletedByID
+	if err := uc.repo.Update(ctx, *tag); err != nil {
+		return apperr.Internal(err)
+	}
+
 	return nil
 }
 
 func (uc *tagUseCase) HardDelete(ctx context.Context, req DeleteTagRequest) error {
-	if err := uc.repo.HardDelete(ctx, req.ID); err != nil {
+	if err := uc.repo.Delete(ctx, req.ID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return apperr.NotFound("tag")
 		}

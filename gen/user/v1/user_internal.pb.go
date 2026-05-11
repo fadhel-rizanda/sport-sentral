@@ -29,9 +29,11 @@ type UserInternal struct {
 	Username       string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
 	FullName       string                 `protobuf:"bytes,4,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
 	HashedPassword string                 `protobuf:"bytes,5,opt,name=hashed_password,json=hashedPassword,proto3" json:"hashed_password,omitempty"`
-	Status         string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
-	ActiveProfile  string                 `protobuf:"bytes,7,opt,name=active_profile,json=activeProfile,proto3" json:"active_profile,omitempty"`
-	RoleIds        []string               `protobuf:"bytes,8,rep,name=role_ids,json=roleIds,proto3" json:"role_ids,omitempty"`
+	StatusId       string                 `protobuf:"bytes,6,opt,name=status_id,json=statusId,proto3" json:"status_id,omitempty"`
+	StatusName     string                 `protobuf:"bytes,7,opt,name=status_name,json=statusName,proto3" json:"status_name,omitempty"`
+	ActiveRoleId   string                 `protobuf:"bytes,8,opt,name=active_role_id,json=activeRoleId,proto3" json:"active_role_id,omitempty"`
+	ActiveRoleName string                 `protobuf:"bytes,9,opt,name=active_role_name,json=activeRoleName,proto3" json:"active_role_name,omitempty"`
+	RoleIds        []string               `protobuf:"bytes,10,rep,name=role_ids,json=roleIds,proto3" json:"role_ids,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -101,16 +103,30 @@ func (x *UserInternal) GetHashedPassword() string {
 	return ""
 }
 
-func (x *UserInternal) GetStatus() string {
+func (x *UserInternal) GetStatusId() string {
 	if x != nil {
-		return x.Status
+		return x.StatusId
 	}
 	return ""
 }
 
-func (x *UserInternal) GetActiveProfile() string {
+func (x *UserInternal) GetStatusName() string {
 	if x != nil {
-		return x.ActiveProfile
+		return x.StatusName
+	}
+	return ""
+}
+
+func (x *UserInternal) GetActiveRoleId() string {
+	if x != nil {
+		return x.ActiveRoleId
+	}
+	return ""
+}
+
+func (x *UserInternal) GetActiveRoleName() string {
+	if x != nil {
+		return x.ActiveRoleName
 	}
 	return ""
 }
@@ -302,16 +318,20 @@ var File_user_v1_user_internal_proto protoreflect.FileDescriptor
 
 const file_user_v1_user_internal_proto_rawDesc = "" +
 	"\n" +
-	"\x1buser/v1/user_internal.proto\x12\auser.v1\x1a\x1bbuf/validate/validate.proto\"\xf0\x01\n" +
+	"\x1buser/v1/user_internal.proto\x12\auser.v1\x1a\x1bbuf/validate/validate.proto\"\xbf\x02\n" +
 	"\fUserInternal\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
 	"\busername\x18\x03 \x01(\tR\busername\x12\x1b\n" +
 	"\tfull_name\x18\x04 \x01(\tR\bfullName\x12'\n" +
-	"\x0fhashed_password\x18\x05 \x01(\tR\x0ehashedPassword\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x12%\n" +
-	"\x0eactive_profile\x18\a \x01(\tR\ractiveProfile\x12\x19\n" +
-	"\brole_ids\x18\b \x03(\tR\aroleIds\">\n" +
+	"\x0fhashed_password\x18\x05 \x01(\tR\x0ehashedPassword\x12\x1b\n" +
+	"\tstatus_id\x18\x06 \x01(\tR\bstatusId\x12\x1f\n" +
+	"\vstatus_name\x18\a \x01(\tR\n" +
+	"statusName\x12$\n" +
+	"\x0eactive_role_id\x18\b \x01(\tR\factiveRoleId\x12(\n" +
+	"\x10active_role_name\x18\t \x01(\tR\x0eactiveRoleName\x12\x19\n" +
+	"\brole_ids\x18\n" +
+	" \x03(\tR\aroleIds\">\n" +
 	"\x1dGetUserByEmailInternalRequest\x12\x1d\n" +
 	"\x05email\x18\x01 \x01(\tB\a\xbaH\x04r\x02`\x01R\x05email\"K\n" +
 	"\x1eGetUserByEmailInternalResponse\x12)\n" +

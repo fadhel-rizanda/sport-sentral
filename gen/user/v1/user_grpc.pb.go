@@ -19,15 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_CreateUser_FullMethodName      = "/user.v1.UserService/CreateUser"
-	UserService_GetUser_FullMethodName         = "/user.v1.UserService/GetUser"
-	UserService_UpdateUser_FullMethodName      = "/user.v1.UserService/UpdateUser"
-	UserService_DeleteUser_FullMethodName      = "/user.v1.UserService/DeleteUser"
-	UserService_ListUsers_FullMethodName       = "/user.v1.UserService/ListUsers"
-	UserService_SendVerifyEmail_FullMethodName = "/user.v1.UserService/SendVerifyEmail"
-	UserService_VerifyAccount_FullMethodName   = "/user.v1.UserService/VerifyAccount"
-	UserService_ForgotPassword_FullMethodName  = "/user.v1.UserService/ForgotPassword"
-	UserService_ResetPassword_FullMethodName   = "/user.v1.UserService/ResetPassword"
+	UserService_CreateUser_FullMethodName          = "/user.v1.UserService/CreateUser"
+	UserService_GetUser_FullMethodName             = "/user.v1.UserService/GetUser"
+	UserService_UpdateUser_FullMethodName          = "/user.v1.UserService/UpdateUser"
+	UserService_DeleteUser_FullMethodName          = "/user.v1.UserService/DeleteUser"
+	UserService_ListUsers_FullMethodName           = "/user.v1.UserService/ListUsers"
+	UserService_SendVerifyEmail_FullMethodName     = "/user.v1.UserService/SendVerifyEmail"
+	UserService_VerifyAccount_FullMethodName       = "/user.v1.UserService/VerifyAccount"
+	UserService_ForgotPassword_FullMethodName      = "/user.v1.UserService/ForgotPassword"
+	UserService_ResetPassword_FullMethodName       = "/user.v1.UserService/ResetPassword"
+	UserService_AssignRolesToUser_FullMethodName   = "/user.v1.UserService/AssignRolesToUser"
+	UserService_RemoveRolesFromUser_FullMethodName = "/user.v1.UserService/RemoveRolesFromUser"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -43,6 +45,8 @@ type UserServiceClient interface {
 	VerifyAccount(ctx context.Context, in *VerifyAccountRequest, opts ...grpc.CallOption) (*VerifyAccountResponse, error)
 	ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*ForgotPasswordResponse, error)
 	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*ResetPasswordResponse, error)
+	AssignRolesToUser(ctx context.Context, in *AssignRolesToUserRequest, opts ...grpc.CallOption) (*AssignRolesToUserResponse, error)
+	RemoveRolesFromUser(ctx context.Context, in *RemoveRolesFromUserRequest, opts ...grpc.CallOption) (*RemoveRolesFromUserResponse, error)
 }
 
 type userServiceClient struct {
@@ -143,6 +147,26 @@ func (c *userServiceClient) ResetPassword(ctx context.Context, in *ResetPassword
 	return out, nil
 }
 
+func (c *userServiceClient) AssignRolesToUser(ctx context.Context, in *AssignRolesToUserRequest, opts ...grpc.CallOption) (*AssignRolesToUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AssignRolesToUserResponse)
+	err := c.cc.Invoke(ctx, UserService_AssignRolesToUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) RemoveRolesFromUser(ctx context.Context, in *RemoveRolesFromUserRequest, opts ...grpc.CallOption) (*RemoveRolesFromUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveRolesFromUserResponse)
+	err := c.cc.Invoke(ctx, UserService_RemoveRolesFromUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -156,6 +180,8 @@ type UserServiceServer interface {
 	VerifyAccount(context.Context, *VerifyAccountRequest) (*VerifyAccountResponse, error)
 	ForgotPassword(context.Context, *ForgotPasswordRequest) (*ForgotPasswordResponse, error)
 	ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error)
+	AssignRolesToUser(context.Context, *AssignRolesToUserRequest) (*AssignRolesToUserResponse, error)
+	RemoveRolesFromUser(context.Context, *RemoveRolesFromUserRequest) (*RemoveRolesFromUserResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -192,6 +218,12 @@ func (UnimplementedUserServiceServer) ForgotPassword(context.Context, *ForgotPas
 }
 func (UnimplementedUserServiceServer) ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ResetPassword not implemented")
+}
+func (UnimplementedUserServiceServer) AssignRolesToUser(context.Context, *AssignRolesToUserRequest) (*AssignRolesToUserResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AssignRolesToUser not implemented")
+}
+func (UnimplementedUserServiceServer) RemoveRolesFromUser(context.Context, *RemoveRolesFromUserRequest) (*RemoveRolesFromUserResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RemoveRolesFromUser not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -376,6 +408,42 @@ func _UserService_ResetPassword_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_AssignRolesToUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AssignRolesToUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).AssignRolesToUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_AssignRolesToUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).AssignRolesToUser(ctx, req.(*AssignRolesToUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_RemoveRolesFromUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveRolesFromUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).RemoveRolesFromUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_RemoveRolesFromUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).RemoveRolesFromUser(ctx, req.(*RemoveRolesFromUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -418,6 +486,14 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResetPassword",
 			Handler:    _UserService_ResetPassword_Handler,
+		},
+		{
+			MethodName: "AssignRolesToUser",
+			Handler:    _UserService_AssignRolesToUser_Handler,
+		},
+		{
+			MethodName: "RemoveRolesFromUser",
+			Handler:    _UserService_RemoveRolesFromUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
