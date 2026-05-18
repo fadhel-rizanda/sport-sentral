@@ -3,11 +3,10 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"microservice-golang/shared/pkg/constants"
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"golang.org/x/crypto/bcrypt"
-
 	"microservice-golang/services/identity-service/internal/repository"
 	apperr "microservice-golang/shared/pkg/errors"
 	"microservice-golang/shared/pkg/jwt"
@@ -17,15 +16,16 @@ type AuthUseCase interface {
 	Login(ctx context.Context, req LoginRequest) (*LoginResponse, error)
 	Logout(ctx context.Context, refreshToken string) error
 	RefreshToken(ctx context.Context, refreshToken string) (*RefreshTokenResponse, error)
-	ValidateToken(ctx context.Context, accessToken string) (*jwt.Claims, error)
+	ValidateToken(_ context.Context, accessToken string) (*jwt.Claims, error)
 }
 
 type authUseCase struct {
-	userRepo     repository.UserRepository
-	userRoleRepo repository.UserRoleRepository
-	jwtManager   *jwt.Manager
-	redis        *redis.Client
-	refreshTTL   time.Duration
+	userRepo        repository.UserRepository
+	userRoleRepo    repository.UserRoleRepository
+	jwtManager      *jwt.Manager
+	redis           *redis.Client
+	refreshTTL      time.Duration
+	statusCacheRepo repository.StatusCacheRepository
 }
 
 func NewAuthUseCase(
@@ -34,13 +34,15 @@ func NewAuthUseCase(
 	jwtManager *jwt.Manager,
 	redis *redis.Client,
 	refreshTTL time.Duration,
+	statusCacheRepo repository.StatusCacheRepository,
 ) AuthUseCase {
 	return &authUseCase{
-		userRepo:     userRepo,
-		userRoleRepo: userRoleRepo,
-		jwtManager:   jwtManager,
-		redis:        redis,
-		refreshTTL:   refreshTTL,
+		userRepo:        userRepo,
+		userRoleRepo:    userRoleRepo,
+		jwtManager:      jwtManager,
+		redis:           redis,
+		refreshTTL:      refreshTTL,
+		statusCacheRepo: statusCacheRepo,
 	}
 }
 
@@ -54,11 +56,16 @@ func (uc *authUseCase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 		return nil, apperr.Unauthorized("account not verified")
 	}
 
-	if user.Status.Name != "active" {
-		return nil, apperr.Unauthorized("account is " + user.Status.Name)
+	status, err := uc.statusCacheRepo.GetByTypeAndName(ctx, constants.StatusTypeUser, constants.StatusActive)
+	if err != nil {
+		return nil, apperr.Internal(err)
 	}
 
-	if !checkPassword(user.HashedPassword, req.Password) {
+	if user.StatusID != status.ID {
+		return nil, apperr.Unauthorized("account is " + status.Name)
+	}
+
+	if !user.CheckPassword(req.Password) {
 		return nil, apperr.Unauthorized("invalid email or password")
 	}
 
@@ -78,6 +85,7 @@ func (uc *authUseCase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 		user.Username,
 		roleIDs,
 		activeRole.Role.Name,
+		activeRole.Role.ID,
 	)
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -89,13 +97,25 @@ func (uc *authUseCase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 	}
 
 	return &LoginResponse{
-		AccessToken:   tokens.AccessToken,
-		RefreshToken:  tokens.RefreshToken,
-		ExpiresAt:     tokens.ExpiresAt,
-		UserID:        user.ID,
-		Email:         user.Email,
-		Username:      user.Username,
-		ActiveProfile: activeRole.Role.Name,
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+		ExpiresAt:    tokens.ExpiresAt,
+		UserID:       user.ID,
+		FullName:     user.FullName,
+		Email:        user.Email,
+		Username:     user.Username,
+		ActiveRole: RoleSimpleResponse{
+			Name:           activeRole.Role.Name,
+			Slug:           activeRole.Role.Slug,
+			ID:             activeRole.Role.ID,
+			PermissionsIDs: roleIDs,
+		},
+		Status: StatusSimpleResponse{
+			ID:   status.ID,
+			Name: status.Name,
+			Slug: status.Slug,
+			Type: status.Type,
+		},
 	}, nil
 }
 
@@ -137,7 +157,8 @@ func (uc *authUseCase) RefreshToken(ctx context.Context, refreshToken string) (*
 		claims.Email,
 		claims.Username,
 		claims.Roles,
-		claims.ActiveProfile,
+		claims.ActiveRoleName,
+		claims.ActiveRoleID,
 	)
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -155,7 +176,7 @@ func (uc *authUseCase) RefreshToken(ctx context.Context, refreshToken string) (*
 	}, nil
 }
 
-func (uc *authUseCase) ValidateToken(ctx context.Context, accessToken string) (*jwt.Claims, error) {
+func (uc *authUseCase) ValidateToken(_ context.Context, accessToken string) (*jwt.Claims, error) {
 	claims, err := uc.jwtManager.ValidateAccess(accessToken)
 	if err != nil {
 		return nil, apperr.Unauthorized("invalid or expired token")
@@ -167,8 +188,4 @@ func (uc *authUseCase) ValidateToken(ctx context.Context, accessToken string) (*
 
 func refreshTokenKey(userID, token string) string {
 	return fmt.Sprintf("refresh:%s:%s", userID, token)
-}
-
-func checkPassword(hashedPassword, plainPassword string) bool {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword)) == nil
 }

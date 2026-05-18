@@ -50,17 +50,3 @@ func (h *UserInternalHandler) GetUserByIDInternal(ctx context.Context, req *user
 		User: toProtoUserInternal(user),
 	}, nil
 }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-func toProtoUserInternal(u *usecase.UserResponse) *userv1.UserInternal {
-	return &userv1.UserInternal{
-		Id:            u.ID.String(),
-		Email:         u.Email,
-		Username:      u.Username,
-		FullName:      u.FullName,
-		Status:        u.Status,
-		ActiveProfile: u.ActiveProfile,
-		RoleIds:       u.RoleIDs(),
-	}
-}

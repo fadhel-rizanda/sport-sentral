@@ -5,6 +5,7 @@ package auth.v1;
 option go_package = "microservice-golang/gen/auth/v1;authv1";
 
 import "buf/validate/validate.proto";
+import "common/v1/common.proto";
 
 // ─── Messages ─────────────────────────────────────────────────────────────────
 
@@ -27,10 +28,9 @@ message LoginRequest {
 
 message LoginResponse {
   TokenPair tokens        = 1;
-  string    user_id       = 2;
-  string    email         = 3;
-  string    username      = 4;
-  string    active_profile = 5;
+  common.v1.UserSimple user = 2;
+  common.v1.StatusSimple status = 3;
+  common.v1.RoleSimple active_role = 4;
 }
 
 message LogoutRequest {
@@ -58,11 +58,9 @@ message ValidateTokenRequest {
 }
 
 message ValidateTokenResponse {
-  string          user_id        = 1;
-  string          email          = 2;
-  string          username       = 3;
-  repeated string role_ids       = 4;
-  string          active_profile = 5;
+  common.v1.UserSimple user = 1;
+  common.v1.StatusSimple status = 2;
+  common.v1.RoleSimple active_role = 3;
 }
 
 // ─── Service ──────────────────────────────────────────────────────────────────

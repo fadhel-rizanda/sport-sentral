@@ -10,6 +10,7 @@ import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	v1 "microservice-golang/gen/common/v1"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -29,9 +30,8 @@ type UserInternal struct {
 	Username       string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
 	FullName       string                 `protobuf:"bytes,4,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
 	HashedPassword string                 `protobuf:"bytes,5,opt,name=hashed_password,json=hashedPassword,proto3" json:"hashed_password,omitempty"`
-	Status         string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
-	ActiveProfile  string                 `protobuf:"bytes,7,opt,name=active_profile,json=activeProfile,proto3" json:"active_profile,omitempty"`
-	RoleIds        []string               `protobuf:"bytes,8,rep,name=role_ids,json=roleIds,proto3" json:"role_ids,omitempty"`
+	Status         *v1.StatusSimple       `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	ActiveRole     *v1.RoleSimple         `protobuf:"bytes,7,opt,name=active_role,json=activeRole,proto3" json:"active_role,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -101,23 +101,16 @@ func (x *UserInternal) GetHashedPassword() string {
 	return ""
 }
 
-func (x *UserInternal) GetStatus() string {
+func (x *UserInternal) GetStatus() *v1.StatusSimple {
 	if x != nil {
 		return x.Status
 	}
-	return ""
+	return nil
 }
 
-func (x *UserInternal) GetActiveProfile() string {
+func (x *UserInternal) GetActiveRole() *v1.RoleSimple {
 	if x != nil {
-		return x.ActiveProfile
-	}
-	return ""
-}
-
-func (x *UserInternal) GetRoleIds() []string {
-	if x != nil {
-		return x.RoleIds
+		return x.ActiveRole
 	}
 	return nil
 }
@@ -302,16 +295,16 @@ var File_user_v1_user_internal_proto protoreflect.FileDescriptor
 
 const file_user_v1_user_internal_proto_rawDesc = "" +
 	"\n" +
-	"\x1buser/v1/user_internal.proto\x12\auser.v1\x1a\x1bbuf/validate/validate.proto\"\xf0\x01\n" +
+	"\x1buser/v1/user_internal.proto\x12\auser.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/v1/common.proto\"\xff\x01\n" +
 	"\fUserInternal\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
 	"\busername\x18\x03 \x01(\tR\busername\x12\x1b\n" +
 	"\tfull_name\x18\x04 \x01(\tR\bfullName\x12'\n" +
-	"\x0fhashed_password\x18\x05 \x01(\tR\x0ehashedPassword\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x12%\n" +
-	"\x0eactive_profile\x18\a \x01(\tR\ractiveProfile\x12\x19\n" +
-	"\brole_ids\x18\b \x03(\tR\aroleIds\">\n" +
+	"\x0fhashed_password\x18\x05 \x01(\tR\x0ehashedPassword\x12/\n" +
+	"\x06status\x18\x06 \x01(\v2\x17.common.v1.StatusSimpleR\x06status\x126\n" +
+	"\vactive_role\x18\a \x01(\v2\x15.common.v1.RoleSimpleR\n" +
+	"activeRole\">\n" +
 	"\x1dGetUserByEmailInternalRequest\x12\x1d\n" +
 	"\x05email\x18\x01 \x01(\tB\a\xbaH\x04r\x02`\x01R\x05email\"K\n" +
 	"\x1eGetUserByEmailInternalResponse\x12)\n" +
@@ -343,19 +336,23 @@ var file_user_v1_user_internal_proto_goTypes = []any{
 	(*GetUserByEmailInternalResponse)(nil), // 2: user.v1.GetUserByEmailInternalResponse
 	(*GetUserByIDInternalRequest)(nil),     // 3: user.v1.GetUserByIDInternalRequest
 	(*GetUserByIDInternalResponse)(nil),    // 4: user.v1.GetUserByIDInternalResponse
+	(*v1.StatusSimple)(nil),                // 5: common.v1.StatusSimple
+	(*v1.RoleSimple)(nil),                  // 6: common.v1.RoleSimple
 }
 var file_user_v1_user_internal_proto_depIdxs = []int32{
-	0, // 0: user.v1.GetUserByEmailInternalResponse.user:type_name -> user.v1.UserInternal
-	0, // 1: user.v1.GetUserByIDInternalResponse.user:type_name -> user.v1.UserInternal
-	1, // 2: user.v1.UserInternalService.GetUserByEmailInternal:input_type -> user.v1.GetUserByEmailInternalRequest
-	3, // 3: user.v1.UserInternalService.GetUserByIDInternal:input_type -> user.v1.GetUserByIDInternalRequest
-	2, // 4: user.v1.UserInternalService.GetUserByEmailInternal:output_type -> user.v1.GetUserByEmailInternalResponse
-	4, // 5: user.v1.UserInternalService.GetUserByIDInternal:output_type -> user.v1.GetUserByIDInternalResponse
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	5, // 0: user.v1.UserInternal.status:type_name -> common.v1.StatusSimple
+	6, // 1: user.v1.UserInternal.active_role:type_name -> common.v1.RoleSimple
+	0, // 2: user.v1.GetUserByEmailInternalResponse.user:type_name -> user.v1.UserInternal
+	0, // 3: user.v1.GetUserByIDInternalResponse.user:type_name -> user.v1.UserInternal
+	1, // 4: user.v1.UserInternalService.GetUserByEmailInternal:input_type -> user.v1.GetUserByEmailInternalRequest
+	3, // 5: user.v1.UserInternalService.GetUserByIDInternal:input_type -> user.v1.GetUserByIDInternalRequest
+	2, // 6: user.v1.UserInternalService.GetUserByEmailInternal:output_type -> user.v1.GetUserByEmailInternalResponse
+	4, // 7: user.v1.UserInternalService.GetUserByIDInternal:output_type -> user.v1.GetUserByIDInternalResponse
+	6, // [6:8] is the sub-list for method output_type
+	4, // [4:6] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_user_v1_user_internal_proto_init() }

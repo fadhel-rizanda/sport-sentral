@@ -1,22 +1,21 @@
 package main
 
 import (
-	"errors"
+	"buf.build/go/protovalidate"
+	"context"
 	"fmt"
-	"microservice-golang/shared/pkg/redisclient"
-	"net"
-
-	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
+	metav1 "microservice-golang/gen/meta/v1"
 	"microservice-golang/services/identity-service/internal/config"
-	"microservice-golang/services/identity-service/internal/entity"
+	"microservice-golang/services/identity-service/internal/database"
+	"microservice-golang/services/identity-service/internal/delivery/nats"
 	"microservice-golang/services/identity-service/internal/handler"
 	"microservice-golang/services/identity-service/internal/repository"
 	"microservice-golang/services/identity-service/internal/usecase"
@@ -25,13 +24,19 @@ import (
 	"microservice-golang/shared/pkg/jwt"
 	"microservice-golang/shared/pkg/logger"
 	"microservice-golang/shared/pkg/mailer"
+	"microservice-golang/shared/pkg/messaging"
+	"microservice-golang/shared/pkg/redisclient"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
 	// ── Env ───────────────────────────────────────────────────────────────────
 	_ = godotenv.Load()
 	env := envConfig.GetEnv("APP_ENV", "development")
-	appName := envConfig.GetEnv("APP_NAME", "sportcentral")
+	appName := envConfig.GetEnv("APP_NAME", "sport-sentral")
 	appVersion := envConfig.GetEnv("APP_VERSION", "0.0.1")
 	serviceName := envConfig.GetEnv("SERVICE_NAME", "identity-service")
 	serviceVersion := envConfig.GetEnv("SERVICE_VERSION", "0.0.1")
@@ -53,18 +58,28 @@ func main() {
 	}
 
 	// ── Database ──────────────────────────────────────────────────────────────
-	db, err := gorm.Open(postgres.Open(cfg.Database.DSN()), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(cfg.Database.GormDSN()), &gorm.Config{})
 	if err != nil {
-		log.Fatal("failed to connect to database", zap.Error(err))
+		log.Fatal("connect to database failed", zap.Error(err))
 	}
 
-	if err := migrate(db); err != nil {
-		log.Fatal("failed to migrate database", zap.Error(err))
+	log.Info("Database URL check", zap.String("url", cfg.Database.PgDSN()))
+	if err := database.RunExternalMigrations(cfg.Database.PgDSN()); err != nil {
+		log.Fatal("database migration failed", zap.Error(err))
 	}
-
-	if err := seed(db); err != nil {
+	if err := database.Migrate(db); err != nil {
+		log.Fatal("migrate failed", zap.Error(err))
+	}
+	if err := database.Seed(db); err != nil {
 		log.Fatal("failed to seed database", zap.Error(err))
 	}
+
+	// ── NATS ──────────────────────────────────────────────────────────────────
+	natsClient, err := messaging.Connect(messaging.Config(cfg.MetaNats), log)
+	if err != nil {
+		log.Fatal("failed to connect to nats server", zap.Error(err))
+	}
+	defer natsClient.Drain()
 
 	// ── Redis ─────────────────────────────────────────────────────────────────
 	redisClient := redis.NewClient(&redis.Options{
@@ -85,35 +100,84 @@ func main() {
 	// ── Mailer ────────────────────────────────────────────────────────────────
 	mailerClient := mailer.New(cfg.Mailer)
 
-	// ── Repositories ─────────────────────────────────────────────────────────
+	// ── gRPC Clients ──────────────────────────────────────────────────────────
+	metaConn, err := grpc.NewClient(cfg.MetaService.Address,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatal("failed to connect to meta-service", zap.Error(err))
+	}
+	defer metaConn.Close()
+	_ = metav1.NewStatusServiceClient(metaConn) // not yet implement
+
+	// ── Event Publisher ───────────────────────────────────────────────────────
+	eventPublisher := nats.NewUserEventPublisher(natsClient, log)
+
+	// ── Repositories ──────────────────────────────────────────────────────────
 	userRepo := repository.NewUserRepository(db)
 	userRoleRepo := repository.NewUserRoleRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
-	statusRepo := repository.NewStatusRepository(db)
+	permissionRepo := repository.NewPermissionRepository(db)
+	statusCacheRepo := repository.NewStatusCacheRepository(db)
 
-	// ── Usecases ──────────────────────────────────────────────────────────────
-	authUC := usecase.NewAuthUseCase(userRepo, userRoleRepo, jwtManager, redisClient, cfg.JWT.RefreshTTL)
-	userUC := usecase.NewUserUseCase(userRepo, userRoleRepo, roleRepo, statusRepo, mailerClient, redisWrapper, cfg.AppURL, log)
-	profileUC := usecase.NewProfileUseCase(userRepo, userRoleRepo, roleRepo, statusRepo)
+	// ── Use Cases ─────────────────────────────────────────────────────────────
+	authUC := usecase.NewAuthUseCase(
+		userRepo,
+		userRoleRepo,
+		jwtManager,
+		redisClient,
+		cfg.JWT.RefreshTTL,
+		statusCacheRepo,
+	)
+	userUC := usecase.NewUserUseCase(
+		db,
+		userRepo,
+		userRoleRepo,
+		roleRepo,
+		mailerClient,
+		redisWrapper,
+		cfg.AppURL,
+		log,
+		statusCacheRepo,
+		eventPublisher,
+	)
+	profileUC := usecase.NewProfileUseCase(
+		userRepo,
+		userRoleRepo,
+		roleRepo,
+		statusCacheRepo,
+	)
+	roleUC := usecase.NewRoleUseCase(roleRepo, permissionRepo, userRepo, log)
+	permissionUC := usecase.NewPermissionUseCase(permissionRepo)
+	statusSyncUC := usecase.NewStatusSyncUseCase(statusCacheRepo, log)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	authHandler := handler.NewAuthHandler(authUC)
 	userHandler := handler.NewUserHandler(userUC)
 	profileHandler := handler.NewProfileHandler(profileUC)
 	userInternalHandler := handler.NewUserInternalHandler(userUC)
+	roleHandler := handler.NewRoleHandler(roleUC)
+	permissionHandler := handler.NewPermissionHandler(permissionUC)
 
 	// ── gRPC Server ───────────────────────────────────────────────────────────
+	v, err := protovalidate.New()
+	if err != nil {
+		log.Fatal("failed to initialize validator", zap.Error(err))
+	}
+
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			interceptor.UnaryLogger(log),
 			interceptor.UnaryRecovery(log),
+			interceptor.UnaryValidator(v),
 		),
 	)
-
 	authHandler.RegisterGRPC(grpcServer)
 	userHandler.RegisterGRPC(grpcServer)
 	profileHandler.RegisterGRPC(grpcServer)
 	userInternalHandler.RegisterGRPC(grpcServer)
+	roleHandler.RegisterGRPC(grpcServer)
+	permissionHandler.RegisterGRPC(grpcServer)
 
 	reflection.Register(grpcServer)
 
@@ -123,79 +187,28 @@ func main() {
 		log.Fatal("failed to listen", zap.Error(err))
 	}
 
-	log.Info("identity-service gRPC listening", zap.Int("port", cfg.GRPC.Port))
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
 
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatal("failed to serve", zap.Error(err))
-	}
-}
-
-// ─── Migration ────────────────────────────────────────────────────────────────
-
-func migrate(db *gorm.DB) error {
-	return db.AutoMigrate(
-		&entity.Status{},
-		&entity.Permission{},
-		&entity.Role{},
-		&entity.User{},
-		&entity.UserRole{},
-	)
-}
-
-// ─── Seed ─────────────────────────────────────────────────────────────────────
-
-func seed(db *gorm.DB) error {
-	if err := seedStatuses(db); err != nil {
-		return err
-	}
-	return seedRoles(db)
-}
-
-func seedStatuses(db *gorm.DB) error {
-	statuses := []entity.Status{
-		{Type: entity.StatusTypeUser, Name: entity.UserStatusActive},
-		{Type: entity.StatusTypeUser, Name: entity.UserStatusPending},
-		{Type: entity.StatusTypeUser, Name: entity.UserStatusBanned},
-		{Type: entity.StatusTypeUserRole, Name: entity.UserRoleStatusActive},
-		{Type: entity.StatusTypeUserRole, Name: entity.UserRoleStatusPending},
-	}
-
-	for _, s := range statuses {
-		var existing entity.Status
-		err := db.Where("type = ? AND name = ?", s.Type, s.Name).First(&existing).Error
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			s.ID = uuid.New()
-			if err := db.Create(&s).Error; err != nil {
-				return err
-			}
-		} else if err != nil {
-			return err
+	go func() {
+		log.Info("identity-service gRPC listening", zap.Int("port", cfg.GRPC.Port))
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Error("gRPC server stopped", zap.Error(err))
+			cancel()
 		}
-	}
-	return nil
-}
+	}()
 
-func seedRoles(db *gorm.DB) error {
-	roles := []entity.Role{
-		{Name: entity.RoleAthlete, Description: "Default role. Can join academy, competitions, book courts."},
-		{Name: entity.RoleScout, Description: "Talent finder. Freemium access to athlete profiles and leaderboard."},
-		{Name: entity.RoleCourtOwner, Description: "Manages courts. Requires admin verification."},
-		{Name: entity.RoleAcademyAdmin, Description: "Manages academies. Requires admin verification."},
-		{Name: entity.RoleRegulator, Description: "Official sport body. Assigned by platform admin only."},
-		{Name: entity.RolePlatformAdmin, Description: "Internal platform administrator."},
+	log.Info("grpc server listening", zap.Int("port", cfg.GRPC.Port))
+
+	// ── NATS Subscriber ────────────────────────────────────────────────────────────────
+	statusDurableName := envConfig.GetEnv("STATUS_DURABLE_NAME", "identity-service-status-sync")
+	statusSub := nats.NewStatusSubscriber(statusSyncUC, natsClient, log, statusDurableName)
+
+	log.Info("starting status event consumer")
+	if err := statusSub.Listen(ctx); err != nil {
+		log.Error("consumer stopped", zap.Error(err))
 	}
 
-	for _, r := range roles {
-		var existing entity.Role
-		err := db.Where("name = ?", r.Name).First(&existing).Error
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			r.ID = uuid.New()
-			if err := db.Create(&r).Error; err != nil {
-				return err
-			}
-		} else if err != nil {
-			return err
-		}
-	}
-	return nil
+	log.Info("shutting down gracefully")
+	grpcServer.GracefulStop()
 }

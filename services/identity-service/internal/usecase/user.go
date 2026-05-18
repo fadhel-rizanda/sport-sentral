@@ -3,17 +3,22 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"go.uber.org/zap"
-	"microservice-golang/shared/pkg/redisclient"
+	"google.golang.org/protobuf/types/known/timestamppb"
+	userv1 "microservice-golang/gen/user/v1"
+	"microservice-golang/shared/pkg/constants"
 	"time"
 
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+
 	"microservice-golang/services/identity-service/internal/entity"
 	"microservice-golang/services/identity-service/internal/repository"
 	"microservice-golang/shared/infrastructure/postgres"
 	apperr "microservice-golang/shared/pkg/errors"
 	"microservice-golang/shared/pkg/mailer"
+	"microservice-golang/shared/pkg/redisclient"
 	"microservice-golang/shared/pkg/token"
 )
 
@@ -22,77 +27,90 @@ type UserUseCase interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*UserResponse, error)
 	GetByEmail(ctx context.Context, email string) (*UserResponse, error)
 	Update(ctx context.Context, req UpdateUserRequest) (*UserResponse, error)
-	SoftDelete(ctx context.Context, id uuid.UUID) error
-	List(ctx context.Context, req ListUsersRequest) (*ListUsersResponse, error)
+	SoftDelete(ctx context.Context, req DeleteUserRequest) error
+	List(ctx context.Context, req ListRequest) (*ListUsersResponse, error)
 	SendVerifyEmail(ctx context.Context, email string) error
 	VerifyAccount(ctx context.Context, tokenStr string) error
 	ForgotPassword(ctx context.Context, email string) error
 	ResetPassword(ctx context.Context, tokenStr, newPassword string) error
+
+	AssignRolesToUser(ctx context.Context, userID string, roleIDs []string) error
+	RemoveRolesFromUser(ctx context.Context, userID string, roleIDs []string) error
 }
 
 type userUseCase struct {
-	userRepo     repository.UserRepository
-	userRoleRepo repository.UserRoleRepository
-	roleRepo     repository.RoleRepository
-	statusRepo   repository.StatusRepository
-	mailer       *mailer.Mailer
-	redis        redisclient.Client
-	AppURL       string
-	logger       *zap.Logger
+	db              *gorm.DB
+	userRepo        repository.UserRepository
+	userRoleRepo    repository.UserRoleRepository
+	roleRepo        repository.RoleRepository
+	mailer          *mailer.Mailer
+	redis           redisclient.Client
+	AppURL          string
+	logger          *zap.Logger
+	statusCacheRepo repository.StatusCacheRepository
+	publisher       EventPublisher
 }
 
 func NewUserUseCase(
+	db *gorm.DB,
 	userRepo repository.UserRepository,
 	userRoleRepo repository.UserRoleRepository,
 	roleRepo repository.RoleRepository,
-	statusRepo repository.StatusRepository,
 	mailer *mailer.Mailer,
 	redis redisclient.Client,
 	AppURL string,
 	logger *zap.Logger,
+	statusCacheRepo repository.StatusCacheRepository,
+	publisher EventPublisher,
 ) UserUseCase {
 	return &userUseCase{
-		userRepo:     userRepo,
-		userRoleRepo: userRoleRepo,
-		roleRepo:     roleRepo,
-		statusRepo:   statusRepo,
-		mailer:       mailer,
-		redis:        redis,
-		AppURL:       AppURL,
-		logger:       logger,
+		db:              db,
+		userRepo:        userRepo,
+		userRoleRepo:    userRoleRepo,
+		roleRepo:        roleRepo,
+		redis:           redis,
+		mailer:          mailer,
+		AppURL:          AppURL,
+		logger:          logger,
+		statusCacheRepo: statusCacheRepo,
+		publisher:       publisher,
 	}
 }
 
 func (uc *userUseCase) Create(ctx context.Context, req CreateUserRequest) (*UserResponse, error) {
-	// validate role — tidak boleh assign admin-only role saat register
-	if entity.RolesAdminAssignOnly[req.RoleName] {
-		return nil, apperr.Forbidden("cannot self-register with this role")
-	}
-
-	role, err := uc.roleRepo.GetByName(ctx, req.RoleName)
+	role, err := uc.roleRepo.GetByID(ctx, req.RoleID)
 	if err != nil {
 		return nil, apperr.NotFound("role")
 	}
 
-	// determine user status based on role
-	userStatusName := entity.UserStatusActive
-	if entity.RolesPendingApproval[req.RoleName] {
-		userStatusName = entity.UserStatusPending
+	if entity.RolesAdminAssignOnly[role.Name] {
+		return nil, apperr.Forbidden("cannot self-register with this role")
 	}
 
-	userStatus, err := uc.statusRepo.GetByTypeAndName(ctx, entity.StatusTypeUser, userStatusName)
+	userStatusName := constants.StatusActive
+	if entity.RolesPendingApproval[role.Name] {
+		userStatusName = constants.StatusPending
+	}
+
+	userRoleStatusName := constants.StatusActive
+	if entity.RolesPendingApproval[role.Name] {
+		userRoleStatusName = constants.StatusPending
+	}
+
+	statusCache, err := uc.statusCacheRepo.GetByTypeAndName(ctx, constants.StatusTypeUser, userStatusName)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
-
-	userRoleStatusName := entity.UserRoleStatusActive
-	if entity.RolesPendingApproval[req.RoleName] {
-		userRoleStatusName = entity.UserRoleStatusPending
+	if statusCache == nil {
+		return nil, apperr.Internal(fmt.Errorf("status cache not found"))
 	}
 
-	userRoleStatus, err := uc.statusRepo.GetByTypeAndName(ctx, entity.StatusTypeUserRole, userRoleStatusName)
+	roleStatusCache, err := uc.statusCacheRepo.GetByTypeAndName(ctx, constants.StatusTypeUserRole, userRoleStatusName)
 	if err != nil {
 		return nil, apperr.Internal(err)
+	}
+	if roleStatusCache == nil {
+		return nil, apperr.Internal(fmt.Errorf("role status cache not found"))
 	}
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -100,45 +118,70 @@ func (uc *userUseCase) Create(ctx context.Context, req CreateUserRequest) (*User
 		return nil, apperr.Internal(err)
 	}
 
+	id, err := uuid.NewV7()
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+
 	user := &entity.User{
-		ID:             uuid.New(),
+		ID:             id,
 		Email:          req.Email,
 		Username:       req.Username,
 		FullName:       req.FullName,
 		HashedPassword: string(hashed),
-		StatusID:       userStatus.ID,
+		StatusID:       statusCache.ID,
 	}
 
-	if err := uc.userRepo.Create(ctx, user); err != nil {
-		if postgres.IsUniqueConstraint(err, "users_email_key") {
-			return nil, apperr.Conflict("email")
+	if err := uc.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		txUserRepo := repository.NewUserRepository(tx)
+		txUserRoleRepo := repository.NewUserRoleRepository(tx)
+
+		if err := txUserRepo.Create(ctx, user); err != nil {
+			if postgres.IsUniqueConstraint(err, "idx_users_email") {
+				return apperr.Conflict("email")
+			}
+			if postgres.IsUniqueConstraint(err, "idx_users_username") {
+				return apperr.Conflict("username")
+			}
+			return apperr.Internal(err)
 		}
-		if postgres.IsUniqueConstraint(err, "users_username_key") {
-			return nil, apperr.Conflict("username")
+
+		if err := txUserRoleRepo.Add(ctx, &entity.UserRole{
+			UserID:   user.ID,
+			RoleID:   role.ID,
+			IsActive: true,
+			StatusID: roleStatusCache.ID,
+		}); err != nil {
+			return apperr.Internal(err)
 		}
+
+		return nil
+	}); err != nil {
 		return nil, apperr.Internal(err)
 	}
 
-	userRole := &entity.UserRole{
-		UserID:   user.ID,
-		RoleID:   role.ID,
-		IsActive: true,
-		StatusID: userRoleStatus.ID,
-	}
-
-	if err := uc.userRoleRepo.Add(ctx, userRole); err != nil {
-		return nil, apperr.Internal(err)
-	}
-
-	if err := uc.sendVerifyEmailInternal(ctx, user); err != nil {
-		uc.logger.Error("failed to send verify email", zap.Error(err))
-	}
+	go func() {
+		if err := uc.sendVerifyEmailInternal(context.Background(), user); err != nil {
+			uc.logger.Error("failed to send verify email", zap.Error(err))
+		}
+	}()
 
 	return uc.GetByID(ctx, user.ID)
 }
 
 func (uc *userUseCase) GetByID(ctx context.Context, id uuid.UUID) (*UserResponse, error) {
 	user, err := uc.userRepo.GetByID(ctx, id)
+	if err != nil {
+		if postgres.IsNotFound(err) {
+			return nil, apperr.NotFound("user")
+		}
+		return nil, apperr.Internal(err)
+	}
+	return ToUserResponse(user), nil
+}
+
+func (uc *userUseCase) GetByEmail(ctx context.Context, email string) (*UserResponse, error) {
+	user, err := uc.userRepo.GetByEmail(ctx, email)
 	if err != nil {
 		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("user")
@@ -157,35 +200,74 @@ func (uc *userUseCase) Update(ctx context.Context, req UpdateUserRequest) (*User
 		return nil, apperr.Internal(err)
 	}
 
-	if req.FullName != "" {
-		user.FullName = req.FullName
+	if req.FullName != nil {
+		user.FullName = *req.FullName
 	}
-	if req.Username != "" {
-		user.Username = req.Username
+	if req.Username != nil {
+		user.Username = *req.Username
 	}
 
 	if err := uc.userRepo.Update(ctx, user); err != nil {
-		if postgres.IsUniqueConstraint(err, "users_username_key") {
+		if postgres.IsUniqueConstraint(err, "idx_users_username") {
 			return nil, apperr.Conflict("username")
 		}
+		return nil, apperr.Internal(err)
+	}
+
+	userRole, err := uc.userRoleRepo.GetActiveByUserID(ctx, user.ID)
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	evt := uc.buildUserEvent(
+		userv1.UserEventType_USER_EVENT_TYPE_UPDATED,
+		user,
+		&userRole.Role,
+	)
+	if err := uc.publisher.PublishUserUpdated(ctx, evt); err != nil {
 		return nil, apperr.Internal(err)
 	}
 
 	return ToUserResponse(user), nil
 }
 
-func (uc *userUseCase) SoftDelete(ctx context.Context, id uuid.UUID) error {
-	_, err := uc.userRepo.GetByID(ctx, id)
+func (uc *userUseCase) SoftDelete(ctx context.Context, req DeleteUserRequest) error {
+	user, err := uc.userRepo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
 			return apperr.NotFound("user")
 		}
 		return apperr.Internal(err)
 	}
-	return uc.userRepo.SoftDelete(ctx, id)
+
+	if !user.CheckPassword(req.Password) {
+		return apperr.Unauthorized("invalid email or password")
+	}
+
+	user.DeletedAt = gorm.DeletedAt{Time: time.Now(), Valid: true}
+
+	if err := uc.userRepo.Update(ctx, user); err != nil {
+		return apperr.Internal(err)
+	}
+
+	userRole, err := uc.userRoleRepo.GetActiveByUserID(ctx, user.ID)
+	if err != nil {
+		return apperr.Internal(err)
+	}
+
+	evt := uc.buildUserEvent(
+		userv1.UserEventType_USER_EVENT_TYPE_DELETED,
+		user,
+		&userRole.Role,
+	)
+	if err := uc.publisher.PublishUserDeleted(ctx, evt); err != nil {
+		return apperr.Internal(err)
+	}
+
+	return nil
 }
 
-func (uc *userUseCase) List(ctx context.Context, req ListUsersRequest) (*ListUsersResponse, error) {
+func (uc *userUseCase) List(ctx context.Context, req ListRequest) (*ListUsersResponse, error) {
 	users, total, err := uc.userRepo.List(ctx, req.Page, req.PageSize)
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -207,7 +289,6 @@ func (uc *userUseCase) List(ctx context.Context, req ListUsersRequest) (*ListUse
 func (uc *userUseCase) SendVerifyEmail(ctx context.Context, email string) error {
 	user, err := uc.userRepo.GetByEmail(ctx, email)
 	if err != nil {
-		// jangan expose apakah email exist atau tidak
 		return nil
 	}
 
@@ -215,19 +296,11 @@ func (uc *userUseCase) SendVerifyEmail(ctx context.Context, email string) error 
 		return apperr.InvalidArgument("account already verified")
 	}
 
-	tok, err := token.Generate(18)
-	if err != nil {
-		return apperr.Internal(err)
-	}
-
-	key := verifyEmailKey(tok)
-	if err := uc.redis.Set(ctx, key, user.ID.String(), 24*time.Hour); err != nil {
-		return apperr.Internal(err)
-	}
-
-	if err := uc.sendVerifyEmailInternal(ctx, user); err != nil {
-		uc.logger.Error("failed to send verify email", zap.Error(err))
-	}
+	go func() {
+		if err := uc.sendVerifyEmailInternal(context.Background(), user); err != nil {
+			uc.logger.Error("failed to send verify email", zap.Error(err))
+		}
+	}()
 
 	return nil
 }
@@ -249,14 +322,28 @@ func (uc *userUseCase) VerifyAccount(ctx context.Context, tokenStr string) error
 		return apperr.NotFound("user")
 	}
 
-	now := time.Now()
-	user.VerifiedAt = &now
+	user.Verify()
 
 	if err := uc.userRepo.Update(ctx, user); err != nil {
 		return apperr.Internal(err)
 	}
 
 	uc.redis.Del(ctx, key)
+
+	userRole, err := uc.userRoleRepo.GetActiveByUserID(ctx, user.ID)
+	if err != nil {
+		return apperr.Internal(err)
+	}
+
+	evt := uc.buildUserEvent(
+		userv1.UserEventType_USER_EVENT_TYPE_CREATED,
+		user,
+		&userRole.Role,
+	)
+	if err := uc.publisher.PublishUserCreated(ctx, evt); err != nil {
+		return apperr.Internal(err)
+	}
+
 	return nil
 }
 
@@ -321,15 +408,59 @@ func (uc *userUseCase) ResetPassword(ctx context.Context, tokenStr, newPassword 
 	return nil
 }
 
-func (uc *userUseCase) GetByEmail(ctx context.Context, email string) (*UserResponse, error) {
-	user, err := uc.userRepo.GetByEmail(ctx, email)
+func (uc *userUseCase) AssignRolesToUser(ctx context.Context, userID string, roleID []string) error {
+	uid, err := uuid.Parse(userID)
 	if err != nil {
-		if postgres.IsNotFound(err) {
-			return nil, apperr.NotFound("user")
-		}
-		return nil, apperr.Internal(err)
+		return apperr.InvalidArgument("invalid user id")
 	}
-	return ToUserResponse(user), nil
+
+	rids, err := parseUUIDs(roleID)
+	if err != nil {
+		return apperr.InvalidArgument("invalid role id")
+	}
+
+	if _, err := uc.userRepo.GetByID(ctx, uid); err != nil {
+		return apperr.Internal(err)
+	}
+
+	for _, rid := range rids {
+		if _, err := uc.roleRepo.GetByID(ctx, rid); err != nil {
+			return apperr.Internal(err)
+		}
+	}
+
+	err = uc.userRepo.AssignRoles(ctx, uid, rids)
+	if err != nil {
+		if postgres.IsUniqueViolation(err) {
+			return apperr.Conflict("user already has one or more roles")
+		}
+		if postgres.IsForeignKeyViolation(err) {
+			return apperr.NotFound("one or more roles not found")
+		}
+		return apperr.Internal(err)
+	}
+	return nil
+}
+
+func (uc *userUseCase) RemoveRolesFromUser(ctx context.Context, userID string, roleIDs []string) error {
+	uID, err := uuid.Parse(userID)
+	if err != nil {
+		return apperr.InvalidArgument("invalid user id")
+	}
+
+	rIDs, err := parseUUIDs(roleIDs)
+	if err != nil {
+		return apperr.Internal(err)
+	}
+
+	err = uc.userRepo.RemoveRoles(ctx, uID, rIDs)
+	if err != nil {
+		if postgres.IsForeignKeyViolation(err) {
+			return apperr.NotFound("one or more roles not found")
+		}
+		return apperr.Internal(err)
+	}
+	return nil
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -337,26 +468,17 @@ func (uc *userUseCase) GetByEmail(ctx context.Context, email string) (*UserRespo
 func (uc *userUseCase) sendVerifyEmailInternal(ctx context.Context, user *entity.User) error {
 	tok, err := token.Generate(18)
 	if err != nil {
-		return err
+		return apperr.Internal(err)
 	}
 
 	key := verifyEmailKey(tok)
 	if err := uc.redis.Set(ctx, key, user.ID.String(), 24*time.Hour); err != nil {
-		return err
+		return apperr.Internal(err)
 	}
 
 	verifyURL := fmt.Sprintf("%s/verify?token=%s", uc.AppURL, tok)
 	body := mailer.VerifyAccountBody(user.Username, verifyURL)
-
-	go func() {
-		_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		if err := uc.mailer.Send(user.Email, "Verify your SportCentral account", body); err != nil {
-			uc.logger.Error("failed to send verify email", zap.Error(err))
-		}
-	}()
-	return nil
+	return uc.mailer.Send(user.Email, "Verify your SportCentral account", body)
 }
 
 func verifyEmailKey(tok string) string {
@@ -365,4 +487,32 @@ func verifyEmailKey(tok string) string {
 
 func resetPasswordKey(tok string) string {
 	return "reset_password:" + tok
+}
+
+func (uc *userUseCase) buildUserEvent(
+	eventType userv1.UserEventType,
+	user *entity.User,
+	role *entity.Role,
+) *userv1.UserEvent {
+	evtID, _ := uuid.NewV7()
+
+	evt := &userv1.UserEvent{
+		EventId:            evtID.String(),
+		EventType:          eventType,
+		OccurredAt:         timestamppb.Now(),
+		UserId:             user.ID.String(),
+		UserEmail:          user.Email,
+		UserUsername:       user.Username,
+		UserFullName:       user.FullName,
+		UserActiveRoleId:   role.ID.String(),
+		UserActiveRoleName: role.Name,
+		UserStatusId:       user.StatusID.String(),
+	}
+
+	if user.DeletedAt.Valid {
+		deletedAt := user.DeletedAt
+		evt.DeletedAt = timestamppb.New(deletedAt.Time)
+	}
+
+	return evt
 }

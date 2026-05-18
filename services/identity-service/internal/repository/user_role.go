@@ -33,36 +33,50 @@ func (r *userRoleRepository) Add(ctx context.Context, userRole *entity.UserRole)
 func (r *userRoleRepository) GetActiveByUserID(ctx context.Context, userID uuid.UUID) (*entity.UserRole, error) {
 	var userRole entity.UserRole
 	err := r.db.WithContext(ctx).
-		Preload("Status").
 		Preload("Role").
 		First(&userRole, "user_id = ? AND is_active = true", userID).Error
 	if err != nil {
 		return nil, err
 	}
+
+	if err := r.loadStatus(ctx, &userRole); err != nil {
+		return nil, err
+	}
+
 	return &userRole, nil
 }
 
 func (r *userRoleRepository) GetByUserIDAndRoleID(ctx context.Context, userID, roleID uuid.UUID) (*entity.UserRole, error) {
 	var userRole entity.UserRole
 	err := r.db.WithContext(ctx).
-		Preload("Status").
 		Preload("Role").
 		First(&userRole, "user_id = ? AND role_id = ?", userID, roleID).Error
 	if err != nil {
 		return nil, err
 	}
+
+	if err := r.loadStatus(ctx, &userRole); err != nil {
+		return nil, err
+	}
+
 	return &userRole, nil
 }
 
 func (r *userRoleRepository) ListByUserID(ctx context.Context, userID uuid.UUID) ([]*entity.UserRole, error) {
 	var userRoles []*entity.UserRole
 	err := r.db.WithContext(ctx).
-		Preload("Status").
 		Preload("Role").
 		Find(&userRoles, "user_id = ?", userID).Error
 	if err != nil {
 		return nil, err
 	}
+
+	for i := range userRoles {
+		if err := r.loadStatus(ctx, userRoles[i]); err != nil {
+			return nil, err
+		}
+	}
+
 	return userRoles, nil
 }
 
@@ -72,13 +86,11 @@ func (r *userRoleRepository) Update(ctx context.Context, userRole *entity.UserRo
 
 func (r *userRoleRepository) SetActive(ctx context.Context, userID, roleID uuid.UUID) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// deactivate semua role user ini dulu
 		if err := tx.Model(&entity.UserRole{}).
 			Where("user_id = ?", userID).
 			Update("is_active", false).Error; err != nil {
 			return err
 		}
-		// activate yang dipilih
 		if err := tx.Model(&entity.UserRole{}).
 			Where("user_id = ? AND role_id = ?", userID, roleID).
 			Update("is_active", true).Error; err != nil {
@@ -92,4 +104,19 @@ func (r *userRoleRepository) Delete(ctx context.Context, userID, roleID uuid.UUI
 	return r.db.WithContext(ctx).
 		Where("user_id = ? AND role_id = ?", userID, roleID).
 		Delete(&entity.UserRole{}).Error
+}
+
+func (r *userRoleRepository) loadStatus(ctx context.Context, userRole *entity.UserRole) error {
+	var statusCache entity.StatusCache
+	err := r.db.WithContext(ctx).
+		Table("status_caches").
+		Where("id = ?", userRole.StatusID).
+		First(&statusCache).Error
+
+	if err != nil {
+		return err
+	}
+
+	userRole.Status = statusCache
+	return nil
 }

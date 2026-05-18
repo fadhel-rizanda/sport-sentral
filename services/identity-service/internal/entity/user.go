@@ -20,8 +20,8 @@ type User struct {
 	DeletedAt      gorm.DeletedAt `gorm:"index"`
 	VerifiedAt     *time.Time
 
-	Status    Status     `gorm:"foreignKey:StatusID"`
-	UserRoles []UserRole `gorm:"foreignKey:UserID"`
+	Status    StatusCache `gorm:"-"`
+	UserRoles []UserRole  `gorm:"foreignKey:UserID"`
 }
 
 func (u *User) BeforeCreate(_ *gorm.DB) error {
@@ -33,19 +33,6 @@ func (u *User) BeforeCreate(_ *gorm.DB) error {
 		u.ID = id
 	}
 	return nil
-}
-
-func NewUser(email, username, fullName, password string) (*User, error) {
-	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-	return &User{
-		Email:          email,
-		Username:       username,
-		FullName:       fullName,
-		HashedPassword: string(hashed),
-	}, nil
 }
 
 func (u *User) CheckPassword(plain string) bool {

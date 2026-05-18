@@ -5,6 +5,7 @@ package user.v1;
 option go_package = "microservice-golang/gen/user/v1;userv1";
 
 import "buf/validate/validate.proto";
+import "common/v1/common.proto";
 
 // ─── Messages ─────────────────────────────────────────────────────────────────
 
@@ -14,9 +15,8 @@ message UserInternal {
   string username        = 3;
   string full_name       = 4;
   string hashed_password = 5;
-  string status          = 6;
-  string active_profile  = 7;
-  repeated string role_ids = 8;
+  common.v1.StatusSimple status = 6;
+  common.v1.RoleSimple active_role = 7;
 }
 
 // ─── Requests/Responses ───────────────────────────────────────────────────────

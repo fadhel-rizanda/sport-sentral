@@ -5,8 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/timestamppb"
-
 	userv1 "microservice-golang/gen/user/v1"
 	"microservice-golang/services/identity-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
@@ -26,12 +24,17 @@ func (h *UserHandler) RegisterGRPC(s *grpc.Server) {
 }
 
 func (h *UserHandler) CreateUser(ctx context.Context, req *userv1.CreateUserRequest) (*userv1.CreateUserResponse, error) {
+	roleId, err := uuid.Parse(req.RoleId)
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid role id"))
+	}
+
 	res, err := h.uc.Create(ctx, usecase.CreateUserRequest{
 		Email:    req.Email,
 		Username: req.Username,
 		FullName: req.FullName,
 		Password: req.Password,
-		RoleName: req.RoleName,
+		RoleID:   roleId,
 	})
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
@@ -78,7 +81,10 @@ func (h *UserHandler) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequ
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid user id"))
 	}
 
-	if err := h.uc.SoftDelete(ctx, id); err != nil {
+	if err := h.uc.SoftDelete(ctx, usecase.DeleteUserRequest{
+		ID:       id,
+		Password: req.Password,
+	}); err != nil {
 		return nil, apperr.ToGRPC(err)
 	}
 
@@ -86,7 +92,7 @@ func (h *UserHandler) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequ
 }
 
 func (h *UserHandler) ListUsers(ctx context.Context, req *userv1.ListUsersRequest) (*userv1.ListUsersResponse, error) {
-	res, err := h.uc.List(ctx, usecase.ListUsersRequest{
+	res, err := h.uc.List(ctx, usecase.ListRequest{
 		Page:     int(req.Page),
 		PageSize: int(req.PageSize),
 	})
@@ -135,34 +141,16 @@ func (h *UserHandler) ResetPassword(ctx context.Context, req *userv1.ResetPasswo
 	return &userv1.ResetPasswordResponse{}, nil
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-func toProtoUser(u *usecase.UserResponse) *userv1.User {
-	var verifiedAt *timestamppb.Timestamp
-	if u.VerifiedAt != nil {
-		verifiedAt = timestamppb.New(*u.VerifiedAt)
+func (h *UserHandler) AssignRolesToUser(ctx context.Context, req *userv1.AssignRolesToUserRequest) (*userv1.AssignRolesToUserResponse, error) {
+	if err := h.uc.AssignRolesToUser(ctx, req.UserId, req.RoleIds); err != nil {
+		return nil, apperr.ToGRPC(err)
 	}
+	return &userv1.AssignRolesToUserResponse{}, nil
+}
 
-	profiles := make([]*userv1.UserProfile, len(u.Profiles))
-	for i, p := range u.Profiles {
-		profiles[i] = &userv1.UserProfile{
-			RoleId:   p.RoleID.String(),
-			RoleName: p.RoleName,
-			IsActive: p.IsActive,
-			Status:   p.Status,
-		}
+func (h *UserHandler) RemoveRolesFromUser(ctx context.Context, req *userv1.RemoveRolesFromUserRequest) (*userv1.RemoveRolesFromUserResponse, error) {
+	if err := h.uc.RemoveRolesFromUser(ctx, req.UserId, req.RoleIds); err != nil {
+		return nil, apperr.ToGRPC(err)
 	}
-
-	return &userv1.User{
-		Id:            u.ID.String(),
-		Email:         u.Email,
-		Username:      u.Username,
-		FullName:      u.FullName,
-		Status:        u.Status,
-		ActiveProfile: u.ActiveProfile,
-		Profiles:      profiles,
-		CreatedAt:     timestamppb.New(u.CreatedAt),
-		UpdatedAt:     timestamppb.New(u.UpdatedAt),
-		VerifiedAt:    verifiedAt,
-	}
+	return &userv1.RemoveRolesFromUserResponse{}, nil
 }

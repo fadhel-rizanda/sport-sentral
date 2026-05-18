@@ -16,10 +16,11 @@ grpcurl -plaintext -d '{
 
 ```go
 grpcurl -plaintext -d '{
-    "email": "test@example.com",
+    "email": "test2@example.com",
     "username": "testuser2",
     "full_name": "Test User 2",
-    "password": "password123"
+    "password": "password123",
+    "role_id": "e3bce012-6d45-47ba-afe2-89ff4c2ec5e2"
 }' localhost:50051 user.v1.UserService/CreateUser
 ```
 

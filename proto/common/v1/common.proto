@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package common.v1;
+
+option go_package = "microservice-golang/gen/common/v1;commonv1";
+
+message UserSimple {
+  string id        = 1;
+  string email     = 2;
+  string username  = 3;
+  string full_name = 4;
+  repeated string role_ids = 5;
+}
+
+message StatusSimple {
+  string id   = 1;
+  string type = 2;
+  string name = 3;
+  string slug = 4;
+}
+
+message PermissionSimple {
+  string id       = 1;
+  string resource = 2;
+  string action   = 3;
+  string slug     = 4;
+}
+
+message RoleSimple {
+  string id   = 1;
+  string name = 2;
+  string slug = 3;
+  repeated PermissionSimple permissions = 4;
+  repeated string permission_ids = 5;
+}
+
+message TagSimple {
+  string id   = 1;
+  string type = 2;
+  string name = 3;
+  string slug = 4;
+}

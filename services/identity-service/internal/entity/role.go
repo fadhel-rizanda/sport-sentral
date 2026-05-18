@@ -3,6 +3,7 @@ package entity
 import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"microservice-golang/shared/pkg/constants"
 	"time"
 )
 
@@ -10,9 +11,18 @@ type Role struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name        string    `gorm:"uniqueIndex;not null"`
 	Description string    `gorm:"not null;default:''"`
+	Slug        string    `gorm:"not null;unique"`
+
+	CreatedByID uuid.UUID  `gorm:"type:uuid;not null"`
+	UpdatedByID uuid.UUID  `gorm:"type:uuid;not null"`
+	DeletedByID *uuid.UUID `gorm:"type:uuid"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
+
+	CreatedBy User  `gorm:"foreignKey:CreatedByID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+	UpdatedBy User  `gorm:"foreignKey:UpdatedByID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+	DeletedBy *User `gorm:"foreignKey:DeletedByID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 
 	Permissions []*Permission `gorm:"many2many:role_permissions;"`
 }
@@ -28,37 +38,21 @@ func (r *Role) BeforeCreate(_ *gorm.DB) error {
 	return nil
 }
 
-func NewRole(name, description string) *Role {
-	return &Role{
-		Name:        name,
-		Description: description,
-	}
-}
-
-const (
-	RoleAthlete       = "athlete"
-	RoleScout         = "scout"
-	RoleCourtOwner    = "court_owner"
-	RoleAcademyAdmin  = "academy_admin"
-	RoleRegulator     = "regulator"
-	RolePlatformAdmin = "platform_admin"
-)
-
 var RolesInstantActive = map[string]bool{
-	RoleAthlete: true,
-	RoleScout:   true,
+	constants.RoleAthlete: true,
+	constants.RoleScout:   true,
 }
 
 var RolesPendingApproval = map[string]bool{
-	RoleCourtOwner:   true,
-	RoleAcademyAdmin: true,
+	constants.RoleCourtOwner:   true,
+	constants.RoleAcademyAdmin: true,
 }
 
 var RolesAdminAssignOnly = map[string]bool{
-	RoleRegulator:     true,
-	RolePlatformAdmin: true,
+	constants.RoleRegulator:     true,
+	constants.RolePlatformAdmin: true,
 }
 
 var RolesExpandableFrom = map[string][]string{
-	RoleAthlete: {RoleScout, RoleCourtOwner, RoleAcademyAdmin},
+	constants.RoleAthlete: {constants.RoleScout, constants.RoleCourtOwner, constants.RoleAcademyAdmin},
 }

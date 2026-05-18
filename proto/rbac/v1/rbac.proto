@@ -6,39 +6,42 @@ option go_package = "microservice-golang/gen/rbac/v1;rbacv1";
 
 import "buf/validate/validate.proto";
 
-// ─── Profile Requests/Responses ───────────────────────────────────────────────
+// ─── Requests ─────────────────────────────────────────────────────────────────
 
 message ApplyProfileRequest {
-  string user_id   = 1 [(buf.validate.field).string.uuid = true];
-  string role_name = 2 [(buf.validate.field).string.min_len = 1];
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  string role_id = 2 [(buf.validate.field).string.uuid = true];
 }
+
+
+message ToggleProfileRequest {
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  string role_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message ApproveProfileRequest {
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  string role_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message RejectProfileRequest {
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  string role_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+// ─── Responses ────────────────────────────────────────────────────────────────
 
 message ApplyProfileResponse {}
 
-message ToggleProfileRequest {
-  string user_id   = 1 [(buf.validate.field).string.uuid = true];
-  string role_name = 2 [(buf.validate.field).string.min_len = 1];
-}
-
 message ToggleProfileResponse {}
 
-message ApproveProfileRequest {
-  string user_id   = 1 [(buf.validate.field).string.uuid = true];
-  string role_name = 2 [(buf.validate.field).string.min_len = 1];
-}
-
 message ApproveProfileResponse {}
-
-message RejectProfileRequest {
-  string user_id   = 1 [(buf.validate.field).string.uuid = true];
-  string role_name = 2 [(buf.validate.field).string.min_len = 1];
-}
 
 message RejectProfileResponse {}
 
 // ─── Service ──────────────────────────────────────────────────────────────────
 
-service RbacService {
+service RBACService {
   rpc ApplyProfile   (ApplyProfileRequest)   returns (ApplyProfileResponse);
   rpc ToggleProfile  (ToggleProfileRequest)  returns (ToggleProfileResponse);
   rpc ApproveProfile (ApproveProfileRequest) returns (ApproveProfileResponse);

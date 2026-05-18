@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package meta.v1;
+
+option go_package = "microservice-golang/gen/meta/v1;metav1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ─── Enum ─────────────────────────────────────────────────────────────────────
+enum StatusEventType {
+  STATUS_EVENT_TYPE_UNSPECIFIED = 0;
+  STATUS_EVENT_TYPE_CREATED     = 1;
+  STATUS_EVENT_TYPE_UPDATED     = 2;
+  STATUS_EVENT_TYPE_DELETED     = 3;
+}
+
+// ─── Event envelope ───────────────────────────────────────────────────────────
+message StatusEvent {
+  string event_id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+
+  StatusEventType event_type = 2 [
+    (buf.validate.field).enum.defined_only = true
+  ];
+
+  google.protobuf.Timestamp occurred_at = 3 [
+    (buf.validate.field).required = true
+  ];
+
+  // The ID of the status associated with this event
+  string status_id = 4 [
+    (buf.validate.field).string.uuid = true
+  ];
+
+  string status_type = 5 [
+    (buf.validate.field).string.min_len = 1
+  ];
+
+  string status_name = 6 [
+    (buf.validate.field).string.min_len = 1
+  ];
+
+  string status_slug = 7 [
+    (buf.validate.field).string.min_len = 1
+  ];
+
+  optional string deleted_by_id = 8 [
+    (buf.validate.field).string.uuid = true
+  ];
+}

@@ -6,14 +6,14 @@ option go_package = "microservice-golang/gen/user/v1;userv1";
 
 import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
+import "common/v1/common.proto";
 
 // ─── Messages ─────────────────────────────────────────────────────────────────
 
-message UserProfile {
-  string role_id   = 1;
-  string role_name = 2;
+message UserRole {
+  common.v1.RoleSimple role = 1;
+  common.v1.StatusSimple status = 2;
   bool   is_active = 3;
-  string status    = 4;
 }
 
 message User {
@@ -21,12 +21,12 @@ message User {
   string    email          = 2;
   string    username       = 3;
   string    full_name      = 4;
-  string    status         = 5;
-  string    active_profile = 6;
-  repeated UserProfile profiles = 7;
-  google.protobuf.Timestamp created_at  = 8;
-  google.protobuf.Timestamp updated_at  = 9;
-  google.protobuf.Timestamp verified_at = 10;
+  common.v1.StatusSimple status = 5;
+  repeated UserRole roles  = 6;
+  google.protobuf.Timestamp created_at  = 7;
+  google.protobuf.Timestamp updated_at  = 8;
+  google.protobuf.Timestamp verified_at = 9;
+  optional google.protobuf.Timestamp deleted_at = 10;
 }
 
 // ─── Requests ─────────────────────────────────────────────────────────────────
@@ -48,8 +48,8 @@ message CreateUserRequest {
     (buf.validate.field).string.min_len = 8,
     (buf.validate.field).string.max_len = 72
   ];
-  string role_name = 5 [
-    (buf.validate.field).string.min_len = 1
+  string role_id = 5 [
+    (buf.validate.field).string.uuid = true
   ];
 }
 
@@ -59,8 +59,9 @@ message GetUserRequest {
 
 message UpdateUserRequest {
   string id = 1 [(buf.validate.field).string.uuid = true];
-  string full_name = 2 [(buf.validate.field).string.max_len = 100];
-  string username = 3 [
+  optional string full_name = 2 [(buf.validate.field).string.max_len = 100];
+  optional string username = 3 [
+    (buf.validate.field).string.min_len = 3,
     (buf.validate.field).string.max_len = 50,
     (buf.validate.field).string.pattern = "^[a-zA-Z0-9_]*$"
   ];
@@ -68,6 +69,9 @@ message UpdateUserRequest {
 
 message DeleteUserRequest {
   string id = 1 [(buf.validate.field).string.uuid = true];
+  string password = 2 [
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message ListUsersRequest {
@@ -98,12 +102,45 @@ message ResetPasswordRequest {
   ];
 }
 
+message AssignRolesToUserRequest {
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  repeated string role_ids = 2 [
+    (buf.validate.field).repeated = {
+      min_items: 1,
+      max_items: 50,
+      items: { string: { uuid: true } }
+    }
+  ];
+}
+
+message RemoveRolesFromUserRequest {
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  repeated string role_ids = 2 [
+    (buf.validate.field).repeated = {
+      min_items: 1,
+      max_items: 50,
+      items: { string: { uuid: true } }
+    }
+  ];
+}
+
 // ─── Responses ────────────────────────────────────────────────────────────────
 
-message CreateUserResponse   { User user = 1; }
-message GetUserResponse      { User user = 1; }
-message UpdateUserResponse   { User user = 1; }
+message CreateUserResponse {
+  User user = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message UpdateUserResponse {
+  User user = 1;
+
+}
+
 message DeleteUserResponse   {}
+
 message ListUsersResponse {
   repeated User users = 1;
   int64 total     = 2;
@@ -111,9 +148,16 @@ message ListUsersResponse {
   int32 page_size = 4;
 }
 message SendVerifyEmailResponse {}
+
 message VerifyAccountResponse   {}
+
 message ForgotPasswordResponse  {}
+
 message ResetPasswordResponse   {}
+
+message AssignRolesToUserResponse {}
+
+message RemoveRolesFromUserResponse {}
 
 // ─── Service ──────────────────────────────────────────────────────────────────
 
@@ -127,4 +171,7 @@ service UserService {
   rpc VerifyAccount   (VerifyAccountRequest)   returns (VerifyAccountResponse);
   rpc ForgotPassword  (ForgotPasswordRequest)  returns (ForgotPasswordResponse);
   rpc ResetPassword   (ResetPasswordRequest)   returns (ResetPasswordResponse);
+
+  rpc AssignRolesToUser  (AssignRolesToUserRequest)  returns (AssignRolesToUserResponse);
+  rpc RemoveRolesFromUser(RemoveRolesFromUserRequest)returns (RemoveRolesFromUserResponse);
 }
