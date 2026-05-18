@@ -1,7 +1,7 @@
 # Nambah service baru
 ```
     cd services/gateway
-    go mod init microservice-golang/services/gateaway
+    go mod init microservice-golang/services/gateway
     cd ../..
     go work sync
     go work use -r .

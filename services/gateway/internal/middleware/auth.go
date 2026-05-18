@@ -40,7 +40,7 @@ func Auth(authClient authv1.AuthServiceClient) fiber.Handler {
 		c.Locals(ContextEmail, resp.User.Email)
 		c.Locals(ContextUsername, resp.User.Username)
 		c.Locals(ContextActiveRoleName, resp.ActiveRole.Name)
-		c.Locals(ContextRoleIDs, resp.ActiveRole.PermissionIds)
+		c.Locals(ContextRoleIDs, resp.User.RoleIds)
 
 		return c.Next()
 	}
