@@ -48,11 +48,12 @@ func (uc *statusUseCase) Create(ctx context.Context, req CreateStatusRequest) (*
 		Name:        req.Name,
 		CreatedByID: req.CreatedByID,
 		UpdatedByID: req.CreatedByID,
+		Slug:        req.Slug,
 	}
 
 	if err := uc.repo.Create(ctx, status); err != nil {
-		if postgres.IsUniqueConstraint(err, "statuses_type_name_key") {
-			return nil, apperr.Conflict("name")
+		if postgres.IsUniqueConstraint(err, "uni_statuses_slug") {
+			return nil, apperr.Conflict("slug")
 		}
 		return nil, apperr.Internal(err)
 	}
@@ -125,13 +126,16 @@ func (uc *statusUseCase) Update(ctx context.Context, id uuid.UUID, req UpdateSta
 	if req.Type != nil {
 		status.Type = *req.Type
 	}
-	if req.Name != nil || req.Type != nil {
+	if req.Slug != nil {
+		status.Slug = *req.Slug
+	}
+	if req.Name != nil || req.Type != nil || req.Slug != nil {
 		status.UpdatedByID = req.UpdatedByID
 	}
 
 	if err := uc.repo.Update(ctx, *status); err != nil {
-		if postgres.IsUniqueConstraint(err, "statuses_type_name_key") {
-			return nil, apperr.Conflict("name")
+		if postgres.IsUniqueConstraint(err, "uni_statuses_slug") {
+			return nil, apperr.Conflict("slug")
 		}
 		return nil, apperr.Internal(err)
 	}
@@ -210,6 +214,7 @@ func (uc *statusUseCase) buildStatusEvent(
 		StatusId:   s.ID.String(),
 		StatusType: s.Type,
 		StatusName: s.Name,
+		StatusSlug: s.Slug,
 	}
 
 	if s.DeletedByID != nil {

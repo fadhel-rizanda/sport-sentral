@@ -29,7 +29,7 @@ func NewStatusSyncUseCase(
 }
 
 func (uc *StatusSyncUseCase) upsertCache(ctx context.Context, evt *metav1.StatusEvent) error {
-	if evt.StatusId == "" || evt.StatusName == "" {
+	if evt.StatusId == "" || evt.StatusName == "" || evt.StatusSlug == "" {
 		uc.logger.Warn("incomplete event – skipping", zap.String("event_id", evt.EventId))
 		return nil
 	}
@@ -47,6 +47,7 @@ func (uc *StatusSyncUseCase) upsertCache(ctx context.Context, evt *metav1.Status
 		ID:   id,
 		Type: evt.StatusType,
 		Name: evt.StatusName,
+		Slug: evt.StatusSlug,
 	}); err != nil {
 		return apperr.Internal(fmt.Errorf("upsert status cache: %w", err))
 	}

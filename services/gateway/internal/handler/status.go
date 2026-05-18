@@ -6,7 +6,6 @@ import (
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/services/gateway/internal/request"
 	"microservice-golang/services/gateway/internal/response"
-	"time"
 )
 
 type StatusHandler struct {
@@ -27,8 +26,8 @@ func (h *StatusHandler) Routes(router fiber.Router, auth fiber.Handler, admin ..
 	adminMiddlewares := append([]fiber.Handler{auth}, admin...)
 	adminGroup := router.Group("/admin/statuses", adminMiddlewares...)
 	adminGroup.Post("/", h.CreateStatus)
-	adminGroup.Put("/", h.UpdateStatus)
-	adminGroup.Delete("/", h.DeleteStatus)
+	adminGroup.Put("/:id", h.UpdateStatus)
+	adminGroup.Delete("/:id", h.DeleteStatus)
 }
 
 func (h *StatusHandler) CreateStatus(c *fiber.Ctx) error {
@@ -37,6 +36,7 @@ func (h *StatusHandler) CreateStatus(c *fiber.Ctx) error {
 	var body struct {
 		Type string `json:"type"`
 		Name string `json:"name"`
+		Slug string `json:"slug"`
 	}
 	if err := request.Parse(c, &body); err != nil {
 		return err
@@ -46,6 +46,7 @@ func (h *StatusHandler) CreateStatus(c *fiber.Ctx) error {
 		Type:        body.Type,
 		Name:        body.Name,
 		CreatedById: userID,
+		Slug:        body.Slug,
 	})
 	if err != nil {
 		return err
@@ -55,11 +56,12 @@ func (h *StatusHandler) CreateStatus(c *fiber.Ctx) error {
 }
 
 func (h *StatusHandler) UpdateStatus(c *fiber.Ctx) error {
-	statusID := c.Query("id")
+	statusID := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
 	var body struct {
 		Type *string `json:"type"`
 		Name *string `json:"name"`
+		Slug *string `json:"slug"`
 	}
 	if err := request.Parse(c, &body); err != nil {
 		return err
@@ -70,6 +72,7 @@ func (h *StatusHandler) UpdateStatus(c *fiber.Ctx) error {
 		Type:        body.Type,
 		Name:        body.Name,
 		UpdatedById: userID,
+		Slug:        body.Slug,
 	})
 	if err != nil {
 		return err
@@ -78,8 +81,8 @@ func (h *StatusHandler) UpdateStatus(c *fiber.Ctx) error {
 }
 
 func (h *StatusHandler) DeleteStatus(c *fiber.Ctx) error {
-	statusID := c.Query("id")
-	isPermanent := c.QueryBool("permanent")
+	statusID := c.Params("id")
+	isPermanent := c.QueryBool("permanent", false)
 	userID := c.Locals(middleware.ContextUserID).(string)
 	_, err := h.statusClient.DeleteStatus(c.Context(), &metav1.DeleteStatusRequest{
 		Id:          statusID,
@@ -108,10 +111,14 @@ func (h *StatusHandler) ListStatuses(c *fiber.Ctx) error {
 	page := c.QueryInt("page", 1)
 	pageSize := c.QueryInt("pageSize", 10)
 	statusType := c.Query("type", "")
+	var statusTypePtr *string
+	if statusType != "" {
+		statusTypePtr = &statusType
+	}
 
 	resp, err := h.statusClient.ListStatuses(c.Context(), &metav1.ListStatusesRequest{
 		PageSize: int32(pageSize),
-		Type:     &statusType,
+		Type:     statusTypePtr,
 		Page:     int32(page),
 	})
 	if err != nil {
@@ -128,36 +135,4 @@ func (h *StatusHandler) ListStatuses(c *fiber.Ctx) error {
 		PageSize: int(resp.PageSize),
 		Total:    resp.Total,
 	})
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-type StatusResponse struct {
-	ID          string  `json:"id"`
-	Type        string  `json:"type"`
-	Name        string  `json:"name"`
-	CreatedByID string  `json:"created_by_id"`
-	UpdatedByID string  `json:"updated_by_id"`
-	DeletedByID *string `json:"deleted_by_id"`
-	CreatedAt   string  `json:"created_at"`
-	UpdatedAt   string  `json:"updated_at"`
-	DeletedAt   *string `json:"deleted_at"`
-}
-
-func toStatusResponse(status *metav1.Status) StatusResponse {
-	res := StatusResponse{
-		ID:          status.Id,
-		Type:        status.Type,
-		Name:        status.Name,
-		CreatedByID: status.CreatedById,
-		UpdatedByID: status.UpdatedById,
-		CreatedAt:   status.CreatedAt.AsTime().UTC().Format(time.RFC3339),
-		UpdatedAt:   status.UpdatedAt.AsTime().UTC().Format(time.RFC3339),
-	}
-	if status.DeletedAt != nil {
-		formattedDate := status.DeletedAt.AsTime().Format(time.RFC3339)
-		res.DeletedAt = &formattedDate
-		res.DeletedByID = status.DeletedById
-	}
-	return res
 }

@@ -72,6 +72,8 @@ func main() {
 	profileHandler := handler.NewProfileHandler(identityClient.RBAC)
 	statusHandler := handler.NewStatusHandler(metaClient.Status)
 	tagHandler := handler.NewTagHandler(metaClient.Tag)
+	roleHandler := handler.NewRoleHandler(identityClient.Role)
+	permissionHandler := handler.NewPermissionHandler(identityClient.Permission)
 
 	// ── Fiber ─────────────────────────────────────────────────────────────────
 	app := fiber.New(fiber.Config{
@@ -93,6 +95,8 @@ func main() {
 		identityClient.Auth,
 		statusHandler,
 		tagHandler,
+		roleHandler,
+		permissionHandler,
 	)
 
 	// ── Start ─────────────────────────────────────────────────────────────────

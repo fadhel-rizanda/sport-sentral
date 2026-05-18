@@ -6,6 +6,7 @@ option go_package = "microservice-golang/gen/meta/v1;metav1";
 
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
 
 // ─── Messages ─────────────────────────────────────────────────────────────────
 
@@ -13,25 +14,33 @@ message Status {
   string id      = 1;
   string type    = 2;
   string name    = 3;
-  string created_by_id = 4;
-  string updated_by_id = 5;
-  optional string deleted_by_id = 6;
+  common.v1.UserSimple created_by = 4;
+  common.v1.UserSimple updated_by = 5;
+  optional common.v1.UserSimple deleted_by = 6;
   google.protobuf.Timestamp created_at = 7;
   google.protobuf.Timestamp updated_at = 8;
   optional google.protobuf.Timestamp deleted_at = 9;
+  string slug = 10;
 }
 
 // ─── Requests ────────────────────────────────────────────────────────────────
 
 message CreateStatusRequest {
   string type = 1 [
-    (buf.validate.field).string.min_len = 1
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 50
   ];
   string name = 2 [
-    (buf.validate.field).string.min_len = 1
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 50
   ];
   string created_by_id = 3 [
     (buf.validate.field).string.uuid = true
+  ];
+  string slug = 4 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 100,
+    (buf.validate.field).string.pattern = "^[a-z0-9-]+$"
   ];
 }
 
@@ -66,13 +75,20 @@ message UpdateStatusRequest {
     (buf.validate.field).string.uuid = true
   ];
   optional string type = 2 [
-    (buf.validate.field).string.min_len = 1
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 50
   ];
   optional string name = 3 [
-    (buf.validate.field).string.min_len = 1
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 50
   ];
   string updated_by_id = 4 [
     (buf.validate.field).string.uuid = true
+  ];
+  optional string slug = 5 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 100,
+    (buf.validate.field).string.pattern = "^[a-z0-9-]+$"
   ];
 }
 

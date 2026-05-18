@@ -9,24 +9,24 @@ import "buf/validate/validate.proto";
 // ─── Requests ─────────────────────────────────────────────────────────────────
 
 message ApplyProfileRequest {
-  string user_id   = 1 [(buf.validate.field).string.uuid = true];
-  string role_name = 2 [(buf.validate.field).string.min_len = 1];
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  string role_id = 2 [(buf.validate.field).string.uuid = true];
 }
 
 
 message ToggleProfileRequest {
-  string user_id   = 1 [(buf.validate.field).string.uuid = true];
-  string role_name = 2 [(buf.validate.field).string.min_len = 1];
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  string role_id = 2 [(buf.validate.field).string.uuid = true];
 }
 
 message ApproveProfileRequest {
-  string user_id   = 1 [(buf.validate.field).string.uuid = true];
-  string role_name = 2 [(buf.validate.field).string.min_len = 1];
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  string role_id = 2 [(buf.validate.field).string.uuid = true];
 }
 
 message RejectProfileRequest {
-  string user_id   = 1 [(buf.validate.field).string.uuid = true];
-  string role_name = 2 [(buf.validate.field).string.min_len = 1];
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  string role_id = 2 [(buf.validate.field).string.uuid = true];
 }
 
 // ─── Responses ────────────────────────────────────────────────────────────────

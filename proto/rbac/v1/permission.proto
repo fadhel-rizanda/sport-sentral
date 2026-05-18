@@ -6,6 +6,7 @@ option go_package = "microservice-golang/gen/rbac/v1;rbacv1";
 
 import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
+import "common/v1/common.proto";
 
 // ─── Message ──────────────────────────────────────────────────────────────────
 
@@ -14,12 +15,13 @@ message Permission {
   string resource    = 2;
   string action      = 3;
   string description = 4;
-  string created_by_id = 5;
-  string updated_by_id = 6;
-  optional string deleted_by_id = 7;
+  common.v1.UserSimple created_by = 5;
+  common.v1.UserSimple updated_by = 6;
+  optional common.v1.UserSimple deleted_by = 7;
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp updated_at = 9;
   optional google.protobuf.Timestamp deleted_at = 10;
+  string slug = 11;
 }
 
 // ─── Requests ─────────────────────────────────────────────────────────────────
@@ -34,31 +36,39 @@ message CreatePermissionRequest {
     (buf.validate.field).string.max_len = 50
   ];
   string description = 3 [
+    (buf.validate.field).string.min_len = 1,
     (buf.validate.field).string.max_len = 255
   ];
   string created_by_id = 4 [
     (buf.validate.field).string.uuid = true
   ];
+  string slug = 5 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 100,
+    (buf.validate.field).string.pattern = "^[a-z0-9-]+$"
+  ];
 }
 
 message UpdatePermissionRequest {
   string id = 1 [(buf.validate.field).string.uuid = true];
-  optional string name = 2 [
-    (buf.validate.field).string.max_len = 50
-  ];
-  optional string resource = 3 [
+  optional string resource = 2 [
     (buf.validate.field).string.min_len = 1,
     (buf.validate.field).string.max_len = 50
   ];
-  optional string action = 4[
+  optional string action = 3 [
     (buf.validate.field).string.min_len = 1,
     (buf.validate.field).string.max_len = 50
   ];
-  optional string description = 5 [
+  optional string description = 4 [
     (buf.validate.field).string.max_len = 255
   ];
-  string updated_by_id = 6 [
+  string updated_by_id = 5 [
     (buf.validate.field).string.uuid = true
+  ];
+  optional string slug = 6 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 100,
+    (buf.validate.field).string.pattern = "^[a-z0-9-]+$"
   ];
 }
 

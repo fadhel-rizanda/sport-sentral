@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	rbacv1 "microservice-golang/gen/rbac/v1"
 	"microservice-golang/services/identity-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
@@ -33,6 +32,7 @@ func (h *PermissionHandler) CreatePermission(ctx context.Context, req *rbacv1.Cr
 		Resource:    req.GetResource(),
 		Description: req.GetDescription(),
 		CreatedByID: createdBy,
+		Slug:        req.Slug,
 	})
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
@@ -71,6 +71,7 @@ func (h *PermissionHandler) UpdatePermission(ctx context.Context, req *rbacv1.Up
 		Resource:    req.Resource,
 		Description: req.Description,
 		UpdatedByID: updatedBy,
+		Slug:        req.Slug,
 	})
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
@@ -138,27 +139,4 @@ func (h *PermissionHandler) CheckPermission(ctx context.Context, req *rbacv1.Che
 		return nil, apperr.ToGRPC(err)
 	}
 	return &rbacv1.CheckPermissionResponse{Allowed: allowed}, nil
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-func toProtoPermission(r *usecase.PermissionResponse) *rbacv1.Permission {
-	createdAt := timestamppb.New(r.CreatedAt)
-	updatedAt := timestamppb.New(r.UpdatedAt)
-	res := &rbacv1.Permission{
-		Id:          r.ID.String(),
-		Action:      r.Action,
-		Resource:    r.Resource,
-		Description: r.Description,
-		CreatedById: r.CreatedByID.String(),
-		UpdatedById: r.UpdatedByID.String(),
-		CreatedAt:   createdAt,
-		UpdatedAt:   updatedAt,
-	}
-	if r.DeletedAt != nil {
-		deletedByID := r.DeletedByID.String()
-		res.DeletedAt = timestamppb.New(*r.DeletedAt)
-		res.DeletedById = &deletedByID
-	}
-	return res
 }

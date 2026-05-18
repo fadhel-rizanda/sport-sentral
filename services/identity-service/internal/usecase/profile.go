@@ -53,6 +53,11 @@ func (uc *profileUseCase) ApplyProfile(ctx context.Context, req ApplyProfileRequ
 		return apperr.Internal(err)
 	}
 
+	role, err := uc.roleRepo.GetByID(ctx, req.RoleID)
+	if err != nil {
+		return apperr.NotFound("role")
+	}
+
 	allowedExpansions, canExpand := entity.RolesExpandableFrom[activeRole.Role.Name]
 	if !canExpand {
 		return apperr.Forbidden("your role cannot apply for additional profiles")
@@ -61,7 +66,7 @@ func (uc *profileUseCase) ApplyProfile(ctx context.Context, req ApplyProfileRequ
 	// cek apakah role target allowed
 	allowed := false
 	for _, r := range allowedExpansions {
-		if r == req.RoleName {
+		if r == role.Name {
 			allowed = true
 			break
 		}
@@ -71,7 +76,7 @@ func (uc *profileUseCase) ApplyProfile(ctx context.Context, req ApplyProfileRequ
 	}
 
 	// cek sudah punya role ini belum
-	targetRole, err := uc.roleRepo.GetByName(ctx, req.RoleName)
+	targetRole, err := uc.roleRepo.GetByID(ctx, req.RoleID)
 	if err != nil {
 		return apperr.NotFound("role")
 	}
@@ -86,7 +91,7 @@ func (uc *profileUseCase) ApplyProfile(ctx context.Context, req ApplyProfileRequ
 
 	// scout → langsung active, lainnya → pending
 	statusName := constants.StatusPending
-	if req.RoleName == constants.RoleScout {
+	if role.Name == constants.RoleScout {
 		statusName = constants.StatusActive
 	}
 
@@ -114,7 +119,7 @@ func (uc *profileUseCase) ToggleProfile(ctx context.Context, req ToggleProfileRe
 		return apperr.Internal(err)
 	}
 
-	targetRole, err := uc.roleRepo.GetByName(ctx, req.RoleName)
+	targetRole, err := uc.roleRepo.GetByID(ctx, req.RoleID)
 	if err != nil {
 		return apperr.NotFound("role")
 	}
@@ -133,7 +138,7 @@ func (uc *profileUseCase) ToggleProfile(ctx context.Context, req ToggleProfileRe
 }
 
 func (uc *profileUseCase) ApproveProfile(ctx context.Context, req ApproveProfileRequest) error {
-	targetRole, err := uc.roleRepo.GetByName(ctx, req.RoleName)
+	targetRole, err := uc.roleRepo.GetByID(ctx, req.RoleID)
 	if err != nil {
 		return apperr.NotFound("role")
 	}
@@ -157,7 +162,7 @@ func (uc *profileUseCase) ApproveProfile(ctx context.Context, req ApproveProfile
 }
 
 func (uc *profileUseCase) RejectProfile(ctx context.Context, req ApproveProfileRequest) error {
-	targetRole, err := uc.roleRepo.GetByName(ctx, req.RoleName)
+	targetRole, err := uc.roleRepo.GetByID(ctx, req.RoleID)
 	if err != nil {
 		return apperr.NotFound("role")
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	metav1 "microservice-golang/gen/meta/v1"
 	"microservice-golang/services/meta-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
@@ -70,7 +69,7 @@ func (h *TagHandler) GetTagByID(ctx context.Context, req *metav1.GetTagByIDReque
 	}, nil
 }
 
-func (h *TagHandler) ListTag(ctx context.Context, req *metav1.ListTagsRequest) (*metav1.ListTagsResponse, error) {
+func (h *TagHandler) ListTags(ctx context.Context, req *metav1.ListTagsRequest) (*metav1.ListTagsResponse, error) {
 	res, err := h.uc.List(ctx, usecase.ListTagsRequest{
 		Type:     req.Type,
 		Page:     int(req.Page),
@@ -141,25 +140,4 @@ func (h *TagHandler) DeleteTag(ctx context.Context, req *metav1.DeleteTagRequest
 		return nil, apperr.ToGRPC(err)
 	}
 	return &metav1.DeleteTagResponse{}, nil
-}
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-func toProtoTag(t *usecase.TagResponse) *metav1.Tag {
-	res := &metav1.Tag{
-		Id:          t.ID.String(),
-		Type:        t.Type,
-		Name:        t.Name,
-		Slug:        t.Slug,
-		CreatedById: t.CreatedByID.String(),
-		UpdatedById: t.UpdatedByID.String(),
-		CreatedAt:   timestamppb.New(t.CreatedAt),
-		UpdatedAt:   timestamppb.New(t.UpdatedAt),
-	}
-	if t.DeletedAt != nil {
-		deletedByID := t.DeletedByID.String()
-		res.DeletedAt = timestamppb.New(*t.DeletedAt)
-		res.DeletedById = &deletedByID
-	}
-	return res
 }

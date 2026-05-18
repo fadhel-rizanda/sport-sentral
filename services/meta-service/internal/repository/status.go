@@ -47,21 +47,119 @@ func (r *statusRepository) Create(ctx context.Context, e entity.Status) error {
 	return nil
 }
 
+type statusWithUsers struct {
+	entity.Status
+	CreatedByEmail    string `gorm:"column:created_by_email"`
+	CreatedByUsername string `gorm:"column:created_by_username"`
+	CreatedByFullName string `gorm:"column:created_by_full_name"`
+	UpdatedByEmail    string `gorm:"column:updated_by_email"`
+	UpdatedByUsername string `gorm:"column:updated_by_username"`
+	UpdatedByFullName string `gorm:"column:updated_by_full_name"`
+	DeletedByEmail    string `gorm:"column:deleted_by_email"`
+	DeletedByUsername string `gorm:"column:deleted_by_username"`
+	DeletedByFullName string `gorm:"column:deleted_by_full_name"`
+}
+
 func (r *statusRepository) GetByTypeAndName(ctx context.Context, statusType, name string) (*entity.Status, error) {
-	var status entity.Status
+	var row statusWithUsers
+
 	err := r.db.WithContext(ctx).
+		Table("statuses").
+		Select(`
+			statuses.*,
+			cb.email AS created_by_email,
+			cb.username AS created_by_username,
+			cb.full_name AS created_by_full_name,
+			ub.email AS updated_by_email,
+			ub.username AS updated_by_username,
+			ub.full_name AS updated_by_full_name,
+			db.email AS deleted_by_email,
+			db.username AS deleted_by_username,
+			db.full_name AS deleted_by_full_name
+		`).
+		Joins("LEFT JOIN user_caches cb ON cb.id = statuses.created_by_id").
+		Joins("LEFT JOIN user_caches ub ON ub.id = statuses.updated_by_id").
+		Joins("LEFT JOIN user_caches db ON db.id = statuses.deleted_by_id").
 		Where("type = ? AND name = ?", statusType, name).
-		First(&status).Error
+		First(&row).Error
+
 	if err != nil {
 		return nil, err
 	}
-	return &status, nil
+
+	row.Status.CreatedBy = &entity.UserCache{
+		ID:       row.CreatedByID,
+		Email:    row.CreatedByEmail,
+		Username: row.CreatedByUsername,
+		FullName: row.CreatedByFullName,
+	}
+	row.Status.UpdatedBy = &entity.UserCache{
+		ID:       row.UpdatedByID,
+		Email:    row.UpdatedByEmail,
+		Username: row.UpdatedByUsername,
+		FullName: row.UpdatedByFullName,
+	}
+	if row.DeletedByID != nil && row.DeletedByEmail != "" {
+		row.Status.DeletedBy = &entity.UserCache{
+			ID:       *row.DeletedByID,
+			Email:    row.DeletedByEmail,
+			Username: row.DeletedByUsername,
+			FullName: row.DeletedByFullName,
+		}
+	}
+
+	return &row.Status, nil
 }
 
 func (r *statusRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Status, error) {
-	var status entity.Status
-	err := r.db.WithContext(ctx).Where("id = ?", id).First(&status).Error
-	return &status, err
+	var row statusWithUsers
+
+	err := r.db.WithContext(ctx).
+		Table("statuses").
+		Select(`
+			statuses.*,
+			cb.email AS created_by_email,
+			cb.username AS created_by_username,
+			cb.full_name AS created_by_full_name,
+			ub.email AS updated_by_email,
+			ub.username AS updated_by_username,
+			ub.full_name AS updated_by_full_name,
+			db.email AS deleted_by_email,
+			db.username AS deleted_by_username,
+			db.full_name AS deleted_by_full_name
+		`).
+		Joins("LEFT JOIN user_caches cb ON cb.id = statuses.created_by_id").
+		Joins("LEFT JOIN user_caches ub ON ub.id = statuses.updated_by_id").
+		Joins("LEFT JOIN user_caches db ON db.id = statuses.deleted_by_id").
+		Where("statuses.id = ?", id).
+		First(&row).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	row.Status.CreatedBy = &entity.UserCache{
+		ID:       row.CreatedByID,
+		Email:    row.CreatedByEmail,
+		Username: row.CreatedByUsername,
+		FullName: row.CreatedByFullName,
+	}
+	row.Status.UpdatedBy = &entity.UserCache{
+		ID:       row.UpdatedByID,
+		Email:    row.UpdatedByEmail,
+		Username: row.UpdatedByUsername,
+		FullName: row.UpdatedByFullName,
+	}
+	if row.DeletedByID != nil && row.DeletedByEmail != "" {
+		row.Status.DeletedBy = &entity.UserCache{
+			ID:       *row.DeletedByID,
+			Email:    row.DeletedByEmail,
+			Username: row.DeletedByUsername,
+			FullName: row.DeletedByFullName,
+		}
+	}
+
+	return &row.Status, nil
 }
 
 func (r *statusRepository) List(ctx context.Context, statusType *string, page, pageSize int) ([]*entity.Status, int64, error) {
@@ -84,18 +182,66 @@ func (r *statusRepository) List(ctx context.Context, statusType *string, page, p
 	if err == nil && cached != "" {
 		var items []*entity.Status
 		if jsonErr := json.Unmarshal([]byte(cached), &items); jsonErr == nil {
-			return items, total, nil
+			if loadErr := r.loadUserCaches(ctx, items); loadErr == nil {
+				return items, total, nil
+			}
 		}
 	}
 
-	var items []*entity.Status
-	err = query.
+	listQuery := r.db.WithContext(ctx).
+		Table("statuses").
+		Select(`
+          statuses.*,
+          cb.email AS created_by_email,
+          cb.username AS created_by_username,
+          cb.full_name AS created_by_full_name,
+          ub.email AS updated_by_email,
+          ub.username AS updated_by_username,
+          ub.full_name AS updated_by_full_name,
+          db.email AS deleted_by_email,
+          db.username AS deleted_by_username,
+          db.full_name AS deleted_by_full_name
+       `).
+		Joins("LEFT JOIN user_caches cb ON cb.id = statuses.created_by_id").
+		Joins("LEFT JOIN user_caches ub ON ub.id = statuses.updated_by_id").
+		Joins("LEFT JOIN user_caches db ON db.id = statuses.deleted_by_id")
+
+	if statusType != nil && *statusType != "" {
+		listQuery = listQuery.Where("statuses.type = ?", *statusType)
+	}
+
+	var rows []statusWithUsers
+	err = listQuery.
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
-		Find(&items).Error
-
+		Find(&rows).Error
 	if err != nil {
 		return nil, 0, err
+	}
+
+	items := make([]*entity.Status, len(rows))
+	for i := range rows {
+		rows[i].Status.CreatedBy = &entity.UserCache{
+			ID:       rows[i].CreatedByID,
+			Email:    rows[i].CreatedByEmail,
+			Username: rows[i].CreatedByUsername,
+			FullName: rows[i].CreatedByFullName,
+		}
+		rows[i].Status.UpdatedBy = &entity.UserCache{
+			ID:       rows[i].UpdatedByID,
+			Email:    rows[i].UpdatedByEmail,
+			Username: rows[i].UpdatedByUsername,
+			FullName: rows[i].UpdatedByFullName,
+		}
+		if rows[i].DeletedByID != nil && rows[i].DeletedByEmail != "" {
+			rows[i].Status.DeletedBy = &entity.UserCache{
+				ID:       *rows[i].DeletedByID,
+				Email:    rows[i].DeletedByEmail,
+				Username: rows[i].DeletedByUsername,
+				FullName: rows[i].DeletedByFullName,
+			}
+		}
+		items[i] = &rows[i].Status
 	}
 
 	if data, jsonErr := json.Marshal(items); jsonErr == nil {
@@ -140,4 +286,56 @@ func (r *statusRepository) getTypeByID(ctx context.Context, id uuid.UUID) (strin
 		Where("id = ?", id).
 		First(&s).Error
 	return s.Type, err
+}
+
+func (r *statusRepository) loadUserCaches(ctx context.Context, statuses []*entity.Status) error {
+	if len(statuses) == 0 {
+		return nil
+	}
+
+	userIDMap := make(map[uuid.UUID]bool)
+	for _, status := range statuses {
+		userIDMap[status.CreatedByID] = true
+		userIDMap[status.UpdatedByID] = true
+		if status.DeletedByID != nil {
+			userIDMap[*status.DeletedByID] = true
+		}
+	}
+
+	userIDs := make([]uuid.UUID, 0, len(userIDMap))
+	for id := range userIDMap {
+		userIDs = append(userIDs, id)
+	}
+
+	if len(userIDs) == 0 {
+		return nil
+	}
+
+	var users []entity.UserCache
+	if err := r.db.WithContext(ctx).
+		Where("id IN ?", userIDs).
+		Find(&users).Error; err != nil {
+		return err
+	}
+
+	userMap := make(map[uuid.UUID]*entity.UserCache)
+	for i := range users {
+		userMap[users[i].ID] = &users[i]
+	}
+
+	for _, status := range statuses {
+		if user, ok := userMap[status.CreatedByID]; ok {
+			status.CreatedBy = user
+		}
+		if user, ok := userMap[status.UpdatedByID]; ok {
+			status.UpdatedBy = user
+		}
+		if status.DeletedByID != nil {
+			if user, ok := userMap[*status.DeletedByID]; ok {
+				status.DeletedBy = user
+			}
+		}
+	}
+
+	return nil
 }

@@ -25,7 +25,7 @@ const (
 type ApplyProfileRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	RoleName      string                 `protobuf:"bytes,2,opt,name=role_name,json=roleName,proto3" json:"role_name,omitempty"`
+	RoleId        string                 `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -67,9 +67,9 @@ func (x *ApplyProfileRequest) GetUserId() string {
 	return ""
 }
 
-func (x *ApplyProfileRequest) GetRoleName() string {
+func (x *ApplyProfileRequest) GetRoleId() string {
 	if x != nil {
-		return x.RoleName
+		return x.RoleId
 	}
 	return ""
 }
@@ -77,7 +77,7 @@ func (x *ApplyProfileRequest) GetRoleName() string {
 type ToggleProfileRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	RoleName      string                 `protobuf:"bytes,2,opt,name=role_name,json=roleName,proto3" json:"role_name,omitempty"`
+	RoleId        string                 `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -119,9 +119,9 @@ func (x *ToggleProfileRequest) GetUserId() string {
 	return ""
 }
 
-func (x *ToggleProfileRequest) GetRoleName() string {
+func (x *ToggleProfileRequest) GetRoleId() string {
 	if x != nil {
-		return x.RoleName
+		return x.RoleId
 	}
 	return ""
 }
@@ -129,7 +129,7 @@ func (x *ToggleProfileRequest) GetRoleName() string {
 type ApproveProfileRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	RoleName      string                 `protobuf:"bytes,2,opt,name=role_name,json=roleName,proto3" json:"role_name,omitempty"`
+	RoleId        string                 `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -171,9 +171,9 @@ func (x *ApproveProfileRequest) GetUserId() string {
 	return ""
 }
 
-func (x *ApproveProfileRequest) GetRoleName() string {
+func (x *ApproveProfileRequest) GetRoleId() string {
 	if x != nil {
-		return x.RoleName
+		return x.RoleId
 	}
 	return ""
 }
@@ -181,7 +181,7 @@ func (x *ApproveProfileRequest) GetRoleName() string {
 type RejectProfileRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	RoleName      string                 `protobuf:"bytes,2,opt,name=role_name,json=roleName,proto3" json:"role_name,omitempty"`
+	RoleId        string                 `protobuf:"bytes,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -223,9 +223,9 @@ func (x *RejectProfileRequest) GetUserId() string {
 	return ""
 }
 
-func (x *RejectProfileRequest) GetRoleName() string {
+func (x *RejectProfileRequest) GetRoleId() string {
 	if x != nil {
-		return x.RoleName
+		return x.RoleId
 	}
 	return ""
 }
@@ -378,19 +378,19 @@ var File_rbac_v1_rbac_proto protoreflect.FileDescriptor
 
 const file_rbac_v1_rbac_proto_rawDesc = "" +
 	"\n" +
-	"\x12rbac/v1/rbac.proto\x12\arbac.v1\x1a\x1bbuf/validate/validate.proto\"^\n" +
+	"\x12rbac/v1/rbac.proto\x12\arbac.v1\x1a\x1bbuf/validate/validate.proto\"[\n" +
 	"\x13ApplyProfileRequest\x12!\n" +
-	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12$\n" +
-	"\trole_name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\broleName\"_\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12!\n" +
+	"\arole_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06roleId\"\\\n" +
 	"\x14ToggleProfileRequest\x12!\n" +
-	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12$\n" +
-	"\trole_name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\broleName\"`\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12!\n" +
+	"\arole_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06roleId\"]\n" +
 	"\x15ApproveProfileRequest\x12!\n" +
-	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12$\n" +
-	"\trole_name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\broleName\"_\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12!\n" +
+	"\arole_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06roleId\"\\\n" +
 	"\x14RejectProfileRequest\x12!\n" +
-	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12$\n" +
-	"\trole_name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\broleName\"\x16\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12!\n" +
+	"\arole_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06roleId\"\x16\n" +
 	"\x14ApplyProfileResponse\"\x17\n" +
 	"\x15ToggleProfileResponse\"\x18\n" +
 	"\x16ApproveProfileResponse\"\x17\n" +

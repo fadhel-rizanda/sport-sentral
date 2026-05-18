@@ -42,7 +42,11 @@ message StatusEvent {
     (buf.validate.field).string.min_len = 1
   ];
 
-  optional string deleted_by_id = 7 [
+  string status_slug = 7 [
+    (buf.validate.field).string.min_len = 1
+  ];
+
+  optional string deleted_by_id = 8 [
     (buf.validate.field).string.uuid = true
   ];
 }

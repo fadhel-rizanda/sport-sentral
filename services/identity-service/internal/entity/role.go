@@ -11,14 +11,18 @@ type Role struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name        string    `gorm:"uniqueIndex;not null"`
 	Description string    `gorm:"not null;default:''"`
+	Slug        string    `gorm:"not null;unique"`
 
 	CreatedByID uuid.UUID  `gorm:"type:uuid;not null"`
 	UpdatedByID uuid.UUID  `gorm:"type:uuid;not null"`
 	DeletedByID *uuid.UUID `gorm:"type:uuid"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
 
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	CreatedBy User  `gorm:"foreignKey:CreatedByID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+	UpdatedBy User  `gorm:"foreignKey:UpdatedByID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+	DeletedBy *User `gorm:"foreignKey:DeletedByID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 
 	Permissions []*Permission `gorm:"many2many:role_permissions;"`
 }

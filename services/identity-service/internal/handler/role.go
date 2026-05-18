@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	rbacv1 "microservice-golang/gen/rbac/v1"
 	"microservice-golang/services/identity-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
@@ -43,10 +42,20 @@ func (h *RoleHandler) CreateRole(ctx context.Context, req *rbacv1.CreateRoleRequ
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid created_by id"))
 	}
+	permissionIDs := make([]*uuid.UUID, len(req.PermissionIds))
+	for i, permissionId := range req.PermissionIds {
+		id, err := uuid.Parse(permissionId)
+		if err != nil {
+			return nil, apperr.ToGRPC(err)
+		}
+		permissionIDs[i] = &id
+	}
 	res, err := h.uc.Create(ctx, usecase.CreateRoleRequest{
-		Name:        req.GetName(),
-		Description: req.Description,
-		CreatedByID: createdBy,
+		Name:          req.GetName(),
+		Description:   req.Description,
+		CreatedByID:   createdBy,
+		Slug:          req.Slug,
+		PermissionIDs: permissionIDs,
 	})
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
@@ -65,12 +74,21 @@ func (h *RoleHandler) UpdateRole(ctx context.Context, req *rbacv1.UpdateRoleRequ
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid updated_by id"))
 	}
-
+	permissionIDs := make([]*uuid.UUID, len(req.PermissionIds))
+	for i, permissionId := range req.PermissionIds {
+		id, err := uuid.Parse(permissionId)
+		if err != nil {
+			return nil, apperr.ToGRPC(err)
+		}
+		permissionIDs[i] = &id
+	}
 	res, err := h.uc.Update(ctx, usecase.UpdateRoleRequest{
-		ID:          id,
-		Name:        req.Name,
-		Description: req.Description,
-		UpdatedByID: updatedBy,
+		ID:            id,
+		Name:          req.Name,
+		Description:   req.Description,
+		UpdatedByID:   updatedBy,
+		Slug:          req.Slug,
+		PermissionIDs: permissionIDs,
 	})
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
@@ -136,50 +154,4 @@ func (h *RoleHandler) RevokePermissionFromRole(ctx context.Context, req *rbacv1.
 		return nil, apperr.ToGRPC(err)
 	}
 	return &rbacv1.RevokePermissionFromRoleResponse{}, nil
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-func toProtoRole(r *usecase.RoleResponse) *rbacv1.Role {
-	permissions := make([]*rbacv1.Permission, len(r.Permissions))
-	for i, p := range r.Permissions {
-		createdAt := timestamppb.New(p.CreatedAt)
-		updatedAt := timestamppb.New(p.UpdatedAt)
-
-		permissions[i] = &rbacv1.Permission{
-			Id:          p.ID.String(),
-			Action:      p.Action,
-			Resource:    p.Resource,
-			Description: p.Description,
-			CreatedAt:   createdAt,
-			UpdatedAt:   updatedAt,
-			CreatedById: p.CreatedByID.String(),
-			UpdatedById: p.UpdatedByID.String(),
-		}
-		if p.DeletedAt != nil {
-			deletedByID := p.DeletedByID.String()
-			permissions[i].DeletedAt = timestamppb.New(*p.DeletedAt)
-			permissions[i].DeletedById = &deletedByID
-		}
-	}
-
-	createdAt := timestamppb.New(r.CreatedAt)
-	updatedAt := timestamppb.New(r.UpdatedAt)
-
-	res := &rbacv1.Role{
-		Id:          r.ID.String(),
-		Name:        r.Name,
-		Permissions: permissions,
-		Description: r.Description,
-		CreatedById: r.CreatedByID.String(),
-		UpdatedById: r.UpdatedByID.String(),
-		CreatedAt:   createdAt,
-		UpdatedAt:   updatedAt,
-	}
-	if r.DeletedAt != nil {
-		deletedByID := r.DeletedByID.String()
-		res.DeletedAt = timestamppb.New(*r.DeletedAt)
-		res.DeletedById = &deletedByID
-	}
-	return res
 }

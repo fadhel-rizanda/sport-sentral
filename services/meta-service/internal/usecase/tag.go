@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,29 +33,30 @@ func NewTagUseCase(repo repository.TagRepository) TagUseCase {
 }
 
 func (uc *tagUseCase) Create(ctx context.Context, req CreateTagRequest) (*TagResponse, error) {
-	var slug string
-	if req.Slug == nil {
-		slug = slugify(req.Name)
-	} else {
-		slug = *req.Slug
-	}
-
 	tag := &entity.Tag{
-		ID:        uuid.New(),
-		Type:      req.Type,
-		Name:      req.Name,
-		Slug:      slug,
-		CreatedBy: req.CreatedByID,
+		ID:          uuid.New(),
+		Type:        req.Type,
+		Name:        req.Name,
+		Slug:        req.Slug,
+		CreatedByID: req.CreatedByID,
 	}
 
 	if err := uc.repo.Create(ctx, tag); err != nil {
-		if postgres.IsUniqueConstraint(err, "tags_type_name_key") {
+		if postgres.IsUniqueConstraint(err, "uni_tags_name") {
 			return nil, apperr.Conflict("name")
+		}
+		if postgres.IsUniqueConstraint(err, "uni_tags_slug") {
+			return nil, apperr.Conflict("slug")
 		}
 		return nil, apperr.Internal(err)
 	}
 
-	return toTagResponse(tag), nil
+	newTag, err := uc.repo.GetByID(ctx, tag.ID)
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	return toTagResponse(newTag), nil
 }
 
 func (uc *tagUseCase) GetByID(ctx context.Context, id uuid.UUID) (*TagResponse, error) {
@@ -122,12 +122,15 @@ func (uc *tagUseCase) Update(ctx context.Context, id uuid.UUID, req UpdateTagReq
 	}
 
 	if req.Type != nil || req.Name != nil || req.Slug != nil {
-		tag.UpdatedBy = req.UpdatedByID
+		tag.UpdatedByID = req.UpdatedByID
 	}
 
 	if err := uc.repo.Update(ctx, *tag); err != nil {
-		if postgres.IsUniqueConstraint(err, "tags_type_name_key") {
+		if postgres.IsUniqueConstraint(err, "uni_tags_name") {
 			return nil, apperr.Conflict("name")
+		}
+		if postgres.IsUniqueConstraint(err, "uni_tags_slug") {
+			return nil, apperr.Conflict("slug")
 		}
 		return nil, apperr.Internal(err)
 	}
@@ -144,7 +147,7 @@ func (uc *tagUseCase) SoftDelete(ctx context.Context, req DeleteTagRequest) erro
 	}
 
 	tag.DeletedAt = gorm.DeletedAt{Time: time.Now(), Valid: true}
-	tag.DeletedBy = &req.DeletedByID
+	tag.DeletedByID = &req.DeletedByID
 	if err := uc.repo.Update(ctx, *tag); err != nil {
 		return apperr.Internal(err)
 	}
@@ -160,12 +163,4 @@ func (uc *tagUseCase) HardDelete(ctx context.Context, req DeleteTagRequest) erro
 		return apperr.Internal(err)
 	}
 	return nil
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-func slugify(s string) string {
-	s = strings.ToLower(s)
-	s = strings.ReplaceAll(s, " ", "-")
-	return s
 }

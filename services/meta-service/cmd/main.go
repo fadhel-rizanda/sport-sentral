@@ -99,7 +99,7 @@ func main() {
 
 	err = database.SeedStatuses(statusUC)
 	if err != nil {
-		return
+		log.Fatal("failed to seed statuses", zap.Error(err))
 	}
 
 	// ── Handlers ──────────────────────────────────────────────────────────────

@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"microservice-golang/shared/pkg/constants"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -55,7 +56,7 @@ func (uc *authUseCase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 		return nil, apperr.Unauthorized("account not verified")
 	}
 
-	status, err := uc.statusCacheRepo.GetByTypeAndName(ctx, "account", "active")
+	status, err := uc.statusCacheRepo.GetByTypeAndName(ctx, constants.StatusTypeUser, constants.StatusActive)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -96,13 +97,25 @@ func (uc *authUseCase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 	}
 
 	return &LoginResponse{
-		AccessToken:    tokens.AccessToken,
-		RefreshToken:   tokens.RefreshToken,
-		ExpiresAt:      tokens.ExpiresAt,
-		UserID:         user.ID,
-		Email:          user.Email,
-		Username:       user.Username,
-		ActiveRoleName: activeRole.Role.Name,
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+		ExpiresAt:    tokens.ExpiresAt,
+		UserID:       user.ID,
+		FullName:     user.FullName,
+		Email:        user.Email,
+		Username:     user.Username,
+		ActiveRole: RoleSimpleResponse{
+			Name:           activeRole.Role.Name,
+			Slug:           activeRole.Role.Slug,
+			ID:             activeRole.Role.ID,
+			PermissionsIDs: roleIDs,
+		},
+		Status: StatusSimpleResponse{
+			ID:   status.ID,
+			Name: status.Name,
+			Slug: status.Slug,
+			Type: status.Type,
+		},
 	}, nil
 }
 

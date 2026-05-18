@@ -1,90 +1,117 @@
 package usecase
 
 import (
-	"github.com/google/uuid"
 	"microservice-golang/services/identity-service/internal/entity"
 )
 
 func ToUserResponse(user *entity.User) *UserResponse {
-	roles := make([]UserRoleResponse, len(user.UserRoles))
-	activeRoleName := ""
-	var activeRoleID uuid.UUID
+	roles := make([]UserRoleSimpleResponse, len(user.UserRoles))
+	var activeRole RoleSimpleResponse
 
 	for i, ur := range user.UserRoles {
-		roles[i] = UserRoleResponse{
-			ID:         ur.RoleID,
-			Name:       ur.Role.Name,
-			IsActive:   ur.IsActive,
-			StatusName: ur.Status.Name,
-			StatusID:   ur.Status.ID,
+		permissions := make([]PermissionSimpleResponse, len(ur.Role.Permissions))
+		for j, p := range ur.Role.Permissions {
+			permissions[j] = PermissionSimpleResponse{
+				ID:       p.ID,
+				Resource: p.Resource,
+				Action:   p.Action,
+				Slug:     p.Slug,
+			}
 		}
+
+		roleSimple := RoleSimpleResponse{
+			ID:          ur.Role.ID,
+			Name:        ur.Role.Name,
+			Slug:        ur.Role.Slug,
+			Permissions: permissions,
+		}
+
+		roles[i] = UserRoleSimpleResponse{
+			Role: roleSimple,
+			Status: StatusSimpleResponse{
+				ID:   ur.Status.ID,
+				Type: ur.Status.Type,
+				Name: ur.Status.Name,
+				Slug: ur.Status.Slug,
+			},
+			IsActive: ur.IsActive,
+		}
+
 		if ur.IsActive {
-			activeRoleName = ur.Role.Name
-			activeRoleID = ur.Role.ID
+			activeRole = roleSimple
 		}
 	}
 
 	res := &UserResponse{
-		ID:             user.ID,
-		Email:          user.Email,
-		Username:       user.Username,
-		FullName:       user.FullName,
-		StatusName:     user.Status.Name,
-		StatusID:       user.Status.ID,
-		ActiveRoleName: activeRoleName,
-		ActiveRoleID:   activeRoleID,
-		Roles:          roles,
-		VerifiedAt:     user.VerifiedAt,
-		CreatedAt:      user.CreatedAt,
-		UpdatedAt:      user.UpdatedAt,
+		ID:       user.ID,
+		Email:    user.Email,
+		Username: user.Username,
+		FullName: user.FullName,
+		Status: StatusSimpleResponse{
+			ID:   user.Status.ID,
+			Type: user.Status.Type,
+			Name: user.Status.Name,
+			Slug: user.Status.Slug,
+		},
+		ActiveRole: activeRole,
+		Roles:      roles,
+		VerifiedAt: user.VerifiedAt,
+		CreatedAt:  user.CreatedAt,
+		UpdatedAt:  user.UpdatedAt,
 	}
+
 	if user.DeletedAt.Valid {
 		res.DeletedAt = &user.DeletedAt.Time
 	}
+
 	return res
 }
 
-func (u *UserResponse) RoleIDs() []string {
-	ids := make([]string, len(u.Roles))
-	for i, p := range u.Roles {
-		ids[i] = p.ID.String()
-	}
-	return ids
-}
-
 func ToRoleResponse(role *entity.Role) *RoleResponse {
-	permissions := make([]PermissionResponse, len(role.Permissions))
+	permissions := make([]PermissionSimpleResponse, len(role.Permissions))
 	for i, p := range role.Permissions {
-
-		permissions[i] = PermissionResponse{
-			ID:          p.ID,
-			Action:      p.Action,
-			Resource:    p.Resource,
-			CreatedAt:   p.CreatedAt,
-			UpdatedAt:   p.UpdatedAt,
-			CreatedByID: p.CreatedByID,
-			UpdatedByID: p.UpdatedByID,
-			Description: p.Description,
-		}
-		if p.DeletedAt.Valid {
-			permissions[i].DeletedAt = &p.DeletedAt.Time
-			permissions[i].DeletedByID = p.DeletedByID
+		permissions[i] = PermissionSimpleResponse{
+			ID:       p.ID,
+			Resource: p.Resource,
+			Action:   p.Action,
+			Slug:     p.Slug,
 		}
 	}
 
 	res := &RoleResponse{
 		ID:          role.ID,
 		Name:        role.Name,
+		Description: role.Description,
+		Slug:        role.Slug,
 		Permissions: permissions,
-		CreatedAt:   role.CreatedAt,
-		UpdatedAt:   role.UpdatedAt,
-		CreatedByID: role.CreatedByID,
-		UpdatedByID: role.UpdatedByID,
+		CreatedBy: UserSimpleResponse{
+			ID:       role.CreatedByID,
+			Email:    role.CreatedBy.Email,
+			Username: role.CreatedBy.Username,
+			FullName: role.CreatedBy.FullName,
+		},
+		UpdatedBy: UserSimpleResponse{
+			ID:       role.UpdatedByID,
+			Email:    role.UpdatedBy.Email,
+			Username: role.UpdatedBy.Username,
+			FullName: role.UpdatedBy.FullName,
+		},
+		CreatedAt: role.CreatedAt,
+		UpdatedAt: role.UpdatedAt,
 	}
-	if res.DeletedAt != nil {
+
+	if role.DeletedAt.Valid {
 		res.DeletedAt = &role.DeletedAt.Time
-		res.DeletedByID = role.DeletedByID
+		if role.DeletedByID != nil {
+			res.DeletedBy = &UserSimpleResponse{
+				ID:       *role.DeletedByID,
+				Email:    role.DeletedBy.Email,
+				Username: role.DeletedBy.Username,
+				FullName: role.DeletedBy.FullName,
+			}
+		}
 	}
+
 	return res
 }
 
@@ -94,14 +121,34 @@ func ToPermissionResponse(permission *entity.Permission) *PermissionResponse {
 		Resource:    permission.Resource,
 		Action:      permission.Action,
 		Description: permission.Description,
-		CreatedAt:   permission.CreatedAt,
-		UpdatedAt:   permission.UpdatedAt,
-		CreatedByID: permission.CreatedByID,
-		UpdatedByID: permission.UpdatedByID,
+		Slug:        permission.Slug,
+		CreatedBy: UserSimpleResponse{
+			ID:       permission.CreatedByID,
+			Email:    permission.CreatedBy.Email,
+			Username: permission.CreatedBy.Username,
+			FullName: permission.CreatedBy.FullName,
+		},
+		UpdatedBy: UserSimpleResponse{
+			ID:       permission.UpdatedByID,
+			Email:    permission.UpdatedBy.Email,
+			Username: permission.UpdatedBy.Username,
+			FullName: permission.UpdatedBy.FullName,
+		},
+		CreatedAt: permission.CreatedAt,
+		UpdatedAt: permission.UpdatedAt,
 	}
-	if res.DeletedAt != nil {
+
+	if permission.DeletedAt.Valid {
 		res.DeletedAt = &permission.DeletedAt.Time
-		res.DeletedByID = permission.DeletedByID
+		if permission.DeletedByID != nil {
+			res.DeletedBy = &UserSimpleResponse{
+				ID:       *permission.DeletedByID,
+				Email:    permission.DeletedBy.Email,
+				Username: permission.DeletedBy.Username,
+				FullName: permission.DeletedBy.FullName,
+			}
+		}
 	}
+
 	return res
 }

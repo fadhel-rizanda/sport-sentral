@@ -7,16 +7,21 @@ import (
 )
 
 type Tag struct {
-	ID        uuid.UUID  `gorm:"type:uuid;primaryKey"`
-	Type      string     `gorm:"not null"`
-	Name      string     `gorm:"not null;unique"`
-	Slug      string     `gorm:"not null;unique"`
-	CreatedBy uuid.UUID  `gorm:"type:uuid;not null"`
-	UpdatedBy uuid.UUID  `gorm:"type:uuid;not null"`
-	DeletedBy *uuid.UUID `gorm:"type:uuid;"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	ID   uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Type string    `gorm:"not null"`
+	Name string    `gorm:"not null;unique"`
+	Slug string    `gorm:"not null;unique"`
+
+	CreatedByID uuid.UUID  `gorm:"type:uuid;not null"`
+	UpdatedByID uuid.UUID  `gorm:"type:uuid;not null"`
+	DeletedByID *uuid.UUID `gorm:"type:uuid;"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
+
+	CreatedBy *UserCache `gorm:"-"`
+	UpdatedBy *UserCache `gorm:"-"`
+	DeletedBy *UserCache `gorm:"-"`
 }
 
 // ─── Tag Types ────────────────────────────────────────────────────────────────

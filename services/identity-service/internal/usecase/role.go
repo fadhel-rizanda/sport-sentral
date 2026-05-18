@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"microservice-golang/services/identity-service/internal/entity"
 	"microservice-golang/services/identity-service/internal/repository"
@@ -27,13 +28,15 @@ type roleUseCase struct {
 	roleRepo       repository.RoleRepository
 	permissionRepo repository.PermissionRepository
 	userRepo       repository.UserRepository
+	logger         *zap.Logger
 }
 
-func NewRoleUseCase(roleRepo repository.RoleRepository, permissionRepo repository.PermissionRepository, userRepo repository.UserRepository) RoleUseCase {
+func NewRoleUseCase(roleRepo repository.RoleRepository, permissionRepo repository.PermissionRepository, userRepo repository.UserRepository, logger *zap.Logger) RoleUseCase {
 	return &roleUseCase{
 		roleRepo:       roleRepo,
 		permissionRepo: permissionRepo,
 		userRepo:       userRepo,
+		logger:         logger,
 	}
 }
 
@@ -67,7 +70,7 @@ func (uc *roleUseCase) List(ctx context.Context, req ListRequest) (*ListRoleResp
 		}
 		return nil, apperr.Internal(err)
 	}
-	result := make([]*RoleResponse, total)
+	result := make([]*RoleResponse, len(roleList))
 	for i, role := range roleList {
 		result[i] = ToRoleResponse(role)
 	}
@@ -86,15 +89,41 @@ func (uc *roleUseCase) Create(ctx context.Context, req CreateRoleRequest) (*Role
 		Description: req.Description,
 		CreatedByID: req.CreatedByID,
 		UpdatedByID: req.CreatedByID,
+		Slug:        req.Slug,
 	}
 
 	if err := uc.roleRepo.Create(ctx, role); err != nil {
 		if postgres.IsUniqueConstraint(err, "idx_roles_name") {
 			return nil, apperr.Conflict("name")
 		}
+		if postgres.IsUniqueConstraint(err, "uni_roles_slug") {
+			return nil, apperr.Conflict("slug")
+		}
 		return nil, apperr.Internal(err)
 	}
-	return ToRoleResponse(role), nil
+
+	perms := make([]uuid.UUID, len(req.PermissionIDs))
+	for i, p := range req.PermissionIDs {
+		if p != nil {
+			perms[i] = *p
+		}
+	}
+
+	if req.PermissionIDs != nil {
+		err := uc.roleRepo.AssignPermissions(ctx, role.ID, perms)
+		if err != nil {
+			if postgres.IsUniqueConstraint(err, "idx_roles_permission_ids") {
+				return nil, apperr.Conflict("permission_ids")
+			}
+			return nil, apperr.Internal(err)
+		}
+	}
+
+	newRole, err := uc.roleRepo.GetByID(ctx, role.ID)
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+	return ToRoleResponse(newRole), nil
 }
 
 func (uc *roleUseCase) Update(ctx context.Context, req UpdateRoleRequest) (*RoleResponse, error) {
@@ -112,7 +141,10 @@ func (uc *roleUseCase) Update(ctx context.Context, req UpdateRoleRequest) (*Role
 	if req.Description != nil {
 		role.Description = *req.Description
 	}
-	if req.Description != nil || req.Name != nil {
+	if req.Slug != nil {
+		role.Slug = *req.Slug
+	}
+	if req.Description != nil || req.Name != nil || req.Slug != nil {
 		role.UpdatedByID = req.UpdatedByID
 	}
 
@@ -120,9 +152,34 @@ func (uc *roleUseCase) Update(ctx context.Context, req UpdateRoleRequest) (*Role
 		if postgres.IsUniqueConstraint(err, "idx_roles_name") {
 			return nil, apperr.Conflict("name")
 		}
+		if postgres.IsUniqueConstraint(err, "uni_roles_slug") {
+			return nil, apperr.Conflict("slug")
+		}
 		return nil, apperr.Internal(err)
 	}
-	return ToRoleResponse(role), nil
+
+	perms := make([]uuid.UUID, len(req.PermissionIDs))
+	for i, p := range req.PermissionIDs {
+		if p != nil {
+			perms[i] = *p
+		}
+	}
+
+	if req.PermissionIDs != nil {
+		err := uc.roleRepo.ReplacePermissions(ctx, role.ID, perms)
+		if err != nil {
+			if postgres.IsUniqueConstraint(err, "idx_roles_permission_ids") {
+				return nil, apperr.Conflict("permission_ids")
+			}
+			return nil, apperr.Internal(err)
+		}
+	}
+
+	newRole, err := uc.roleRepo.GetByID(ctx, role.ID)
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+	return ToRoleResponse(newRole), nil
 }
 
 func (uc *roleUseCase) SoftDelete(ctx context.Context, req DeleteRequest) error {

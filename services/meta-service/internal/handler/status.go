@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	metav1 "microservice-golang/gen/meta/v1"
 	"microservice-golang/services/meta-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
@@ -78,6 +77,7 @@ func (h *StatusHandler) CreateStatus(ctx context.Context, req *metav1.CreateStat
 	res, err := h.uc.Create(ctx, usecase.CreateStatusRequest{
 		Type:        req.GetType(),
 		Name:        req.GetName(),
+		Slug:        req.GetSlug(),
 		CreatedByID: createdBy,
 	})
 	if err != nil {
@@ -101,6 +101,7 @@ func (h *StatusHandler) UpdateStatus(ctx context.Context, req *metav1.UpdateStat
 	res, err := h.uc.Update(ctx, id, usecase.UpdateStatusRequest{
 		Type:        req.Type,
 		Name:        req.Name,
+		Slug:        req.Slug,
 		UpdatedByID: updatedBy,
 	})
 	if err != nil {
@@ -136,24 +137,4 @@ func (h *StatusHandler) DeleteStatus(ctx context.Context, req *metav1.DeleteStat
 		return nil, apperr.ToGRPC(err)
 	}
 	return &metav1.DeleteStatusResponse{}, nil
-}
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-func toProtoStatus(s *usecase.StatusResponse) *metav1.Status {
-	res := &metav1.Status{
-		Id:          s.ID.String(),
-		Type:        s.Type,
-		Name:        s.Name,
-		CreatedById: s.CreatedByID.String(),
-		UpdatedById: s.UpdatedByID.String(),
-		CreatedAt:   timestamppb.New(s.CreatedAt),
-		UpdatedAt:   timestamppb.New(s.UpdatedAt),
-	}
-	if s.DeletedAt != nil {
-		deletedByID := s.DeletedByID.String()
-		res.DeletedAt = timestamppb.New(*s.DeletedAt)
-		res.DeletedById = &deletedByID
-	}
-	return res
 }

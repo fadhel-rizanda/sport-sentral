@@ -49,7 +49,7 @@ func (p *permissionUseCase) List(ctx context.Context, req ListPermissionRequest)
 		}
 		return nil, apperr.Internal(err)
 	}
-	result := make([]*PermissionResponse, total)
+	result := make([]*PermissionResponse, len(permissionList))
 	for i, permission := range permissionList {
 		result[i] = ToPermissionResponse(permission)
 	}
@@ -68,10 +68,11 @@ func (p *permissionUseCase) Create(ctx context.Context, req CreatePermissionRequ
 		Description: req.Description,
 		CreatedByID: req.CreatedByID,
 		UpdatedByID: req.CreatedByID,
+		Slug:        req.Slug,
 	}
 	if err := p.permissionRepo.Create(ctx, permission); err != nil {
-		if postgres.IsUniqueConstraint(err, "idx_permissions_action_resource") {
-			return nil, apperr.Conflict("action and resource combination")
+		if postgres.IsUniqueConstraint(err, "uni_permissions_slug") {
+			return nil, apperr.Conflict("slug")
 		}
 		return nil, apperr.Internal(err)
 	}
@@ -95,13 +96,16 @@ func (p *permissionUseCase) Update(ctx context.Context, req UpdatePermissionRequ
 	if req.Description != nil {
 		permission.Description = *req.Description
 	}
-	if req.Description != nil || req.Action != nil || req.Resource != nil {
+	if req.Slug != nil {
+		permission.Slug = *req.Slug
+	}
+	if req.Description != nil || req.Action != nil || req.Resource != nil || req.Slug != nil {
 		permission.UpdatedByID = req.UpdatedByID
 	}
 
 	if err := p.permissionRepo.Update(ctx, permission); err != nil {
-		if postgres.IsUniqueConstraint(err, "idx_permissions_action_resource") {
-			return nil, apperr.Conflict("action and resource combination")
+		if postgres.IsUniqueConstraint(err, "uni_permissions_slug") {
+			return nil, apperr.Conflict("slug")
 		}
 		return nil, apperr.Internal(err)
 	}

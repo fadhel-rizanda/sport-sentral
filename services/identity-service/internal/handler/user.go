@@ -5,8 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/timestamppb"
-
 	userv1 "microservice-golang/gen/user/v1"
 	"microservice-golang/services/identity-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
@@ -26,12 +24,17 @@ func (h *UserHandler) RegisterGRPC(s *grpc.Server) {
 }
 
 func (h *UserHandler) CreateUser(ctx context.Context, req *userv1.CreateUserRequest) (*userv1.CreateUserResponse, error) {
+	roleId, err := uuid.Parse(req.RoleId)
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid role id"))
+	}
+
 	res, err := h.uc.Create(ctx, usecase.CreateUserRequest{
 		Email:    req.Email,
 		Username: req.Username,
 		FullName: req.FullName,
 		Password: req.Password,
-		RoleName: req.RoleName,
+		RoleID:   roleId,
 	})
 	if err != nil {
 		return nil, apperr.ToGRPC(err)
@@ -150,43 +153,4 @@ func (h *UserHandler) RemoveRolesFromUser(ctx context.Context, req *userv1.Remov
 		return nil, apperr.ToGRPC(err)
 	}
 	return &userv1.RemoveRolesFromUserResponse{}, nil
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-func toProtoUser(u *usecase.UserResponse) *userv1.User {
-	var verifiedAt *timestamppb.Timestamp
-	if u.VerifiedAt != nil {
-		verifiedAt = timestamppb.New(*u.VerifiedAt)
-	}
-
-	profiles := make([]*userv1.UserRole, len(u.Roles))
-	for i, p := range u.Roles {
-		profiles[i] = &userv1.UserRole{
-			RoleId:     p.ID.String(),
-			RoleName:   p.Name,
-			IsActive:   p.IsActive,
-			StatusName: p.StatusName,
-			StatusId:   p.StatusID.String(),
-		}
-	}
-
-	res := &userv1.User{
-		Id:             u.ID.String(),
-		Email:          u.Email,
-		Username:       u.Username,
-		FullName:       u.FullName,
-		StatusName:     u.StatusName,
-		StatusId:       u.StatusID.String(),
-		ActiveRoleName: u.ActiveRoleName,
-		ActiveRoleId:   u.ActiveRoleID.String(),
-		Roles:          profiles,
-		CreatedAt:      timestamppb.New(u.CreatedAt),
-		UpdatedAt:      timestamppb.New(u.UpdatedAt),
-		VerifiedAt:     verifiedAt,
-	}
-	if u.DeletedAt != nil {
-		res.DeletedAt = timestamppb.New(*u.DeletedAt)
-	}
-	return res
 }

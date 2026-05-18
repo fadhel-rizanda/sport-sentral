@@ -138,6 +138,7 @@ func main() {
 		redisWrapper,
 		cfg.AppURL,
 		log,
+		statusCacheRepo,
 		eventPublisher,
 	)
 	profileUC := usecase.NewProfileUseCase(
@@ -146,7 +147,7 @@ func main() {
 		roleRepo,
 		statusCacheRepo,
 	)
-	roleUC := usecase.NewRoleUseCase(roleRepo, permissionRepo, userRepo)
+	roleUC := usecase.NewRoleUseCase(roleRepo, permissionRepo, userRepo, log)
 	permissionUC := usecase.NewPermissionUseCase(permissionRepo)
 	statusSyncUC := usecase.NewStatusSyncUseCase(statusCacheRepo, log)
 

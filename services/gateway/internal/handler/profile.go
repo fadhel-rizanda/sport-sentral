@@ -33,15 +33,15 @@ func (h *ProfileHandler) ApplyProfile(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
 	var body struct {
-		RoleName string `json:"role_name"`
+		RoleID string `json:"role_id"`
 	}
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
 
 	_, err := h.rbacClient.ApplyProfile(c.Context(), &rbacv1.ApplyProfileRequest{
-		UserId:   userID,
-		RoleName: body.RoleName,
+		UserId: userID,
+		RoleId: body.RoleID,
 	})
 	if err != nil {
 		return err
@@ -54,15 +54,15 @@ func (h *ProfileHandler) ToggleProfile(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
 	var body struct {
-		RoleName string `json:"role_name"`
+		RoleID string `json:"role_id"`
 	}
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
 
 	_, err := h.rbacClient.ToggleProfile(c.Context(), &rbacv1.ToggleProfileRequest{
-		UserId:   userID,
-		RoleName: body.RoleName,
+		UserId: userID,
+		RoleId: body.RoleID,
 	})
 	if err != nil {
 		return err
@@ -73,16 +73,16 @@ func (h *ProfileHandler) ToggleProfile(c *fiber.Ctx) error {
 
 func (h *ProfileHandler) ApproveProfile(c *fiber.Ctx) error {
 	var body struct {
-		UserId   string `json:"user_id"`
-		RoleName string `json:"role_name"`
+		UserId string `json:"user_id"`
+		RoleID string `json:"role_id"`
 	}
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
 
 	_, err := h.rbacClient.ApproveProfile(c.Context(), &rbacv1.ApproveProfileRequest{
-		UserId:   body.UserId,
-		RoleName: body.RoleName,
+		UserId: body.UserId,
+		RoleId: body.RoleID,
 	})
 	if err != nil {
 		return err
@@ -93,16 +93,16 @@ func (h *ProfileHandler) ApproveProfile(c *fiber.Ctx) error {
 
 func (h *ProfileHandler) RejectProfile(c *fiber.Ctx) error {
 	var body struct {
-		UserId   string `json:"user_id"`
-		RoleName string `json:"role_name"`
+		UserId string `json:"user_id"`
+		RoleID string `json:"role_id"`
 	}
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
 
 	_, err := h.rbacClient.RejectProfile(c.Context(), &rbacv1.RejectProfileRequest{
-		UserId:   body.UserId,
-		RoleName: body.RoleName,
+		UserId: body.UserId,
+		RoleId: body.RoleID,
 	})
 	if err != nil {
 		return err

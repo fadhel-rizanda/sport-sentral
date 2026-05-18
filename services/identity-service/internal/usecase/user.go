@@ -60,38 +60,40 @@ func NewUserUseCase(
 	redis redisclient.Client,
 	AppURL string,
 	logger *zap.Logger,
+	statusCacheRepo repository.StatusCacheRepository,
 	publisher EventPublisher,
 ) UserUseCase {
 	return &userUseCase{
-		db:           db,
-		userRepo:     userRepo,
-		userRoleRepo: userRoleRepo,
-		roleRepo:     roleRepo,
-		redis:        redis,
-		mailer:       mailer,
-		AppURL:       AppURL,
-		logger:       logger,
-		publisher:    publisher,
+		db:              db,
+		userRepo:        userRepo,
+		userRoleRepo:    userRoleRepo,
+		roleRepo:        roleRepo,
+		redis:           redis,
+		mailer:          mailer,
+		AppURL:          AppURL,
+		logger:          logger,
+		statusCacheRepo: statusCacheRepo,
+		publisher:       publisher,
 	}
 }
 
 func (uc *userUseCase) Create(ctx context.Context, req CreateUserRequest) (*UserResponse, error) {
-	if entity.RolesAdminAssignOnly[req.RoleName] {
-		return nil, apperr.Forbidden("cannot self-register with this role")
-	}
-
-	role, err := uc.roleRepo.GetByName(ctx, req.RoleName)
+	role, err := uc.roleRepo.GetByID(ctx, req.RoleID)
 	if err != nil {
 		return nil, apperr.NotFound("role")
 	}
 
+	if entity.RolesAdminAssignOnly[role.Name] {
+		return nil, apperr.Forbidden("cannot self-register with this role")
+	}
+
 	userStatusName := constants.StatusActive
-	if entity.RolesPendingApproval[req.RoleName] {
+	if entity.RolesPendingApproval[role.Name] {
 		userStatusName = constants.StatusPending
 	}
 
 	userRoleStatusName := constants.StatusActive
-	if entity.RolesPendingApproval[req.RoleName] {
+	if entity.RolesPendingApproval[role.Name] {
 		userRoleStatusName = constants.StatusPending
 	}
 
@@ -99,10 +101,16 @@ func (uc *userUseCase) Create(ctx context.Context, req CreateUserRequest) (*User
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
+	if statusCache == nil {
+		return nil, apperr.Internal(fmt.Errorf("status cache not found"))
+	}
 
 	roleStatusCache, err := uc.statusCacheRepo.GetByTypeAndName(ctx, constants.StatusTypeUserRole, userRoleStatusName)
 	if err != nil {
 		return nil, apperr.Internal(err)
+	}
+	if roleStatusCache == nil {
+		return nil, apperr.Internal(fmt.Errorf("role status cache not found"))
 	}
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)

@@ -30,9 +30,14 @@ func (h *ProfileHandler) ApplyProfile(ctx context.Context, req *rbacv1.ApplyProf
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid user id"))
 	}
 
+	roleID, err := uuid.Parse(req.RoleId)
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid role id"))
+	}
+
 	if err := h.uc.ApplyProfile(ctx, usecase.ApplyProfileRequest{
-		UserID:   userID,
-		RoleName: req.RoleName,
+		UserID: userID,
+		RoleID: roleID,
 	}); err != nil {
 		return nil, apperr.ToGRPC(err)
 	}
@@ -46,9 +51,14 @@ func (h *ProfileHandler) ToggleProfile(ctx context.Context, req *rbacv1.TogglePr
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid user id"))
 	}
 
+	roleID, err := uuid.Parse(req.RoleId)
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid role id"))
+	}
+
 	if err := h.uc.ToggleProfile(ctx, usecase.ToggleProfileRequest{
-		UserID:   userID,
-		RoleName: req.RoleName,
+		UserID: userID,
+		RoleID: roleID,
 	}); err != nil {
 		return nil, apperr.ToGRPC(err)
 	}
@@ -62,9 +72,14 @@ func (h *ProfileHandler) ApproveProfile(ctx context.Context, req *rbacv1.Approve
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid user id"))
 	}
 
+	roleID, err := uuid.Parse(req.RoleId)
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid role id"))
+	}
+
 	if err := h.uc.ApproveProfile(ctx, usecase.ApproveProfileRequest{
-		UserID:   userID,
-		RoleName: req.RoleName,
+		UserID: userID,
+		RoleID: roleID,
 	}); err != nil {
 		return nil, apperr.ToGRPC(err)
 	}
@@ -78,9 +93,14 @@ func (h *ProfileHandler) RejectProfile(ctx context.Context, req *rbacv1.RejectPr
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid user id"))
 	}
 
+	roleID, err := uuid.Parse(req.RoleId)
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid role id"))
+	}
+
 	if err := h.uc.RejectProfile(ctx, usecase.ApproveProfileRequest{
-		UserID:   userID,
-		RoleName: req.RoleName,
+		UserID: userID,
+		RoleID: roleID,
 	}); err != nil {
 		return nil, apperr.ToGRPC(err)
 	}

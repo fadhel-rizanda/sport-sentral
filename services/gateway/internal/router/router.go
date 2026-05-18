@@ -15,6 +15,8 @@ func Setup(
 	authClient authv1.AuthServiceClient,
 	statusHandler *handler.StatusHandler,
 	tagHandler *handler.TagHandler,
+	roleHandler *handler.RoleHandler,
+	permissionHandler *handler.PermissionHandler,
 ) {
 	api := app.Group("/api/v1")
 
@@ -28,4 +30,6 @@ func Setup(
 	profileHandler.Routes(api, auth, adminOnly)
 	statusHandler.Routes(api, auth, adminOnly)
 	tagHandler.Routes(api, auth, adminOnly)
+	roleHandler.Routes(api, auth, adminOnly)
+	permissionHandler.Routes(api, auth, adminOnly)
 }

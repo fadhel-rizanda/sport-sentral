@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	commonv1 "microservice-golang/gen/common/v1"
 
 	"google.golang.org/grpc"
 	authv1 "microservice-golang/gen/auth/v1"
@@ -37,11 +38,24 @@ func (h *AuthHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 			RefreshToken: res.RefreshToken,
 			ExpiresAt:    res.ExpiresAt.Unix(),
 		},
-		UserId:         res.UserID.String(),
-		Email:          res.Email,
-		Username:       res.Username,
-		ActiveRoleName: res.ActiveRoleName,
-		ActiveRoleId:   res.ActiveRoleID.String(),
+		User: &commonv1.UserSimple{
+			Id:       res.UserID.String(),
+			Email:    res.Email,
+			Username: res.Username,
+			FullName: res.FullName,
+		},
+		ActiveRole: &commonv1.RoleSimple{
+			Id:            res.ActiveRole.ID.String(),
+			Name:          res.ActiveRole.Name,
+			Slug:          res.ActiveRole.Slug,
+			PermissionIds: res.ActiveRole.PermissionsIDs,
+		},
+		Status: &commonv1.StatusSimple{
+			Id:   res.Status.ID.String(),
+			Name: res.Status.Name,
+			Slug: res.Status.Slug,
+			Type: res.Status.Type,
+		},
 	}, nil
 }
 
@@ -74,11 +88,15 @@ func (h *AuthHandler) ValidateToken(ctx context.Context, req *authv1.ValidateTok
 	}
 
 	return &authv1.ValidateTokenResponse{
-		UserId:         claims.UserID,
-		Email:          claims.Email,
-		Username:       claims.Username,
-		RoleIds:        claims.Roles,
-		ActiveRoleName: claims.ActiveRoleName,
-		ActiveRoleId:   claims.ActiveRoleID.String(),
+		ActiveRole: &commonv1.RoleSimple{
+			Id:   claims.ActiveRoleID.String(),
+			Name: claims.ActiveRoleName,
+		},
+		User: &commonv1.UserSimple{
+			Id:       claims.UserID,
+			Email:    claims.Email,
+			Username: claims.Username,
+			RoleIds:  claims.Roles,
+		},
 	}, nil
 }

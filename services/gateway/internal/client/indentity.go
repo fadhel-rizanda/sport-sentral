@@ -9,10 +9,12 @@ import (
 )
 
 type IdentityClient struct {
-	Auth authv1.AuthServiceClient
-	User userv1.UserServiceClient
-	RBAC rbacv1.RBACServiceClient
-	conn *grpc.ClientConn
+	Auth       authv1.AuthServiceClient
+	User       userv1.UserServiceClient
+	RBAC       rbacv1.RBACServiceClient
+	Role       rbacv1.RoleServiceClient
+	Permission rbacv1.PermissionServiceClient
+	conn       *grpc.ClientConn
 }
 
 func NewIdentityClient(address string) (*IdentityClient, error) {
@@ -25,10 +27,12 @@ func NewIdentityClient(address string) (*IdentityClient, error) {
 	}
 
 	return &IdentityClient{
-		Auth: authv1.NewAuthServiceClient(conn),
-		User: userv1.NewUserServiceClient(conn),
-		RBAC: rbacv1.NewRBACServiceClient(conn),
-		conn: conn,
+		Auth:       authv1.NewAuthServiceClient(conn),
+		User:       userv1.NewUserServiceClient(conn),
+		RBAC:       rbacv1.NewRBACServiceClient(conn),
+		Role:       rbacv1.NewRoleServiceClient(conn),
+		Permission: rbacv1.NewPermissionServiceClient(conn),
+		conn:       conn,
 	}, nil
 }
 

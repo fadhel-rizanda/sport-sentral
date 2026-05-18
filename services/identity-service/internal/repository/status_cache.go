@@ -29,7 +29,7 @@ func (r *statusCacheRepository) Upsert(ctx context.Context, s entity.StatusCache
 	return r.db.WithContext(ctx).
 		Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "id"}},
-			DoUpdates: clause.AssignmentColumns([]string{"type", "name", "deleted_at"}),
+			DoUpdates: clause.AssignmentColumns([]string{"type", "name", "slug", "deleted_at"}),
 		}).
 		Create(&s).Error
 }

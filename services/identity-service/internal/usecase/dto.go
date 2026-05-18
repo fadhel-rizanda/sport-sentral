@@ -18,6 +18,44 @@ type DeleteRequest struct {
 	DeletedByID uuid.UUID
 }
 
+// ─── Common Simple Responses ──────────────────────────────────────────────────
+
+type UserSimpleResponse struct {
+	ID       uuid.UUID
+	Email    string
+	Username string
+	FullName string
+}
+
+type StatusSimpleResponse struct {
+	ID   uuid.UUID
+	Type string
+	Name string
+	Slug string
+}
+
+type TagSimpleResponse struct {
+	ID   uuid.UUID
+	Type string
+	Name string
+	Slug string
+}
+
+type PermissionSimpleResponse struct {
+	ID       uuid.UUID
+	Resource string
+	Action   string
+	Slug     string
+}
+
+type RoleSimpleResponse struct {
+	ID             uuid.UUID
+	Name           string
+	Slug           string
+	Permissions    []PermissionSimpleResponse
+	PermissionsIDs []string
+}
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 type LoginRequest struct {
@@ -26,14 +64,15 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	AccessToken    string
-	RefreshToken   string
-	ExpiresAt      time.Time
-	UserID         uuid.UUID
-	Email          string
-	Username       string
-	ActiveRoleName string
-	ActiveRoleID   uuid.UUID
+	AccessToken  string
+	RefreshToken string
+	ExpiresAt    time.Time
+	UserID       uuid.UUID
+	Email        string
+	Username     string
+	FullName     string
+	ActiveRole   RoleSimpleResponse
+	Status       StatusSimpleResponse
 }
 
 type RefreshTokenResponse struct {
@@ -49,7 +88,7 @@ type CreateUserRequest struct {
 	Username string
 	FullName string
 	Password string
-	RoleName string
+	RoleID   uuid.UUID
 }
 
 type UpdateUserRequest struct {
@@ -69,27 +108,23 @@ type AssignRolesRequest struct {
 }
 
 type UserResponse struct {
-	ID             uuid.UUID
-	Email          string
-	Username       string
-	FullName       string
-	StatusName     string
-	StatusID       uuid.UUID
-	ActiveRoleName string
-	ActiveRoleID   uuid.UUID
-	Roles          []UserRoleResponse
-	VerifiedAt     *time.Time
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	DeletedAt      *time.Time
+	ID         uuid.UUID
+	Email      string
+	Username   string
+	FullName   string
+	Status     StatusSimpleResponse
+	ActiveRole RoleSimpleResponse
+	Roles      []UserRoleSimpleResponse
+	VerifiedAt *time.Time
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeletedAt  *time.Time
 }
 
-type UserRoleResponse struct {
-	ID         uuid.UUID
-	Name       string
-	IsActive   bool
-	StatusName string
-	StatusID   uuid.UUID
+type UserRoleSimpleResponse struct {
+	Role     RoleSimpleResponse
+	Status   StatusSimpleResponse
+	IsActive bool
 }
 
 type ListUsersResponse struct {
@@ -102,18 +137,18 @@ type ListUsersResponse struct {
 // ─── Profile ──────────────────────────────────────────────────────────────────
 
 type ApplyProfileRequest struct {
-	UserID   uuid.UUID
-	RoleName string
+	UserID uuid.UUID
+	RoleID uuid.UUID
 }
 
 type ToggleProfileRequest struct {
-	UserID   uuid.UUID
-	RoleName string
+	UserID uuid.UUID
+	RoleID uuid.UUID
 }
 
 type ApproveProfileRequest struct {
-	UserID   uuid.UUID
-	RoleName string
+	UserID uuid.UUID
+	RoleID uuid.UUID
 }
 
 // ─── Role ─────────────────────────────────────────────────────────────────────
@@ -121,28 +156,32 @@ type ApproveProfileRequest struct {
 type CreateRoleRequest struct {
 	Name          string
 	Description   string
+	Slug          string
 	CreatedByID   uuid.UUID
 	PermissionIDs []*uuid.UUID
 }
 
 type UpdateRoleRequest struct {
-	ID          uuid.UUID
-	Name        *string
-	Description *string
-	UpdatedByID uuid.UUID
+	ID            uuid.UUID
+	Name          *string
+	Description   *string
+	Slug          *string
+	UpdatedByID   uuid.UUID
+	PermissionIDs []*uuid.UUID
 }
 
 type RoleResponse struct {
 	ID          uuid.UUID
 	Name        string
 	Description string
-	Permissions []PermissionResponse
+	Slug        string
+	Permissions []PermissionSimpleResponse
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   *time.Time
-	CreatedByID uuid.UUID
-	UpdatedByID uuid.UUID
-	DeletedByID *uuid.UUID
+	CreatedBy   UserSimpleResponse
+	UpdatedBy   UserSimpleResponse
+	DeletedBy   *UserSimpleResponse
 }
 
 type ListRoleResponse struct {
@@ -160,29 +199,10 @@ type ListPermissionRequest struct {
 	PageSize int
 }
 
-type PermissionResponse struct {
-	ID          uuid.UUID
-	Resource    string
-	Action      string
-	Description string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   *time.Time
-	CreatedByID uuid.UUID
-	UpdatedByID uuid.UUID
-	DeletedByID *uuid.UUID
-}
-
-type ListPermissionResponse struct {
-	Permissions []*PermissionResponse
-	Total       int64
-	Page        int
-	PageSize    int
-}
-
 type CreatePermissionRequest struct {
 	Resource    string
 	Action      string
+	Slug        string
 	Description string
 	CreatedByID uuid.UUID
 }
@@ -192,5 +212,27 @@ type UpdatePermissionRequest struct {
 	Resource    *string
 	Action      *string
 	Description *string
+	Slug        *string
 	UpdatedByID uuid.UUID
+}
+
+type PermissionResponse struct {
+	ID          uuid.UUID
+	Resource    string
+	Action      string
+	Description string
+	Slug        string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
+	CreatedBy   UserSimpleResponse
+	UpdatedBy   UserSimpleResponse
+	DeletedBy   *UserSimpleResponse
+}
+
+type ListPermissionResponse struct {
+	Permissions []*PermissionResponse
+	Total       int64
+	Page        int
+	PageSize    int
 }

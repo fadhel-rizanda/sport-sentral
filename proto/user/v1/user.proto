@@ -6,15 +6,14 @@ option go_package = "microservice-golang/gen/user/v1;userv1";
 
 import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
+import "common/v1/common.proto";
 
 // ─── Messages ─────────────────────────────────────────────────────────────────
 
 message UserRole {
-  string role_id   = 1;
-  string role_name = 2;
+  common.v1.RoleSimple role = 1;
+  common.v1.StatusSimple status = 2;
   bool   is_active = 3;
-  string status_id    = 4;
-  string status_name  = 5;
 }
 
 message User {
@@ -22,15 +21,12 @@ message User {
   string    email          = 2;
   string    username       = 3;
   string    full_name      = 4;
-  string    status_id         = 5;
-  string    status_name         = 6;
-  string active_role_id  = 7;
-  string active_role_name  = 8;
-  repeated UserRole roles = 9;
-  google.protobuf.Timestamp created_at  = 10;
-  google.protobuf.Timestamp updated_at  = 11;
-  google.protobuf.Timestamp verified_at = 12;
-  optional google.protobuf.Timestamp deleted_at = 13;
+  common.v1.StatusSimple status = 5;
+  repeated UserRole roles  = 6;
+  google.protobuf.Timestamp created_at  = 7;
+  google.protobuf.Timestamp updated_at  = 8;
+  google.protobuf.Timestamp verified_at = 9;
+  optional google.protobuf.Timestamp deleted_at = 10;
 }
 
 // ─── Requests ─────────────────────────────────────────────────────────────────
@@ -52,8 +48,8 @@ message CreateUserRequest {
     (buf.validate.field).string.min_len = 8,
     (buf.validate.field).string.max_len = 72
   ];
-  string role_name = 5 [
-    (buf.validate.field).string.min_len = 1
+  string role_id = 5 [
+    (buf.validate.field).string.uuid = true
   ];
 }
 

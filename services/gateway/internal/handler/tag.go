@@ -5,7 +5,6 @@ import (
 	metav1 "microservice-golang/gen/meta/v1"
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/services/gateway/internal/response"
-	"time"
 )
 
 type TagHandler struct {
@@ -24,7 +23,7 @@ func (h *TagHandler) Routes(router fiber.Router, auth fiber.Handler, admin ...fi
 	tag.Get("/:id", h.GetTagByID)
 
 	adminMiddlewares := append([]fiber.Handler{auth}, admin...)
-	adminGroup := router.Group("/admin/tag", adminMiddlewares...)
+	adminGroup := router.Group("/admin/tags", adminMiddlewares...)
 	adminGroup.Post("/", h.CreateTag)
 	adminGroup.Put("/:id", h.UpdateTag)
 	adminGroup.Delete("/:id", h.DeleteTag)
@@ -33,12 +32,16 @@ func (h *TagHandler) Routes(router fiber.Router, auth fiber.Handler, admin ...fi
 func (h *TagHandler) ListTags(c *fiber.Ctx) error {
 	page := c.QueryInt("page", 1)
 	pageSize := c.QueryInt("pageSize", 10)
-	tagType := c.Query("type", "")
+	tagType := c.Query("type")
+	var tagTypePtr *string
+	if tagType != "" {
+		tagTypePtr = &tagType
+	}
 
 	resp, err := h.tagClient.ListTags(c.Context(), &metav1.ListTagsRequest{
 		Page:     int32(page),
 		PageSize: int32(pageSize),
-		Type:     &tagType,
+		Type:     tagTypePtr,
 	})
 	if err != nil {
 		return err
@@ -65,16 +68,16 @@ func (h *TagHandler) GetTagByID(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, fiber.Map{"tag": toTagResponse(resp.Tag)})
+	return response.OK(c, toTagResponse(resp.Tag))
 }
 
 func (h *TagHandler) CreateTag(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
 	var body struct {
-		Name string  `json:"name"`
-		Type string  `json:"type"`
-		Slug *string `json:"slug"`
+		Name string `json:"name"`
+		Type string `json:"type"`
+		Slug string `json:"slug"`
 	}
 	if err := c.BodyParser(&body); err != nil {
 		return err
@@ -89,7 +92,7 @@ func (h *TagHandler) CreateTag(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, fiber.Map{"tag": toTagResponse(res.Tag)})
+	return response.OK(c, toTagResponse(res.Tag))
 }
 
 func (h *TagHandler) UpdateTag(c *fiber.Ctx) error {
@@ -113,13 +116,13 @@ func (h *TagHandler) UpdateTag(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, fiber.Map{"tag": toTagResponse(res.Tag)})
+	return response.OK(c, toTagResponse(res.Tag))
 }
 
 func (h *TagHandler) DeleteTag(c *fiber.Ctx) error {
 	tagID := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
-	isPermanent := c.QueryBool("permanent")
+	isPermanent := c.QueryBool("permanent", false)
 	_, err := h.tagClient.DeleteTag(c.Context(), &metav1.DeleteTagRequest{
 		Id:          tagID,
 		IsPermanent: isPermanent,
@@ -129,38 +132,4 @@ func (h *TagHandler) DeleteTag(c *fiber.Ctx) error {
 		return err
 	}
 	return response.OKWithMessage(c, "tag deleted")
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-type TagResponse struct {
-	ID          string  `json:"id"`
-	Type        string  `json:"type"`
-	Name        string  `json:"name"`
-	Slug        string  `json:"slug"`
-	CreatedByID string  `json:"created_by_id"`
-	UpdatedByID string  `json:"updated_by_id"`
-	DeletedByID *string `json:"deleted_by_id"`
-	CreatedAt   string  `json:"created_at"`
-	UpdatedAt   string  `json:"updated_at"`
-	DeletedAt   *string `json:"deleted_at"`
-}
-
-func toTagResponse(tag *metav1.Tag) TagResponse {
-	res := TagResponse{
-		ID:          tag.Id,
-		Type:        tag.Type,
-		Name:        tag.Name,
-		Slug:        tag.Slug,
-		CreatedByID: tag.CreatedById,
-		UpdatedByID: tag.UpdatedById,
-		CreatedAt:   tag.CreatedAt.AsTime().Format(time.RFC3339),
-		UpdatedAt:   tag.UpdatedAt.AsTime().Format(time.RFC3339),
-	}
-	if tag.DeletedAt != nil {
-		formattedDate := tag.DeletedAt.AsTime().Format(time.RFC3339)
-		res.DeletedAt = &formattedDate
-		res.DeletedByID = tag.DeletedById
-	}
-	return res
 }

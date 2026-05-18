@@ -7,7 +7,6 @@ import (
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/services/gateway/internal/request"
 	"microservice-golang/services/gateway/internal/response"
-	"time"
 )
 
 type UserHandler struct {
@@ -20,18 +19,26 @@ func NewUserHandler(userClient userv1.UserServiceClient) *UserHandler {
 	}
 }
 
-func (h *UserHandler) Routes(router fiber.Router, auth fiber.Handler) {
+func (h *UserHandler) Routes(router fiber.Router, auth fiber.Handler, admin ...fiber.Handler) {
+	router.Post("/register", h.CreateUser)
+	router.Post("/verify-email", h.SendVerifyEmail)
+	router.Post("/verify-account", h.VerifyAccount)
+	router.Post("/forgot-password", h.ForgotPassword)
+	router.Post("/reset-password", h.ResetPassword)
+
 	me := router.Group("/me", auth)
 	me.Put("/", h.UpdateUser)
 	me.Delete("/", h.DeleteUser)
 
-	users := router.Group("/users", auth)
-	users.Get("/", h.ListUsers)
-	users.Get("/:id", h.GetUser)
+	// TODO RAPIHIN MIDDLEWARE
+	adminMiddlewares := append([]fiber.Handler{auth}, admin...)
+	adminGroup := router.Group("/users", adminMiddlewares...)
 
-	//adminMiddlewares := append([]fiber.Handler{auth}, admin...)
-	//adminGroup := router.Group("/admin/users", adminMiddlewares...)
-	//adminGroup.Get("/", h.ListUsers)
+	adminGroup.Get("/", h.ListUsers)
+	adminGroup.Get("/:id", h.GetUser)
+
+	adminGroup.Post("/assign-roles", h.AssignRolesToUser)
+	adminGroup.Post("/remove-roles", h.RemoveRolesFromUser)
 }
 
 func (h *UserHandler) GetUser(c *fiber.Ctx) error {
@@ -115,67 +122,128 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "user deleted")
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-type UserResponse struct {
-	ID             string         `json:"id"`
-	Email          string         `json:"email"`
-	Username       string         `json:"username"`
-	FullName       string         `json:"full_name"`
-	StatusName     string         `json:"status_name"`
-	StatusID       string         `json:"status_id"`
-	ActiveRoleName string         `json:"active_role_name"`
-	ActiveRoleID   string         `json:"active_role_id"`
-	Roles          []RoleResponse `json:"roles"`
-	VerifiedAt     *string        `json:"verified_at"`
-	CreatedAt      string         `json:"created_at"`
-	UpdatedAt      string         `json:"updated_at"`
-	DeletedAt      *string        `json:"deletedAt"`
+func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
+	var body struct {
+		Email    string `json:"email"`
+		Username string `json:"username"`
+		FullName string `json:"full_name"`
+		Password string `json:"password"`
+		RoleID   string `json:"role_id"`
+	}
+	if err := request.Parse(c, &body); err != nil {
+		return err
+	}
+	resp, err := h.userClient.CreateUser(context.Background(), &userv1.CreateUserRequest{
+		Email:    body.Email,
+		Username: body.Username,
+		FullName: body.FullName,
+		Password: body.Password,
+		RoleId:   body.RoleID,
+	})
+	if err != nil {
+		return err
+	}
+	return response.OK(c, fiber.Map{"user": toUserResponse(resp.User)})
 }
 
-type RoleResponse struct {
-	RoleID     string `json:"role_id"`
-	RoleName   string `json:"role_name"`
-	IsActive   bool   `json:"is_active"`
-	StatusName string `json:"status_name"`
-	StatusID   string `json:"status_id"`
+func (h *UserHandler) SendVerifyEmail(c *fiber.Ctx) error {
+	var body struct {
+		Email string `json:"email"`
+	}
+	if err := request.Parse(c, &body); err != nil {
+		return err
+	}
+	_, err := h.userClient.SendVerifyEmail(context.Background(), &userv1.SendVerifyEmailRequest{
+		Email: body.Email,
+	})
+	if err != nil {
+		return err
+	}
+	return response.OKWithMessage(c, "verification email sent")
 }
 
-func toUserResponse(u *userv1.User) UserResponse {
-	roles := make([]RoleResponse, len(u.Roles))
-	for i, p := range u.Roles {
-		roles[i] = RoleResponse{
-			RoleID:     p.RoleId,
-			RoleName:   p.RoleName,
-			IsActive:   p.IsActive,
-			StatusID:   p.StatusId,
-			StatusName: p.StatusName,
-		}
+func (h *UserHandler) VerifyAccount(c *fiber.Ctx) error {
+	var body struct {
+		Token string `json:"token"`
 	}
+	if err := request.Parse(c, &body); err != nil {
+		return err
+	}
+	_, err := h.userClient.VerifyAccount(context.Background(), &userv1.VerifyAccountRequest{
+		Token: body.Token,
+	})
+	if err != nil {
+		return err
+	}
+	return response.OKWithMessage(c, "account verified")
+}
 
-	var verifiedAt *string
-	if u.VerifiedAt != nil {
-		t := u.VerifiedAt.AsTime().UTC().Format(time.RFC3339)
-		verifiedAt = &t
+func (h *UserHandler) ForgotPassword(c *fiber.Ctx) error {
+	var body struct {
+		Email string `json:"email"`
 	}
+	if err := request.Parse(c, &body); err != nil {
+		return err
+	}
+	_, err := h.userClient.ForgotPassword(context.Background(), &userv1.ForgotPasswordRequest{
+		Email: body.Email,
+	})
+	if err != nil {
+		return err
+	}
+	return response.OKWithMessage(c, "Forgot password email sent")
+}
 
-	res := UserResponse{
-		ID:             u.Id,
-		Email:          u.Email,
-		Username:       u.Username,
-		FullName:       u.FullName,
-		StatusName:     u.StatusName,
-		StatusID:       u.StatusId,
-		ActiveRoleName: u.ActiveRoleName,
-		ActiveRoleID:   u.ActiveRoleId,
-		Roles:          roles,
-		VerifiedAt:     verifiedAt,
-		CreatedAt:      u.CreatedAt.AsTime().UTC().Format(time.RFC3339),
-		UpdatedAt:      u.UpdatedAt.AsTime().UTC().Format(time.RFC3339),
+func (h *UserHandler) ResetPassword(c *fiber.Ctx) error {
+	var body struct {
+		Token    string `json:"token"`
+		Password string `json:"password"`
 	}
-	if u.DeletedAt != nil {
-		formattedDate := u.DeletedAt.AsTime().Format(time.RFC3339)
-		res.DeletedAt = &formattedDate
+	if err := request.Parse(c, &body); err != nil {
+		return err
 	}
-	return res
+	_, err := h.userClient.ResetPassword(context.Background(), &userv1.ResetPasswordRequest{
+		Token:    body.Token,
+		Password: body.Password,
+	})
+	if err != nil {
+		return err
+	}
+	return response.OKWithMessage(c, "password changed")
+}
+
+func (h *UserHandler) AssignRolesToUser(c *fiber.Ctx) error {
+	var body struct {
+		UserID string   `json:"user_id"`
+		Roles  []string `json:"roles"`
+	}
+	if err := request.Parse(c, &body); err != nil {
+		return err
+	}
+	_, err := h.userClient.AssignRolesToUser(context.Background(), &userv1.AssignRolesToUserRequest{
+		UserId:  body.UserID,
+		RoleIds: body.Roles,
+	})
+	if err != nil {
+		return err
+	}
+	return response.OKWithMessage(c, "assigned roles to user")
+}
+
+func (h *UserHandler) RemoveRolesFromUser(c *fiber.Ctx) error {
+	var body struct {
+		UserID string   `json:"user_id"`
+		Roles  []string `json:"roles"`
+	}
+	if err := request.Parse(c, &body); err != nil {
+		return err
+	}
+	_, err := h.userClient.RemoveRolesFromUser(context.Background(), &userv1.RemoveRolesFromUserRequest{
+		UserId:  body.UserID,
+		RoleIds: body.Roles,
+	})
+	if err != nil {
+		return err
+	}
+	return response.OKWithMessage(c, "removed roles from user")
 }

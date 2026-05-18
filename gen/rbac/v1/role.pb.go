@@ -11,6 +11,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	v1 "microservice-golang/gen/common/v1"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -28,13 +29,14 @@ type Role struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Permissions   []*Permission          `protobuf:"bytes,4,rep,name=permissions,proto3" json:"permissions,omitempty"`
-	CreatedById   string                 `protobuf:"bytes,5,opt,name=created_by_id,json=createdById,proto3" json:"created_by_id,omitempty"`
-	UpdatedById   string                 `protobuf:"bytes,6,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
-	DeletedById   *string                `protobuf:"bytes,7,opt,name=deleted_by_id,json=deletedById,proto3,oneof" json:"deleted_by_id,omitempty"`
+	Permissions   []*v1.PermissionSimple `protobuf:"bytes,4,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	CreatedBy     *v1.UserSimple         `protobuf:"bytes,5,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	UpdatedBy     *v1.UserSimple         `protobuf:"bytes,6,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
+	DeletedBy     *v1.UserSimple         `protobuf:"bytes,7,opt,name=deleted_by,json=deletedBy,proto3,oneof" json:"deleted_by,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
+	Slug          string                 `protobuf:"bytes,11,opt,name=slug,proto3" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -90,32 +92,32 @@ func (x *Role) GetDescription() string {
 	return ""
 }
 
-func (x *Role) GetPermissions() []*Permission {
+func (x *Role) GetPermissions() []*v1.PermissionSimple {
 	if x != nil {
 		return x.Permissions
 	}
 	return nil
 }
 
-func (x *Role) GetCreatedById() string {
+func (x *Role) GetCreatedBy() *v1.UserSimple {
 	if x != nil {
-		return x.CreatedById
+		return x.CreatedBy
 	}
-	return ""
+	return nil
 }
 
-func (x *Role) GetUpdatedById() string {
+func (x *Role) GetUpdatedBy() *v1.UserSimple {
 	if x != nil {
-		return x.UpdatedById
+		return x.UpdatedBy
 	}
-	return ""
+	return nil
 }
 
-func (x *Role) GetDeletedById() string {
-	if x != nil && x.DeletedById != nil {
-		return *x.DeletedById
+func (x *Role) GetDeletedBy() *v1.UserSimple {
+	if x != nil {
+		return x.DeletedBy
 	}
-	return ""
+	return nil
 }
 
 func (x *Role) GetCreatedAt() *timestamppb.Timestamp {
@@ -139,12 +141,20 @@ func (x *Role) GetDeletedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Role) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
 type CreateRoleRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	PermissionIds []string               `protobuf:"bytes,3,rep,name=permission_ids,json=permissionIds,proto3" json:"permission_ids,omitempty"`
 	CreatedById   string                 `protobuf:"bytes,4,opt,name=created_by_id,json=createdById,proto3" json:"created_by_id,omitempty"`
+	Slug          string                 `protobuf:"bytes,5,opt,name=slug,proto3" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -207,6 +217,13 @@ func (x *CreateRoleRequest) GetCreatedById() string {
 	return ""
 }
 
+func (x *CreateRoleRequest) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
 type GetRoleRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -258,6 +275,7 @@ type UpdateRoleRequest struct {
 	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
 	PermissionIds []string               `protobuf:"bytes,4,rep,name=permission_ids,json=permissionIds,proto3" json:"permission_ids,omitempty"`
 	UpdatedById   string                 `protobuf:"bytes,5,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
+	Slug          *string                `protobuf:"bytes,6,opt,name=slug,proto3,oneof" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -323,6 +341,13 @@ func (x *UpdateRoleRequest) GetPermissionIds() []string {
 func (x *UpdateRoleRequest) GetUpdatedById() string {
 	if x != nil {
 		return x.UpdatedById
+	}
+	return ""
+}
+
+func (x *UpdateRoleRequest) GetSlug() string {
+	if x != nil && x.Slug != nil {
+		return *x.Slug
 	}
 	return ""
 }
@@ -855,39 +880,48 @@ var File_rbac_v1_role_proto protoreflect.FileDescriptor
 
 const file_rbac_v1_role_proto_rawDesc = "" +
 	"\n" +
-	"\x12rbac/v1/role.proto\x12\arbac.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\x1a\x18rbac/v1/permission.proto\"\xcb\x03\n" +
+	"\x12rbac/v1/role.proto\x12\arbac.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\x1a\x18rbac/v1/permission.proto\x1a\x16common/v1/common.proto\"\x9a\x04\n" +
 	"\x04Role\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x125\n" +
-	"\vpermissions\x18\x04 \x03(\v2\x13.rbac.v1.PermissionR\vpermissions\x12\"\n" +
-	"\rcreated_by_id\x18\x05 \x01(\tR\vcreatedById\x12\"\n" +
-	"\rupdated_by_id\x18\x06 \x01(\tR\vupdatedById\x12'\n" +
-	"\rdeleted_by_id\x18\a \x01(\tH\x00R\vdeletedById\x88\x01\x01\x129\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12=\n" +
+	"\vpermissions\x18\x04 \x03(\v2\x1b.common.v1.PermissionSimpleR\vpermissions\x124\n" +
+	"\n" +
+	"created_by\x18\x05 \x01(\v2\x15.common.v1.UserSimpleR\tcreatedBy\x124\n" +
+	"\n" +
+	"updated_by\x18\x06 \x01(\v2\x15.common.v1.UserSimpleR\tupdatedBy\x129\n" +
+	"\n" +
+	"deleted_by\x18\a \x01(\v2\x15.common.v1.UserSimpleH\x00R\tdeletedBy\x88\x01\x01\x129\n" +
 	"\n" +
 	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12>\n" +
 	"\n" +
 	"deleted_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampH\x01R\tdeletedAt\x88\x01\x01B\x10\n" +
-	"\x0e_deleted_by_idB\r\n" +
-	"\v_deleted_at\"\xb3\x01\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampH\x01R\tdeletedAt\x88\x01\x01\x12\x12\n" +
+	"\x04slug\x18\v \x01(\tR\x04slugB\r\n" +
+	"\v_deleted_byB\r\n" +
+	"\v_deleted_at\"\xe2\x01\n" +
 	"\x11CreateRoleRequest\x12\x1d\n" +
-	"\x04name\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x02\x182R\x04name\x12*\n" +
-	"\vdescription\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01R\vdescription\x12%\n" +
+	"\x04name\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x02\x182R\x04name\x12,\n" +
+	"\vdescription\x18\x02 \x01(\tB\n" +
+	"\xbaH\ar\x05\x10\x01\x18\xff\x01R\vdescription\x12%\n" +
 	"\x0epermission_ids\x18\x03 \x03(\tR\rpermissionIds\x12,\n" +
-	"\rcreated_by_id\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vcreatedById\"*\n" +
+	"\rcreated_by_id\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vcreatedById\x12+\n" +
+	"\x04slug\x18\x05 \x01(\tB\x17\xbaH\x14r\x12\x10\x01\x18d2\f^[a-z0-9-]+$R\x04slug\"*\n" +
 	"\x0eGetRoleRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\xee\x01\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\xad\x02\n" +
 	"\x11UpdateRoleRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12 \n" +
-	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x182H\x00R\x04name\x88\x01\x01\x12/\n" +
-	"\vdescription\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01H\x01R\vdescription\x88\x01\x01\x12%\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12\"\n" +
+	"\x04name\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182H\x00R\x04name\x88\x01\x01\x121\n" +
+	"\vdescription\x18\x03 \x01(\tB\n" +
+	"\xbaH\ar\x05\x10\x01\x18\xff\x01H\x01R\vdescription\x88\x01\x01\x12%\n" +
 	"\x0epermission_ids\x18\x04 \x03(\tR\rpermissionIds\x12,\n" +
-	"\rupdated_by_id\x18\x05 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vupdatedByIdB\a\n" +
+	"\rupdated_by_id\x18\x05 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vupdatedById\x120\n" +
+	"\x04slug\x18\x06 \x01(\tB\x17\xbaH\x14r\x12\x10\x01\x18d2\f^[a-z0-9-]+$H\x02R\x04slug\x88\x01\x01B\a\n" +
 	"\x05_nameB\x0e\n" +
-	"\f_description\"~\n" +
+	"\f_descriptionB\a\n" +
+	"\x05_slug\"~\n" +
 	"\x11DeleteRoleRequest\x12\x18\n" +
 	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12,\n" +
 	"\rdeleted_by_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vdeletedById\x12!\n" +
@@ -956,37 +990,41 @@ var file_rbac_v1_role_proto_goTypes = []any{
 	(*ListRolesResponse)(nil),                // 12: rbac.v1.ListRolesResponse
 	(*AssignPermissionToRoleResponse)(nil),   // 13: rbac.v1.AssignPermissionToRoleResponse
 	(*RevokePermissionFromRoleResponse)(nil), // 14: rbac.v1.RevokePermissionFromRoleResponse
-	(*Permission)(nil),                       // 15: rbac.v1.Permission
-	(*timestamppb.Timestamp)(nil),            // 16: google.protobuf.Timestamp
+	(*v1.PermissionSimple)(nil),              // 15: common.v1.PermissionSimple
+	(*v1.UserSimple)(nil),                    // 16: common.v1.UserSimple
+	(*timestamppb.Timestamp)(nil),            // 17: google.protobuf.Timestamp
 }
 var file_rbac_v1_role_proto_depIdxs = []int32{
-	15, // 0: rbac.v1.Role.permissions:type_name -> rbac.v1.Permission
-	16, // 1: rbac.v1.Role.created_at:type_name -> google.protobuf.Timestamp
-	16, // 2: rbac.v1.Role.updated_at:type_name -> google.protobuf.Timestamp
-	16, // 3: rbac.v1.Role.deleted_at:type_name -> google.protobuf.Timestamp
-	0,  // 4: rbac.v1.CreateRoleResponse.role:type_name -> rbac.v1.Role
-	0,  // 5: rbac.v1.GetRoleResponse.role:type_name -> rbac.v1.Role
-	0,  // 6: rbac.v1.UpdateRoleResponse.role:type_name -> rbac.v1.Role
-	0,  // 7: rbac.v1.ListRolesResponse.roles:type_name -> rbac.v1.Role
-	2,  // 8: rbac.v1.RoleService.GetRole:input_type -> rbac.v1.GetRoleRequest
-	1,  // 9: rbac.v1.RoleService.CreateRole:input_type -> rbac.v1.CreateRoleRequest
-	3,  // 10: rbac.v1.RoleService.UpdateRole:input_type -> rbac.v1.UpdateRoleRequest
-	4,  // 11: rbac.v1.RoleService.DeleteRole:input_type -> rbac.v1.DeleteRoleRequest
-	5,  // 12: rbac.v1.RoleService.ListRoles:input_type -> rbac.v1.ListRolesRequest
-	6,  // 13: rbac.v1.RoleService.AssignPermissionToRole:input_type -> rbac.v1.AssignPermissionToRoleRequest
-	7,  // 14: rbac.v1.RoleService.RevokePermissionFromRole:input_type -> rbac.v1.RevokePermissionFromRoleRequest
-	9,  // 15: rbac.v1.RoleService.GetRole:output_type -> rbac.v1.GetRoleResponse
-	8,  // 16: rbac.v1.RoleService.CreateRole:output_type -> rbac.v1.CreateRoleResponse
-	10, // 17: rbac.v1.RoleService.UpdateRole:output_type -> rbac.v1.UpdateRoleResponse
-	11, // 18: rbac.v1.RoleService.DeleteRole:output_type -> rbac.v1.DeleteRoleResponse
-	12, // 19: rbac.v1.RoleService.ListRoles:output_type -> rbac.v1.ListRolesResponse
-	13, // 20: rbac.v1.RoleService.AssignPermissionToRole:output_type -> rbac.v1.AssignPermissionToRoleResponse
-	14, // 21: rbac.v1.RoleService.RevokePermissionFromRole:output_type -> rbac.v1.RevokePermissionFromRoleResponse
-	15, // [15:22] is the sub-list for method output_type
-	8,  // [8:15] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	15, // 0: rbac.v1.Role.permissions:type_name -> common.v1.PermissionSimple
+	16, // 1: rbac.v1.Role.created_by:type_name -> common.v1.UserSimple
+	16, // 2: rbac.v1.Role.updated_by:type_name -> common.v1.UserSimple
+	16, // 3: rbac.v1.Role.deleted_by:type_name -> common.v1.UserSimple
+	17, // 4: rbac.v1.Role.created_at:type_name -> google.protobuf.Timestamp
+	17, // 5: rbac.v1.Role.updated_at:type_name -> google.protobuf.Timestamp
+	17, // 6: rbac.v1.Role.deleted_at:type_name -> google.protobuf.Timestamp
+	0,  // 7: rbac.v1.CreateRoleResponse.role:type_name -> rbac.v1.Role
+	0,  // 8: rbac.v1.GetRoleResponse.role:type_name -> rbac.v1.Role
+	0,  // 9: rbac.v1.UpdateRoleResponse.role:type_name -> rbac.v1.Role
+	0,  // 10: rbac.v1.ListRolesResponse.roles:type_name -> rbac.v1.Role
+	2,  // 11: rbac.v1.RoleService.GetRole:input_type -> rbac.v1.GetRoleRequest
+	1,  // 12: rbac.v1.RoleService.CreateRole:input_type -> rbac.v1.CreateRoleRequest
+	3,  // 13: rbac.v1.RoleService.UpdateRole:input_type -> rbac.v1.UpdateRoleRequest
+	4,  // 14: rbac.v1.RoleService.DeleteRole:input_type -> rbac.v1.DeleteRoleRequest
+	5,  // 15: rbac.v1.RoleService.ListRoles:input_type -> rbac.v1.ListRolesRequest
+	6,  // 16: rbac.v1.RoleService.AssignPermissionToRole:input_type -> rbac.v1.AssignPermissionToRoleRequest
+	7,  // 17: rbac.v1.RoleService.RevokePermissionFromRole:input_type -> rbac.v1.RevokePermissionFromRoleRequest
+	9,  // 18: rbac.v1.RoleService.GetRole:output_type -> rbac.v1.GetRoleResponse
+	8,  // 19: rbac.v1.RoleService.CreateRole:output_type -> rbac.v1.CreateRoleResponse
+	10, // 20: rbac.v1.RoleService.UpdateRole:output_type -> rbac.v1.UpdateRoleResponse
+	11, // 21: rbac.v1.RoleService.DeleteRole:output_type -> rbac.v1.DeleteRoleResponse
+	12, // 22: rbac.v1.RoleService.ListRoles:output_type -> rbac.v1.ListRolesResponse
+	13, // 23: rbac.v1.RoleService.AssignPermissionToRole:output_type -> rbac.v1.AssignPermissionToRoleResponse
+	14, // 24: rbac.v1.RoleService.RevokePermissionFromRole:output_type -> rbac.v1.RevokePermissionFromRoleResponse
+	18, // [18:25] is the sub-list for method output_type
+	11, // [11:18] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_rbac_v1_role_proto_init() }

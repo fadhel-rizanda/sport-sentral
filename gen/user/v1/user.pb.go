@@ -11,6 +11,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	v1 "microservice-golang/gen/common/v1"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -25,11 +26,9 @@ const (
 
 type UserRole struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	RoleId        string                 `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	RoleName      string                 `protobuf:"bytes,2,opt,name=role_name,json=roleName,proto3" json:"role_name,omitempty"`
+	Role          *v1.RoleSimple         `protobuf:"bytes,1,opt,name=role,proto3" json:"role,omitempty"`
+	Status        *v1.StatusSimple       `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
 	IsActive      bool                   `protobuf:"varint,3,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	StatusId      string                 `protobuf:"bytes,4,opt,name=status_id,json=statusId,proto3" json:"status_id,omitempty"`
-	StatusName    string                 `protobuf:"bytes,5,opt,name=status_name,json=statusName,proto3" json:"status_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -64,18 +63,18 @@ func (*UserRole) Descriptor() ([]byte, []int) {
 	return file_user_v1_user_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *UserRole) GetRoleId() string {
+func (x *UserRole) GetRole() *v1.RoleSimple {
 	if x != nil {
-		return x.RoleId
+		return x.Role
 	}
-	return ""
+	return nil
 }
 
-func (x *UserRole) GetRoleName() string {
+func (x *UserRole) GetStatus() *v1.StatusSimple {
 	if x != nil {
-		return x.RoleName
+		return x.Status
 	}
-	return ""
+	return nil
 }
 
 func (x *UserRole) GetIsActive() bool {
@@ -85,37 +84,20 @@ func (x *UserRole) GetIsActive() bool {
 	return false
 }
 
-func (x *UserRole) GetStatusId() string {
-	if x != nil {
-		return x.StatusId
-	}
-	return ""
-}
-
-func (x *UserRole) GetStatusName() string {
-	if x != nil {
-		return x.StatusName
-	}
-	return ""
-}
-
 type User struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Email          string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	Username       string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
-	FullName       string                 `protobuf:"bytes,4,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
-	StatusId       string                 `protobuf:"bytes,5,opt,name=status_id,json=statusId,proto3" json:"status_id,omitempty"`
-	StatusName     string                 `protobuf:"bytes,6,opt,name=status_name,json=statusName,proto3" json:"status_name,omitempty"`
-	ActiveRoleId   string                 `protobuf:"bytes,7,opt,name=active_role_id,json=activeRoleId,proto3" json:"active_role_id,omitempty"`
-	ActiveRoleName string                 `protobuf:"bytes,8,opt,name=active_role_name,json=activeRoleName,proto3" json:"active_role_name,omitempty"`
-	Roles          []*UserRole            `protobuf:"bytes,9,rep,name=roles,proto3" json:"roles,omitempty"`
-	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	VerifiedAt     *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=verified_at,json=verifiedAt,proto3" json:"verified_at,omitempty"`
-	DeletedAt      *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
+	FullName      string                 `protobuf:"bytes,4,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
+	Status        *v1.StatusSimple       `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	Roles         []*UserRole            `protobuf:"bytes,6,rep,name=roles,proto3" json:"roles,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	VerifiedAt    *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=verified_at,json=verifiedAt,proto3" json:"verified_at,omitempty"`
+	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *User) Reset() {
@@ -176,32 +158,11 @@ func (x *User) GetFullName() string {
 	return ""
 }
 
-func (x *User) GetStatusId() string {
+func (x *User) GetStatus() *v1.StatusSimple {
 	if x != nil {
-		return x.StatusId
+		return x.Status
 	}
-	return ""
-}
-
-func (x *User) GetStatusName() string {
-	if x != nil {
-		return x.StatusName
-	}
-	return ""
-}
-
-func (x *User) GetActiveRoleId() string {
-	if x != nil {
-		return x.ActiveRoleId
-	}
-	return ""
-}
-
-func (x *User) GetActiveRoleName() string {
-	if x != nil {
-		return x.ActiveRoleName
-	}
-	return ""
+	return nil
 }
 
 func (x *User) GetRoles() []*UserRole {
@@ -245,7 +206,7 @@ type CreateUserRequest struct {
 	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
 	FullName      string                 `protobuf:"bytes,3,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
 	Password      string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
-	RoleName      string                 `protobuf:"bytes,5,opt,name=role_name,json=roleName,proto3" json:"role_name,omitempty"`
+	RoleId        string                 `protobuf:"bytes,5,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -308,9 +269,9 @@ func (x *CreateUserRequest) GetPassword() string {
 	return ""
 }
 
-func (x *CreateUserRequest) GetRoleName() string {
+func (x *CreateUserRequest) GetRoleId() string {
 	if x != nil {
-		return x.RoleName
+		return x.RoleId
 	}
 	return ""
 }
@@ -1267,42 +1228,35 @@ var File_user_v1_user_proto protoreflect.FileDescriptor
 
 const file_user_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x12user/v1/user.proto\x12\auser.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\"\x9b\x01\n" +
-	"\bUserRole\x12\x17\n" +
-	"\arole_id\x18\x01 \x01(\tR\x06roleId\x12\x1b\n" +
-	"\trole_name\x18\x02 \x01(\tR\broleName\x12\x1b\n" +
-	"\tis_active\x18\x03 \x01(\bR\bisActive\x12\x1b\n" +
-	"\tstatus_id\x18\x04 \x01(\tR\bstatusId\x12\x1f\n" +
-	"\vstatus_name\x18\x05 \x01(\tR\n" +
-	"statusName\"\x9e\x04\n" +
+	"\x12user/v1/user.proto\x12\auser.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\x1a\x16common/v1/common.proto\"\x83\x01\n" +
+	"\bUserRole\x12)\n" +
+	"\x04role\x18\x01 \x01(\v2\x15.common.v1.RoleSimpleR\x04role\x12/\n" +
+	"\x06status\x18\x02 \x01(\v2\x17.common.v1.StatusSimpleR\x06status\x12\x1b\n" +
+	"\tis_active\x18\x03 \x01(\bR\bisActive\"\xc1\x03\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
 	"\busername\x18\x03 \x01(\tR\busername\x12\x1b\n" +
-	"\tfull_name\x18\x04 \x01(\tR\bfullName\x12\x1b\n" +
-	"\tstatus_id\x18\x05 \x01(\tR\bstatusId\x12\x1f\n" +
-	"\vstatus_name\x18\x06 \x01(\tR\n" +
-	"statusName\x12$\n" +
-	"\x0eactive_role_id\x18\a \x01(\tR\factiveRoleId\x12(\n" +
-	"\x10active_role_name\x18\b \x01(\tR\x0eactiveRoleName\x12'\n" +
-	"\x05roles\x18\t \x03(\v2\x11.user.v1.UserRoleR\x05roles\x129\n" +
+	"\tfull_name\x18\x04 \x01(\tR\bfullName\x12/\n" +
+	"\x06status\x18\x05 \x01(\v2\x17.common.v1.StatusSimpleR\x06status\x12'\n" +
+	"\x05roles\x18\x06 \x03(\v2\x11.user.v1.UserRoleR\x05roles\x129\n" +
 	"\n" +
-	"created_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12;\n" +
-	"\vverified_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12;\n" +
+	"\vverified_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"verifiedAt\x12>\n" +
 	"\n" +
-	"deleted_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampH\x00R\tdeletedAt\x88\x01\x01B\r\n" +
-	"\v_deleted_at\"\xe0\x01\n" +
+	"deleted_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampH\x00R\tdeletedAt\x88\x01\x01B\r\n" +
+	"\v_deleted_at\"\xdd\x01\n" +
 	"\x11CreateUserRequest\x12 \n" +
 	"\x05email\x18\x01 \x01(\tB\n" +
 	"\xbaH\ar\x05\x18\xff\x01`\x01R\x05email\x126\n" +
 	"\busername\x18\x02 \x01(\tB\x1a\xbaH\x17r\x15\x10\x03\x1822\x0f^[a-zA-Z0-9_]+$R\busername\x12$\n" +
 	"\tfull_name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18dR\bfullName\x12%\n" +
-	"\bpassword\x18\x04 \x01(\tB\t\xbaH\x06r\x04\x10\b\x18HR\bpassword\x12$\n" +
-	"\trole_name\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\broleName\"*\n" +
+	"\bpassword\x18\x04 \x01(\tB\t\xbaH\x06r\x04\x10\b\x18HR\bpassword\x12!\n" +
+	"\arole_id\x18\x05 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06roleId\"*\n" +
 	"\x0eGetUserRequest\x12\x18\n" +
 	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\xb0\x01\n" +
 	"\x11UpdateUserRequest\x12\x18\n" +
@@ -1405,45 +1359,50 @@ var file_user_v1_user_proto_goTypes = []any{
 	(*ResetPasswordResponse)(nil),       // 21: user.v1.ResetPasswordResponse
 	(*AssignRolesToUserResponse)(nil),   // 22: user.v1.AssignRolesToUserResponse
 	(*RemoveRolesFromUserResponse)(nil), // 23: user.v1.RemoveRolesFromUserResponse
-	(*timestamppb.Timestamp)(nil),       // 24: google.protobuf.Timestamp
+	(*v1.RoleSimple)(nil),               // 24: common.v1.RoleSimple
+	(*v1.StatusSimple)(nil),             // 25: common.v1.StatusSimple
+	(*timestamppb.Timestamp)(nil),       // 26: google.protobuf.Timestamp
 }
 var file_user_v1_user_proto_depIdxs = []int32{
-	0,  // 0: user.v1.User.roles:type_name -> user.v1.UserRole
-	24, // 1: user.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	24, // 2: user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	24, // 3: user.v1.User.verified_at:type_name -> google.protobuf.Timestamp
-	24, // 4: user.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
-	1,  // 5: user.v1.CreateUserResponse.user:type_name -> user.v1.User
-	1,  // 6: user.v1.GetUserResponse.user:type_name -> user.v1.User
-	1,  // 7: user.v1.UpdateUserResponse.user:type_name -> user.v1.User
-	1,  // 8: user.v1.ListUsersResponse.users:type_name -> user.v1.User
-	2,  // 9: user.v1.UserService.CreateUser:input_type -> user.v1.CreateUserRequest
-	3,  // 10: user.v1.UserService.GetUser:input_type -> user.v1.GetUserRequest
-	4,  // 11: user.v1.UserService.UpdateUser:input_type -> user.v1.UpdateUserRequest
-	5,  // 12: user.v1.UserService.DeleteUser:input_type -> user.v1.DeleteUserRequest
-	6,  // 13: user.v1.UserService.ListUsers:input_type -> user.v1.ListUsersRequest
-	7,  // 14: user.v1.UserService.SendVerifyEmail:input_type -> user.v1.SendVerifyEmailRequest
-	8,  // 15: user.v1.UserService.VerifyAccount:input_type -> user.v1.VerifyAccountRequest
-	9,  // 16: user.v1.UserService.ForgotPassword:input_type -> user.v1.ForgotPasswordRequest
-	10, // 17: user.v1.UserService.ResetPassword:input_type -> user.v1.ResetPasswordRequest
-	11, // 18: user.v1.UserService.AssignRolesToUser:input_type -> user.v1.AssignRolesToUserRequest
-	12, // 19: user.v1.UserService.RemoveRolesFromUser:input_type -> user.v1.RemoveRolesFromUserRequest
-	13, // 20: user.v1.UserService.CreateUser:output_type -> user.v1.CreateUserResponse
-	14, // 21: user.v1.UserService.GetUser:output_type -> user.v1.GetUserResponse
-	15, // 22: user.v1.UserService.UpdateUser:output_type -> user.v1.UpdateUserResponse
-	16, // 23: user.v1.UserService.DeleteUser:output_type -> user.v1.DeleteUserResponse
-	17, // 24: user.v1.UserService.ListUsers:output_type -> user.v1.ListUsersResponse
-	18, // 25: user.v1.UserService.SendVerifyEmail:output_type -> user.v1.SendVerifyEmailResponse
-	19, // 26: user.v1.UserService.VerifyAccount:output_type -> user.v1.VerifyAccountResponse
-	20, // 27: user.v1.UserService.ForgotPassword:output_type -> user.v1.ForgotPasswordResponse
-	21, // 28: user.v1.UserService.ResetPassword:output_type -> user.v1.ResetPasswordResponse
-	22, // 29: user.v1.UserService.AssignRolesToUser:output_type -> user.v1.AssignRolesToUserResponse
-	23, // 30: user.v1.UserService.RemoveRolesFromUser:output_type -> user.v1.RemoveRolesFromUserResponse
-	20, // [20:31] is the sub-list for method output_type
-	9,  // [9:20] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	24, // 0: user.v1.UserRole.role:type_name -> common.v1.RoleSimple
+	25, // 1: user.v1.UserRole.status:type_name -> common.v1.StatusSimple
+	25, // 2: user.v1.User.status:type_name -> common.v1.StatusSimple
+	0,  // 3: user.v1.User.roles:type_name -> user.v1.UserRole
+	26, // 4: user.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	26, // 5: user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	26, // 6: user.v1.User.verified_at:type_name -> google.protobuf.Timestamp
+	26, // 7: user.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
+	1,  // 8: user.v1.CreateUserResponse.user:type_name -> user.v1.User
+	1,  // 9: user.v1.GetUserResponse.user:type_name -> user.v1.User
+	1,  // 10: user.v1.UpdateUserResponse.user:type_name -> user.v1.User
+	1,  // 11: user.v1.ListUsersResponse.users:type_name -> user.v1.User
+	2,  // 12: user.v1.UserService.CreateUser:input_type -> user.v1.CreateUserRequest
+	3,  // 13: user.v1.UserService.GetUser:input_type -> user.v1.GetUserRequest
+	4,  // 14: user.v1.UserService.UpdateUser:input_type -> user.v1.UpdateUserRequest
+	5,  // 15: user.v1.UserService.DeleteUser:input_type -> user.v1.DeleteUserRequest
+	6,  // 16: user.v1.UserService.ListUsers:input_type -> user.v1.ListUsersRequest
+	7,  // 17: user.v1.UserService.SendVerifyEmail:input_type -> user.v1.SendVerifyEmailRequest
+	8,  // 18: user.v1.UserService.VerifyAccount:input_type -> user.v1.VerifyAccountRequest
+	9,  // 19: user.v1.UserService.ForgotPassword:input_type -> user.v1.ForgotPasswordRequest
+	10, // 20: user.v1.UserService.ResetPassword:input_type -> user.v1.ResetPasswordRequest
+	11, // 21: user.v1.UserService.AssignRolesToUser:input_type -> user.v1.AssignRolesToUserRequest
+	12, // 22: user.v1.UserService.RemoveRolesFromUser:input_type -> user.v1.RemoveRolesFromUserRequest
+	13, // 23: user.v1.UserService.CreateUser:output_type -> user.v1.CreateUserResponse
+	14, // 24: user.v1.UserService.GetUser:output_type -> user.v1.GetUserResponse
+	15, // 25: user.v1.UserService.UpdateUser:output_type -> user.v1.UpdateUserResponse
+	16, // 26: user.v1.UserService.DeleteUser:output_type -> user.v1.DeleteUserResponse
+	17, // 27: user.v1.UserService.ListUsers:output_type -> user.v1.ListUsersResponse
+	18, // 28: user.v1.UserService.SendVerifyEmail:output_type -> user.v1.SendVerifyEmailResponse
+	19, // 29: user.v1.UserService.VerifyAccount:output_type -> user.v1.VerifyAccountResponse
+	20, // 30: user.v1.UserService.ForgotPassword:output_type -> user.v1.ForgotPasswordResponse
+	21, // 31: user.v1.UserService.ResetPassword:output_type -> user.v1.ResetPasswordResponse
+	22, // 32: user.v1.UserService.AssignRolesToUser:output_type -> user.v1.AssignRolesToUserResponse
+	23, // 33: user.v1.UserService.RemoveRolesFromUser:output_type -> user.v1.RemoveRolesFromUserResponse
+	23, // [23:34] is the sub-list for method output_type
+	12, // [12:23] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_user_v1_user_proto_init() }

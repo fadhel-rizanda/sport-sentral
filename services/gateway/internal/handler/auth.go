@@ -48,7 +48,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		Username string `json:"username"`
 		FullName string `json:"full_name"`
 		Password string `json:"password"`
-		RoleName string `json:"role_name"`
+		RoleID   string `json:"role_id"`
 	}
 	if err := request.Parse(c, &body); err != nil {
 		return err
@@ -59,7 +59,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		Username: body.Username,
 		FullName: body.FullName,
 		Password: body.Password,
-		RoleName: body.RoleName,
+		RoleId:   body.RoleID,
 	})
 	if err != nil {
 		return err
@@ -86,12 +86,25 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	}
 
 	return response.OK(c, fiber.Map{
-		"tokens":           resp.Tokens,
-		"user_id":          resp.UserId,
-		"email":            resp.Email,
-		"username":         resp.Username,
-		"active_role_name": resp.ActiveRoleName,
-		"active_role_id":   resp.ActiveRoleId,
+		"tokens": resp.Tokens,
+		"user": UserSimpleResponse{
+			ID:       resp.User.Id,
+			Email:    resp.User.Email,
+			Username: resp.User.Username,
+			FullName: resp.User.FullName,
+		},
+		"status": StatusSimpleResponse{
+			ID:   resp.Status.Id,
+			Name: resp.Status.Name,
+			Slug: resp.Status.Slug,
+			Type: resp.Status.Type,
+		},
+		"active_role": RoleSimpleResponse{
+			ID:            resp.ActiveRole.Id,
+			Name:          resp.ActiveRole.Name,
+			Slug:          resp.ActiveRole.Slug,
+			PermissionIDs: resp.ActiveRole.PermissionIds,
+		},
 	})
 }
 

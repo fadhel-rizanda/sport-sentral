@@ -11,6 +11,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	v1 "microservice-golang/gen/common/v1"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -29,12 +30,13 @@ type Permission struct {
 	Resource      string                 `protobuf:"bytes,2,opt,name=resource,proto3" json:"resource,omitempty"`
 	Action        string                 `protobuf:"bytes,3,opt,name=action,proto3" json:"action,omitempty"`
 	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	CreatedById   string                 `protobuf:"bytes,5,opt,name=created_by_id,json=createdById,proto3" json:"created_by_id,omitempty"`
-	UpdatedById   string                 `protobuf:"bytes,6,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
-	DeletedById   *string                `protobuf:"bytes,7,opt,name=deleted_by_id,json=deletedById,proto3,oneof" json:"deleted_by_id,omitempty"`
+	CreatedBy     *v1.UserSimple         `protobuf:"bytes,5,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	UpdatedBy     *v1.UserSimple         `protobuf:"bytes,6,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
+	DeletedBy     *v1.UserSimple         `protobuf:"bytes,7,opt,name=deleted_by,json=deletedBy,proto3,oneof" json:"deleted_by,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
+	Slug          string                 `protobuf:"bytes,11,opt,name=slug,proto3" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -97,25 +99,25 @@ func (x *Permission) GetDescription() string {
 	return ""
 }
 
-func (x *Permission) GetCreatedById() string {
+func (x *Permission) GetCreatedBy() *v1.UserSimple {
 	if x != nil {
-		return x.CreatedById
+		return x.CreatedBy
 	}
-	return ""
+	return nil
 }
 
-func (x *Permission) GetUpdatedById() string {
+func (x *Permission) GetUpdatedBy() *v1.UserSimple {
 	if x != nil {
-		return x.UpdatedById
+		return x.UpdatedBy
 	}
-	return ""
+	return nil
 }
 
-func (x *Permission) GetDeletedById() string {
-	if x != nil && x.DeletedById != nil {
-		return *x.DeletedById
+func (x *Permission) GetDeletedBy() *v1.UserSimple {
+	if x != nil {
+		return x.DeletedBy
 	}
-	return ""
+	return nil
 }
 
 func (x *Permission) GetCreatedAt() *timestamppb.Timestamp {
@@ -139,12 +141,20 @@ func (x *Permission) GetDeletedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Permission) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
 type CreatePermissionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Resource      string                 `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
 	Action        string                 `protobuf:"bytes,2,opt,name=action,proto3" json:"action,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	CreatedById   string                 `protobuf:"bytes,4,opt,name=created_by_id,json=createdById,proto3" json:"created_by_id,omitempty"`
+	Slug          string                 `protobuf:"bytes,5,opt,name=slug,proto3" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -207,14 +217,21 @@ func (x *CreatePermissionRequest) GetCreatedById() string {
 	return ""
 }
 
+func (x *CreatePermissionRequest) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
 type UpdatePermissionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          *string                `protobuf:"bytes,2,opt,name=name,proto3,oneof" json:"name,omitempty"`
-	Resource      *string                `protobuf:"bytes,3,opt,name=resource,proto3,oneof" json:"resource,omitempty"`
-	Action        *string                `protobuf:"bytes,4,opt,name=action,proto3,oneof" json:"action,omitempty"`
-	Description   *string                `protobuf:"bytes,5,opt,name=description,proto3,oneof" json:"description,omitempty"`
-	UpdatedById   string                 `protobuf:"bytes,6,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
+	Resource      *string                `protobuf:"bytes,2,opt,name=resource,proto3,oneof" json:"resource,omitempty"`
+	Action        *string                `protobuf:"bytes,3,opt,name=action,proto3,oneof" json:"action,omitempty"`
+	Description   *string                `protobuf:"bytes,4,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	UpdatedById   string                 `protobuf:"bytes,5,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
+	Slug          *string                `protobuf:"bytes,6,opt,name=slug,proto3,oneof" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -256,13 +273,6 @@ func (x *UpdatePermissionRequest) GetId() string {
 	return ""
 }
 
-func (x *UpdatePermissionRequest) GetName() string {
-	if x != nil && x.Name != nil {
-		return *x.Name
-	}
-	return ""
-}
-
 func (x *UpdatePermissionRequest) GetResource() string {
 	if x != nil && x.Resource != nil {
 		return *x.Resource
@@ -287,6 +297,13 @@ func (x *UpdatePermissionRequest) GetDescription() string {
 func (x *UpdatePermissionRequest) GetUpdatedById() string {
 	if x != nil {
 		return x.UpdatedById
+	}
+	return ""
+}
+
+func (x *UpdatePermissionRequest) GetSlug() string {
+	if x != nil && x.Slug != nil {
+		return *x.Slug
 	}
 	return ""
 }
@@ -799,41 +816,47 @@ var File_rbac_v1_permission_proto protoreflect.FileDescriptor
 
 const file_rbac_v1_permission_proto_rawDesc = "" +
 	"\n" +
-	"\x18rbac/v1/permission.proto\x12\arbac.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\"\xba\x03\n" +
+	"\x18rbac/v1/permission.proto\x12\arbac.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\x1a\x16common/v1/common.proto\"\x81\x04\n" +
 	"\n" +
 	"Permission\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\bresource\x18\x02 \x01(\tR\bresource\x12\x16\n" +
 	"\x06action\x18\x03 \x01(\tR\x06action\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\"\n" +
-	"\rcreated_by_id\x18\x05 \x01(\tR\vcreatedById\x12\"\n" +
-	"\rupdated_by_id\x18\x06 \x01(\tR\vupdatedById\x12'\n" +
-	"\rdeleted_by_id\x18\a \x01(\tH\x00R\vdeletedById\x88\x01\x01\x129\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x124\n" +
+	"\n" +
+	"created_by\x18\x05 \x01(\v2\x15.common.v1.UserSimpleR\tcreatedBy\x124\n" +
+	"\n" +
+	"updated_by\x18\x06 \x01(\v2\x15.common.v1.UserSimpleR\tupdatedBy\x129\n" +
+	"\n" +
+	"deleted_by\x18\a \x01(\v2\x15.common.v1.UserSimpleH\x00R\tdeletedBy\x88\x01\x01\x129\n" +
 	"\n" +
 	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12>\n" +
 	"\n" +
 	"deleted_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampH\x01R\tdeletedAt\x88\x01\x01B\x10\n" +
-	"\x0e_deleted_by_idB\r\n" +
-	"\v_deleted_at\"\xbd\x01\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampH\x01R\tdeletedAt\x88\x01\x01\x12\x12\n" +
+	"\x04slug\x18\v \x01(\tR\x04slugB\r\n" +
+	"\v_deleted_byB\r\n" +
+	"\v_deleted_at\"\xec\x01\n" +
 	"\x17CreatePermissionRequest\x12%\n" +
 	"\bresource\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182R\bresource\x12!\n" +
-	"\x06action\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182R\x06action\x12*\n" +
-	"\vdescription\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01R\vdescription\x12,\n" +
-	"\rcreated_by_id\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vcreatedById\"\xb9\x02\n" +
+	"\x06action\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182R\x06action\x12,\n" +
+	"\vdescription\x18\x03 \x01(\tB\n" +
+	"\xbaH\ar\x05\x10\x01\x18\xff\x01R\vdescription\x12,\n" +
+	"\rcreated_by_id\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vcreatedById\x12+\n" +
+	"\x04slug\x18\x05 \x01(\tB\x17\xbaH\x14r\x12\x10\x01\x18d2\f^[a-z0-9-]+$R\x04slug\"\xc9\x02\n" +
 	"\x17UpdatePermissionRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12 \n" +
-	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x182H\x00R\x04name\x88\x01\x01\x12*\n" +
-	"\bresource\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182H\x01R\bresource\x88\x01\x01\x12&\n" +
-	"\x06action\x18\x04 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182H\x02R\x06action\x88\x01\x01\x12/\n" +
-	"\vdescription\x18\x05 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01H\x03R\vdescription\x88\x01\x01\x12,\n" +
-	"\rupdated_by_id\x18\x06 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vupdatedByIdB\a\n" +
-	"\x05_nameB\v\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12*\n" +
+	"\bresource\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182H\x00R\bresource\x88\x01\x01\x12&\n" +
+	"\x06action\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182H\x01R\x06action\x88\x01\x01\x12/\n" +
+	"\vdescription\x18\x04 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01H\x02R\vdescription\x88\x01\x01\x12,\n" +
+	"\rupdated_by_id\x18\x05 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vupdatedById\x120\n" +
+	"\x04slug\x18\x06 \x01(\tB\x17\xbaH\x14r\x12\x10\x01\x18d2\f^[a-z0-9-]+$H\x03R\x04slug\x88\x01\x01B\v\n" +
 	"\t_resourceB\t\n" +
 	"\a_actionB\x0e\n" +
-	"\f_description\"0\n" +
+	"\f_descriptionB\a\n" +
+	"\x05_slug\"0\n" +
 	"\x14GetPermissionRequest\x12\x18\n" +
 	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\x84\x01\n" +
 	"\x17DeletePermissionRequest\x12\x18\n" +
@@ -905,33 +928,37 @@ var file_rbac_v1_permission_proto_goTypes = []any{
 	(*DeletePermissionResponse)(nil), // 10: rbac.v1.DeletePermissionResponse
 	(*ListPermissionsResponse)(nil),  // 11: rbac.v1.ListPermissionsResponse
 	(*CheckPermissionResponse)(nil),  // 12: rbac.v1.CheckPermissionResponse
-	(*timestamppb.Timestamp)(nil),    // 13: google.protobuf.Timestamp
+	(*v1.UserSimple)(nil),            // 13: common.v1.UserSimple
+	(*timestamppb.Timestamp)(nil),    // 14: google.protobuf.Timestamp
 }
 var file_rbac_v1_permission_proto_depIdxs = []int32{
-	13, // 0: rbac.v1.Permission.created_at:type_name -> google.protobuf.Timestamp
-	13, // 1: rbac.v1.Permission.updated_at:type_name -> google.protobuf.Timestamp
-	13, // 2: rbac.v1.Permission.deleted_at:type_name -> google.protobuf.Timestamp
-	0,  // 3: rbac.v1.CreatePermissionResponse.permission:type_name -> rbac.v1.Permission
-	0,  // 4: rbac.v1.UpdatePermissionResponse.permission:type_name -> rbac.v1.Permission
-	0,  // 5: rbac.v1.GetPermissionResponse.permission:type_name -> rbac.v1.Permission
-	0,  // 6: rbac.v1.ListPermissionsResponse.permissions:type_name -> rbac.v1.Permission
-	1,  // 7: rbac.v1.PermissionService.CreatePermission:input_type -> rbac.v1.CreatePermissionRequest
-	3,  // 8: rbac.v1.PermissionService.GetPermission:input_type -> rbac.v1.GetPermissionRequest
-	2,  // 9: rbac.v1.PermissionService.UpdatePermission:input_type -> rbac.v1.UpdatePermissionRequest
-	4,  // 10: rbac.v1.PermissionService.DeletePermission:input_type -> rbac.v1.DeletePermissionRequest
-	5,  // 11: rbac.v1.PermissionService.ListPermissions:input_type -> rbac.v1.ListPermissionsRequest
-	6,  // 12: rbac.v1.PermissionService.CheckPermission:input_type -> rbac.v1.CheckPermissionRequest
-	7,  // 13: rbac.v1.PermissionService.CreatePermission:output_type -> rbac.v1.CreatePermissionResponse
-	9,  // 14: rbac.v1.PermissionService.GetPermission:output_type -> rbac.v1.GetPermissionResponse
-	8,  // 15: rbac.v1.PermissionService.UpdatePermission:output_type -> rbac.v1.UpdatePermissionResponse
-	10, // 16: rbac.v1.PermissionService.DeletePermission:output_type -> rbac.v1.DeletePermissionResponse
-	11, // 17: rbac.v1.PermissionService.ListPermissions:output_type -> rbac.v1.ListPermissionsResponse
-	12, // 18: rbac.v1.PermissionService.CheckPermission:output_type -> rbac.v1.CheckPermissionResponse
-	13, // [13:19] is the sub-list for method output_type
-	7,  // [7:13] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	13, // 0: rbac.v1.Permission.created_by:type_name -> common.v1.UserSimple
+	13, // 1: rbac.v1.Permission.updated_by:type_name -> common.v1.UserSimple
+	13, // 2: rbac.v1.Permission.deleted_by:type_name -> common.v1.UserSimple
+	14, // 3: rbac.v1.Permission.created_at:type_name -> google.protobuf.Timestamp
+	14, // 4: rbac.v1.Permission.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 5: rbac.v1.Permission.deleted_at:type_name -> google.protobuf.Timestamp
+	0,  // 6: rbac.v1.CreatePermissionResponse.permission:type_name -> rbac.v1.Permission
+	0,  // 7: rbac.v1.UpdatePermissionResponse.permission:type_name -> rbac.v1.Permission
+	0,  // 8: rbac.v1.GetPermissionResponse.permission:type_name -> rbac.v1.Permission
+	0,  // 9: rbac.v1.ListPermissionsResponse.permissions:type_name -> rbac.v1.Permission
+	1,  // 10: rbac.v1.PermissionService.CreatePermission:input_type -> rbac.v1.CreatePermissionRequest
+	3,  // 11: rbac.v1.PermissionService.GetPermission:input_type -> rbac.v1.GetPermissionRequest
+	2,  // 12: rbac.v1.PermissionService.UpdatePermission:input_type -> rbac.v1.UpdatePermissionRequest
+	4,  // 13: rbac.v1.PermissionService.DeletePermission:input_type -> rbac.v1.DeletePermissionRequest
+	5,  // 14: rbac.v1.PermissionService.ListPermissions:input_type -> rbac.v1.ListPermissionsRequest
+	6,  // 15: rbac.v1.PermissionService.CheckPermission:input_type -> rbac.v1.CheckPermissionRequest
+	7,  // 16: rbac.v1.PermissionService.CreatePermission:output_type -> rbac.v1.CreatePermissionResponse
+	9,  // 17: rbac.v1.PermissionService.GetPermission:output_type -> rbac.v1.GetPermissionResponse
+	8,  // 18: rbac.v1.PermissionService.UpdatePermission:output_type -> rbac.v1.UpdatePermissionResponse
+	10, // 19: rbac.v1.PermissionService.DeletePermission:output_type -> rbac.v1.DeletePermissionResponse
+	11, // 20: rbac.v1.PermissionService.ListPermissions:output_type -> rbac.v1.ListPermissionsResponse
+	12, // 21: rbac.v1.PermissionService.CheckPermission:output_type -> rbac.v1.CheckPermissionResponse
+	16, // [16:22] is the sub-list for method output_type
+	10, // [10:16] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_rbac_v1_permission_proto_init() }

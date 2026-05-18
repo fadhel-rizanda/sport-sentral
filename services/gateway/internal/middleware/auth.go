@@ -36,11 +36,11 @@ func Auth(authClient authv1.AuthServiceClient) fiber.Handler {
 			return response.Error(c, fiber.StatusUnauthorized, "invalid or expired token")
 		}
 
-		c.Locals(ContextUserID, resp.UserId)
-		c.Locals(ContextEmail, resp.Email)
-		c.Locals(ContextUsername, resp.Username)
-		c.Locals(ContextActiveRoleName, resp.ActiveRoleName)
-		c.Locals(ContextRoleIDs, resp.RoleIds)
+		c.Locals(ContextUserID, resp.User.Id)
+		c.Locals(ContextEmail, resp.User.Email)
+		c.Locals(ContextUsername, resp.User.Username)
+		c.Locals(ContextActiveRoleName, resp.ActiveRole.Name)
+		c.Locals(ContextRoleIDs, resp.ActiveRole.PermissionIds)
 
 		return c.Next()
 	}

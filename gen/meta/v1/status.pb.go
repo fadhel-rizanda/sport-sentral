@@ -11,6 +11,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	v1 "microservice-golang/gen/common/v1"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -28,12 +29,13 @@ type Status struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	CreatedById   string                 `protobuf:"bytes,4,opt,name=created_by_id,json=createdById,proto3" json:"created_by_id,omitempty"`
-	UpdatedById   string                 `protobuf:"bytes,5,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
-	DeletedById   *string                `protobuf:"bytes,6,opt,name=deleted_by_id,json=deletedById,proto3,oneof" json:"deleted_by_id,omitempty"`
+	CreatedBy     *v1.UserSimple         `protobuf:"bytes,4,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	UpdatedBy     *v1.UserSimple         `protobuf:"bytes,5,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
+	DeletedBy     *v1.UserSimple         `protobuf:"bytes,6,opt,name=deleted_by,json=deletedBy,proto3,oneof" json:"deleted_by,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
+	Slug          string                 `protobuf:"bytes,10,opt,name=slug,proto3" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -89,25 +91,25 @@ func (x *Status) GetName() string {
 	return ""
 }
 
-func (x *Status) GetCreatedById() string {
+func (x *Status) GetCreatedBy() *v1.UserSimple {
 	if x != nil {
-		return x.CreatedById
+		return x.CreatedBy
 	}
-	return ""
+	return nil
 }
 
-func (x *Status) GetUpdatedById() string {
+func (x *Status) GetUpdatedBy() *v1.UserSimple {
 	if x != nil {
-		return x.UpdatedById
+		return x.UpdatedBy
 	}
-	return ""
+	return nil
 }
 
-func (x *Status) GetDeletedById() string {
-	if x != nil && x.DeletedById != nil {
-		return *x.DeletedById
+func (x *Status) GetDeletedBy() *v1.UserSimple {
+	if x != nil {
+		return x.DeletedBy
 	}
-	return ""
+	return nil
 }
 
 func (x *Status) GetCreatedAt() *timestamppb.Timestamp {
@@ -131,11 +133,19 @@ func (x *Status) GetDeletedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Status) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
 type CreateStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	CreatedById   string                 `protobuf:"bytes,3,opt,name=created_by_id,json=createdById,proto3" json:"created_by_id,omitempty"`
+	Slug          string                 `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -187,6 +197,13 @@ func (x *CreateStatusRequest) GetName() string {
 func (x *CreateStatusRequest) GetCreatedById() string {
 	if x != nil {
 		return x.CreatedById
+	}
+	return ""
+}
+
+func (x *CreateStatusRequest) GetSlug() string {
+	if x != nil {
+		return x.Slug
 	}
 	return ""
 }
@@ -353,6 +370,7 @@ type UpdateStatusRequest struct {
 	Type          *string                `protobuf:"bytes,2,opt,name=type,proto3,oneof" json:"type,omitempty"`
 	Name          *string                `protobuf:"bytes,3,opt,name=name,proto3,oneof" json:"name,omitempty"`
 	UpdatedById   string                 `protobuf:"bytes,4,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
+	Slug          *string                `protobuf:"bytes,5,opt,name=slug,proto3,oneof" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -411,6 +429,13 @@ func (x *UpdateStatusRequest) GetName() string {
 func (x *UpdateStatusRequest) GetUpdatedById() string {
 	if x != nil {
 		return x.UpdatedById
+	}
+	return ""
+}
+
+func (x *UpdateStatusRequest) GetSlug() string {
+	if x != nil && x.Slug != nil {
+		return *x.Slug
 	}
 	return ""
 }
@@ -767,26 +792,32 @@ var File_meta_v1_status_proto protoreflect.FileDescriptor
 
 const file_meta_v1_status_proto_rawDesc = "" +
 	"\n" +
-	"\x14meta/v1/status.proto\x12\ameta.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x88\x03\n" +
+	"\x14meta/v1/status.proto\x12\ameta.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16common/v1/common.proto\"\xcf\x03\n" +
 	"\x06Status\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\"\n" +
-	"\rcreated_by_id\x18\x04 \x01(\tR\vcreatedById\x12\"\n" +
-	"\rupdated_by_id\x18\x05 \x01(\tR\vupdatedById\x12'\n" +
-	"\rdeleted_by_id\x18\x06 \x01(\tH\x00R\vdeletedById\x88\x01\x01\x129\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x124\n" +
+	"\n" +
+	"created_by\x18\x04 \x01(\v2\x15.common.v1.UserSimpleR\tcreatedBy\x124\n" +
+	"\n" +
+	"updated_by\x18\x05 \x01(\v2\x15.common.v1.UserSimpleR\tupdatedBy\x129\n" +
+	"\n" +
+	"deleted_by\x18\x06 \x01(\v2\x15.common.v1.UserSimpleH\x00R\tdeletedBy\x88\x01\x01\x129\n" +
 	"\n" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12>\n" +
 	"\n" +
-	"deleted_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampH\x01R\tdeletedAt\x88\x01\x01B\x10\n" +
-	"\x0e_deleted_by_idB\r\n" +
-	"\v_deleted_at\"}\n" +
-	"\x13CreateStatusRequest\x12\x1b\n" +
-	"\x04type\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04type\x12\x1b\n" +
-	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12,\n" +
-	"\rcreated_by_id\x18\x03 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vcreatedById\"L\n" +
+	"deleted_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampH\x01R\tdeletedAt\x88\x01\x01\x12\x12\n" +
+	"\x04slug\x18\n" +
+	" \x01(\tR\x04slugB\r\n" +
+	"\v_deleted_byB\r\n" +
+	"\v_deleted_at\"\xae\x01\n" +
+	"\x13CreateStatusRequest\x12\x1d\n" +
+	"\x04type\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182R\x04type\x12\x1d\n" +
+	"\x04name\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182R\x04name\x12,\n" +
+	"\rcreated_by_id\x18\x03 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vcreatedById\x12+\n" +
+	"\x04slug\x18\x04 \x01(\tB\x17\xbaH\x14r\x12\x10\x01\x18d2\f^[a-z0-9-]+$R\x04slug\"L\n" +
 	"\x10GetStatusRequest\x12\x1b\n" +
 	"\x04type\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04type\x12\x1b\n" +
 	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\"0\n" +
@@ -796,14 +827,16 @@ const file_meta_v1_status_proto_rawDesc = "" +
 	"\x04type\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x00R\x04type\x88\x01\x01\x12\x1b\n" +
 	"\x04page\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\x04page\x12&\n" +
 	"\tpage_size\x18\x03 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01R\bpageSizeB\a\n" +
-	"\x05_type\"\xb3\x01\n" +
+	"\x05_type\"\xf2\x01\n" +
 	"\x13UpdateStatusRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12 \n" +
-	"\x04type\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x00R\x04type\x88\x01\x01\x12 \n" +
-	"\x04name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x01R\x04name\x88\x01\x01\x12,\n" +
-	"\rupdated_by_id\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vupdatedByIdB\a\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12\"\n" +
+	"\x04type\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182H\x00R\x04type\x88\x01\x01\x12\"\n" +
+	"\x04name\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182H\x01R\x04name\x88\x01\x01\x12,\n" +
+	"\rupdated_by_id\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vupdatedById\x120\n" +
+	"\x04slug\x18\x05 \x01(\tB\x17\xbaH\x14r\x12\x10\x01\x18d2\f^[a-z0-9-]+$H\x02R\x04slug\x88\x01\x01B\a\n" +
 	"\x05_typeB\a\n" +
-	"\x05_name\"\x80\x01\n" +
+	"\x05_nameB\a\n" +
+	"\x05_slug\"\x80\x01\n" +
 	"\x13DeleteStatusRequest\x12\x18\n" +
 	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12,\n" +
 	"\rdeleted_by_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vdeletedById\x12!\n" +
@@ -858,34 +891,38 @@ var file_meta_v1_status_proto_goTypes = []any{
 	(*ListStatusesResponse)(nil),  // 10: meta.v1.ListStatusesResponse
 	(*UpdateStatusResponse)(nil),  // 11: meta.v1.UpdateStatusResponse
 	(*DeleteStatusResponse)(nil),  // 12: meta.v1.DeleteStatusResponse
-	(*timestamppb.Timestamp)(nil), // 13: google.protobuf.Timestamp
+	(*v1.UserSimple)(nil),         // 13: common.v1.UserSimple
+	(*timestamppb.Timestamp)(nil), // 14: google.protobuf.Timestamp
 }
 var file_meta_v1_status_proto_depIdxs = []int32{
-	13, // 0: meta.v1.Status.created_at:type_name -> google.protobuf.Timestamp
-	13, // 1: meta.v1.Status.updated_at:type_name -> google.protobuf.Timestamp
-	13, // 2: meta.v1.Status.deleted_at:type_name -> google.protobuf.Timestamp
-	0,  // 3: meta.v1.CreateStatusResponse.status:type_name -> meta.v1.Status
-	0,  // 4: meta.v1.GetStatusResponse.status:type_name -> meta.v1.Status
-	0,  // 5: meta.v1.GetStatusByIDResponse.status:type_name -> meta.v1.Status
-	0,  // 6: meta.v1.ListStatusesResponse.statuses:type_name -> meta.v1.Status
-	0,  // 7: meta.v1.UpdateStatusResponse.status:type_name -> meta.v1.Status
-	1,  // 8: meta.v1.StatusService.CreateStatus:input_type -> meta.v1.CreateStatusRequest
-	2,  // 9: meta.v1.StatusService.GetStatus:input_type -> meta.v1.GetStatusRequest
-	3,  // 10: meta.v1.StatusService.GetStatusByID:input_type -> meta.v1.GetStatusByIDRequest
-	4,  // 11: meta.v1.StatusService.ListStatuses:input_type -> meta.v1.ListStatusesRequest
-	5,  // 12: meta.v1.StatusService.UpdateStatus:input_type -> meta.v1.UpdateStatusRequest
-	6,  // 13: meta.v1.StatusService.DeleteStatus:input_type -> meta.v1.DeleteStatusRequest
-	7,  // 14: meta.v1.StatusService.CreateStatus:output_type -> meta.v1.CreateStatusResponse
-	8,  // 15: meta.v1.StatusService.GetStatus:output_type -> meta.v1.GetStatusResponse
-	9,  // 16: meta.v1.StatusService.GetStatusByID:output_type -> meta.v1.GetStatusByIDResponse
-	10, // 17: meta.v1.StatusService.ListStatuses:output_type -> meta.v1.ListStatusesResponse
-	11, // 18: meta.v1.StatusService.UpdateStatus:output_type -> meta.v1.UpdateStatusResponse
-	12, // 19: meta.v1.StatusService.DeleteStatus:output_type -> meta.v1.DeleteStatusResponse
-	14, // [14:20] is the sub-list for method output_type
-	8,  // [8:14] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	13, // 0: meta.v1.Status.created_by:type_name -> common.v1.UserSimple
+	13, // 1: meta.v1.Status.updated_by:type_name -> common.v1.UserSimple
+	13, // 2: meta.v1.Status.deleted_by:type_name -> common.v1.UserSimple
+	14, // 3: meta.v1.Status.created_at:type_name -> google.protobuf.Timestamp
+	14, // 4: meta.v1.Status.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 5: meta.v1.Status.deleted_at:type_name -> google.protobuf.Timestamp
+	0,  // 6: meta.v1.CreateStatusResponse.status:type_name -> meta.v1.Status
+	0,  // 7: meta.v1.GetStatusResponse.status:type_name -> meta.v1.Status
+	0,  // 8: meta.v1.GetStatusByIDResponse.status:type_name -> meta.v1.Status
+	0,  // 9: meta.v1.ListStatusesResponse.statuses:type_name -> meta.v1.Status
+	0,  // 10: meta.v1.UpdateStatusResponse.status:type_name -> meta.v1.Status
+	1,  // 11: meta.v1.StatusService.CreateStatus:input_type -> meta.v1.CreateStatusRequest
+	2,  // 12: meta.v1.StatusService.GetStatus:input_type -> meta.v1.GetStatusRequest
+	3,  // 13: meta.v1.StatusService.GetStatusByID:input_type -> meta.v1.GetStatusByIDRequest
+	4,  // 14: meta.v1.StatusService.ListStatuses:input_type -> meta.v1.ListStatusesRequest
+	5,  // 15: meta.v1.StatusService.UpdateStatus:input_type -> meta.v1.UpdateStatusRequest
+	6,  // 16: meta.v1.StatusService.DeleteStatus:input_type -> meta.v1.DeleteStatusRequest
+	7,  // 17: meta.v1.StatusService.CreateStatus:output_type -> meta.v1.CreateStatusResponse
+	8,  // 18: meta.v1.StatusService.GetStatus:output_type -> meta.v1.GetStatusResponse
+	9,  // 19: meta.v1.StatusService.GetStatusByID:output_type -> meta.v1.GetStatusByIDResponse
+	10, // 20: meta.v1.StatusService.ListStatuses:output_type -> meta.v1.ListStatusesResponse
+	11, // 21: meta.v1.StatusService.UpdateStatus:output_type -> meta.v1.UpdateStatusResponse
+	12, // 22: meta.v1.StatusService.DeleteStatus:output_type -> meta.v1.DeleteStatusResponse
+	17, // [17:23] is the sub-list for method output_type
+	11, // [11:17] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_meta_v1_status_proto_init() }
