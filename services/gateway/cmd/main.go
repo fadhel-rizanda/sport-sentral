@@ -1,12 +1,18 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"github.com/gofiber/contrib/otelfiber"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"microservice-golang/services/gateway/internal/client"
 	"microservice-golang/services/gateway/internal/config"
 	"microservice-golang/services/gateway/internal/handler"
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/services/gateway/internal/router"
+	"microservice-golang/shared/pkg/telemetry"
+	"net/http"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -27,7 +33,7 @@ func main() {
 	env := envConfig.GetEnv("APP_ENV", "development")
 	appName := envConfig.GetEnv("APP_NAME", "sport-sentral")
 	appVersion := envConfig.GetEnv("APP_VERSION", "0.0.1")
-	serviceName := envConfig.GetEnv("SERVICE_NAME", "gateway")
+	serviceName := envConfig.GetEnv("SERVICE_NAME", "api-gateway")
 	serviceVersion := envConfig.GetEnv("SERVICE_VERSION", "0.0.1")
 
 	// ── Logger ────────────────────────────────────────────────────────────────
@@ -45,6 +51,29 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to load config", zap.Error(err))
 	}
+
+	// ── Telemetry ─────────────────────────────────────────────────────────────
+	tel, err := telemetry.New(telemetry.Config{
+		ServiceName:    serviceName,
+		ServiceVersion: serviceVersion,
+		Environment:    env,
+		JaegerEndpoint: cfg.Telemetry.JaegerEndpoint,
+		Enabled:        cfg.Telemetry.Enabled,
+	}, log)
+	if err != nil {
+		log.Fatal("failed to init telemetry service", zap.Error(err))
+	}
+	defer tel.Shutdown(context.Background())
+
+	http.Handle("/metrics", promhttp.Handler())
+	go func() {
+		metricsAddr := cfg.MetricsPort
+		log.Info("metrics server listening", zap.String("addr", metricsAddr))
+
+		if err := http.ListenAndServe(metricsAddr, nil); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Error("metrics server stopped", zap.Error(err))
+		}
+	}()
 
 	// ── gRPC Client ──────────────────────────────────────────────────
 	identityClient, err := client.NewIdentityClient(cfg.GRPC.IdentityAddress)
@@ -82,6 +111,7 @@ func main() {
 
 	// ── Global Middleware ─────────────────────────────────────────────────────
 	app.Use(recover.New())
+	app.Use(otelfiber.Middleware())
 	app.Use(logger.New())
 	app.Use(cors.New())
 	app.Use(middleware.RateLimit(redisClient, cfg.RateLimit.Max, cfg.RateLimit.Expiration))

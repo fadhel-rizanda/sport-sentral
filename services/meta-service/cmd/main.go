@@ -3,9 +3,12 @@ package main
 import (
 	"buf.build/go/protovalidate"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -22,7 +25,9 @@ import (
 	"microservice-golang/shared/pkg/logger"
 	"microservice-golang/shared/pkg/messaging"
 	"microservice-golang/shared/pkg/redisclient"
+	"microservice-golang/shared/pkg/telemetry"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -53,10 +58,36 @@ func main() {
 		log.Fatal("load config failed", zap.Error(err))
 	}
 
+	// ── Telemetry ─────────────────────────────────────────────────────────────
+	tel, err := telemetry.New(telemetry.Config{
+		ServiceName:    serviceName,
+		ServiceVersion: serviceVersion,
+		Environment:    env,
+		JaegerEndpoint: cfg.Telemetry.JaegerEndpoint,
+		Enabled:        cfg.Telemetry.Enabled,
+	}, log)
+	if err != nil {
+		log.Fatal("failed to init telemetry service", zap.Error(err))
+	}
+	defer tel.Shutdown(context.Background())
+
+	http.Handle("/metrics", promhttp.Handler())
+	go func() {
+		log.Info("metrics server listening", zap.String("port", cfg.MetricsPort))
+		if err := http.ListenAndServe(cfg.MetricsPort, nil); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Error("metrics server stopped", zap.Error(err))
+		}
+	}()
+
 	// ── Database ──────────────────────────────────────────────────────────────
 	db, err := gorm.Open(postgres.Open(cfg.Database.GormDSN()), &gorm.Config{})
 	if err != nil {
 		log.Fatal("connect to database failed", zap.Error(err))
+	}
+
+	// Add GORM tracing
+	if err := telemetry.InitGORMTracing(db, serviceName); err != nil {
+		log.Fatal("failed to initialize gorm telemetry", zap.Error(err))
 	}
 
 	if err := database.RunExternalMigrations(cfg.Database.PgDSN()); err != nil {
@@ -113,6 +144,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer(
+		grpc.StatsHandler(otelgrpc.NewServerHandler()), // Add tracing to server
 		grpc.ChainUnaryInterceptor(
 			interceptor.UnaryLogger(log),
 			interceptor.UnaryRecovery(log),

@@ -1,0 +1,35 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4317"
+      http:
+        endpoint: "0.0.0.0:14318"
+
+connectors:
+  spanmetrics:
+    dimensions:
+      - name: http.method
+      - name: http.status_code
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+
+  otlp/jaeger:
+    endpoint: "127.0.0.1:14317"
+    tls:
+      insecure: true
+
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [spanmetrics, otlp/jaeger, debug]
+
+    metrics/spanmetrics:
+      receivers: [spanmetrics]
+      exporters: [prometheus, debug]

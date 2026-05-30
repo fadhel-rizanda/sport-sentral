@@ -11,6 +11,8 @@ type Config struct {
 	Database     DatabaseConfig
 	Redis        RedisConfig
 	IdentityNats NatsConfig
+	Telemetry    TelemetryConfig
+	MetricsPort  string
 }
 
 type GRPCConfig struct {
@@ -63,11 +65,23 @@ type RedisConfig struct {
 	DB       int
 }
 
+type TelemetryConfig struct {
+	Enabled        bool
+	JaegerEndpoint string
+}
+
 func Load() (*Config, error) {
 	redisHost := envConfig.GetEnv("REDIS_HOST", "localhost")
 	redisPort := envConfig.GetEnvInt("REDIS_PORT", 6379)
+
 	identityNatsHost := envConfig.GetEnv("IDENTITY_NATS_HOST", "nats://localhost")
 	identityNatsPort := envConfig.GetEnvInt("IDENTITY_NATS_PORT", 4222)
+
+	jaegerHost := envConfig.GetEnv("JAEGER_HOST", "localhost")
+	jaegerPort := envConfig.GetEnvInt("JAEGER_PORT", 4317)
+
+	metricPort := envConfig.GetEnv("METRIC_PORT", "9002")
+
 	return &Config{
 		GRPC: GRPCConfig{
 			Port: envConfig.GetEnvInt("GRPC_PORT", 50052),
@@ -98,5 +112,10 @@ func Load() (*Config, error) {
 			DefaultMaxDeliver:    5,
 			DefaultMaxAckPending: 100,
 		},
+		Telemetry: TelemetryConfig{
+			Enabled:        envConfig.GetEnvBool("TELEMETRY_ENABLED", false),
+			JaegerEndpoint: fmt.Sprintf("%s:%d", jaegerHost, jaegerPort),
+		},
+		MetricsPort: fmt.Sprintf(":%s", metricPort),
 	}, nil
 }

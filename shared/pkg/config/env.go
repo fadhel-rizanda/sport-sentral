@@ -48,3 +48,17 @@ func GetEnvDuration(key string, defaultVal time.Duration) time.Duration {
 
 	return d
 }
+
+func GetEnvBool(key string, defaultVal bool) bool {
+	val := os.Getenv(key)
+	if val == "" {
+		return defaultVal
+	}
+
+	b, err := strconv.ParseBool(val)
+	if err != nil {
+		return defaultVal
+	}
+
+	return b
+}

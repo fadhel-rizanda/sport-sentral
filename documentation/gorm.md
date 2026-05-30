@@ -1,22 +1,26 @@
-**GORM — Ringkasan Lengkap**
+# GORM — Panduan dan Praktik Terbaik
+
+Dokumen ini menyajikan ringkasan komprehensif penggunaan **GORM** (Object Relational Mapper) untuk Go, mulai dari koneksi, manajemen skema, relasi asosiasi, hingga daftar kendala yang wajib dihindari.
 
 ---
 
-**Apa itu GORM?**
+## 1. Pendahuluan GORM
 
-ORM (Object Relational Mapper) untuk Go. Tugasnya menjembatani antara Go struct dan tabel database — lu tidak perlu tulis raw SQL untuk operasi umum.
+GORM adalah ORM untuk bahasa pemrograman Go. Tugas utamanya adalah memetakan (mapping) Go Struct ke tabel database relasional. Dengan GORM, Anda dapat meminimalisir penulisan query SQL mentah (raw SQL) untuk operasi dasar CRUD.
 
 ```go
-// Tanpa GORM
+// Tanpa GORM (Raw SQL)
 rows, err := db.QueryContext(ctx, "INSERT INTO users (id, email) VALUES ($1, $2)", id, email)
 
-// Dengan GORM
+// Dengan GORM (Type-Safe dan Ringkas)
 db.WithContext(ctx).Create(&user)
 ```
 
 ---
 
-**Setup & Koneksi**
+## 2. Inisialisasi Koneksi dan Konfigurasi
+
+Inisialisasi database PostgreSQL menggunakan driver resmi GORM:
 
 ```go
 import (
@@ -24,297 +28,238 @@ import (
     "gorm.io/gorm"
 )
 
-dsn := "host=localhost user=postgres password=secret dbname=mydb port=5432"
+dsn := "host=localhost user=postgres password=secret dbname=mydb port=5432 sslmode=disable"
 db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 ```
 
 ---
 
-**Model Convention**
+## 3. Konvensi Model dan Struktur Struct
 
-GORM punya konvensi default yang bisa di-override dengan tag:
+GORM memiliki konvensi bawaan yang kuat. Namun, Anda selalu dapat menyesuaikan perilaku tersebut menggunakan tag struct.
 
 ```go
 type User struct {
-    ID        uuid.UUID      `gorm:"type:uuid;primaryKey"`      // custom type
-    Email     string         `gorm:"uniqueIndex;not null"`      // unique + not null
-    Username  string         `gorm:"column:user_name"`          // custom column name
-    FullName  string         `gorm:"not null;default:''"`       // default value
-    RoleID    *uuid.UUID     `gorm:"type:uuid"`                 // nullable FK
-    CreatedAt time.Time                                         // auto-managed GORM
-    UpdatedAt time.Time                                         // auto-managed GORM
-    DeletedAt gorm.DeletedAt `gorm:"index"`                    // soft delete
+    ID        uuid.UUID      `gorm:"type:uuid;primaryKey"`      // Primary key UUID manual
+    Email     string         `gorm:"uniqueIndex;not null"`      // Unique index & non-nullable
+    Username  string         `gorm:"column:user_name"`          // Nama kolom kustom di DB
+    FullName  string         `gorm:"not null;default:''"`       // Nilai default
+    RoleID    *uuid.UUID     `gorm:"type:uuid"`                 // Nullable Foreign Key
+    CreatedAt time.Time                                         // Dikelola otomatis oleh GORM
+    UpdatedAt time.Time                                         // Dikelola otomatis oleh GORM
+    DeletedAt gorm.DeletedAt `gorm:"index"`                     // Mengaktifkan fitur Soft Delete
 }
 ```
 
-Konvensi default:
-- Nama tabel = plural snake_case dari struct name → `User` jadi `users`
-- Primary key = field `ID`
-- `CreatedAt`, `UpdatedAt`, `DeletedAt` di-manage otomatis
+### Konvensi Default GORM:
+1. **Nama Tabel**: Secara otomatis diubah menjadi jamak (plural) dan berformat `snake_case` (contoh: struct `User` dipetakan ke tabel `users`).
+2. **Primary Key**: Menggunakan kolom bernama `id`.
+3. **Auto-timestamp**: Kolom `created_at` dan `updated_at` diperbarui otomatis oleh framework pada operasi insert dan update.
 
-Override nama tabel:
+Jika ingin menggunakan nama tabel kustom:
 ```go
-func (User) TableName() string { return "app_users" }
+func (User) TableName() string {
+    return "app_users" // Meng-override konvensi tabel
+}
 ```
 
 ---
 
-**AutoMigrate**
+## 4. Migrasi Otomatis (AutoMigrate)
 
-Generate/update tabel dari struct secara otomatis:
+GORM menyediakan fitur skema sinkronisasi instan melalui fungsi `AutoMigrate`.
 
 ```go
 db.AutoMigrate(&User{}, &Role{}, &Permission{})
 ```
 
-Penting: AutoMigrate hanya **tambah** kolom baru, tidak pernah hapus kolom yang sudah ada. Untuk production sebaiknya pakai migration tool seperti `golang-migrate`.
+> [!WARNING]
+> **Penting untuk Lingkungan Produksi**:
+> `AutoMigrate` hanya akan **menambahkan** kolom baru, indeks baru, atau tabel baru. Fitur ini **tidak akan menghapus atau mengubah tipe data** kolom yang sudah ada untuk menghindari kehilangan data secara tidak sengaja.
+> - **Rekomendasi**: Untuk lingkungan produksi, gunakan alat migrasi terpisah yang terstruktur seperti `golang-migrate` agar mutasi skema tercatat dalam versi file `.sql` yang terkontrol.
 
 ---
 
-**CRUD Dasar**
+## 5. Operasi CRUD Dasar
 
-**Create:**
+### A. Create (Insert)
 ```go
-user := &User{Email: "test@example.com"}
+user := &User{Email: "john@example.com", Username: "john_doe"}
 result := db.Create(user)
-// Setelah Create, user.ID sudah ter-set oleh GORM
-// result.Error — error jika ada
-// result.RowsAffected — jumlah row yang dibuat
+
+// result.Error        -> Menampung error jika query gagal
+// result.RowsAffected -> Menghitung jumlah record yang berhasil disimpan
+// Setelah Create berhasil, user.ID akan terisi secara otomatis.
 ```
 
-**Read:**
+### B. Read (Querying)
 ```go
-// First — ambil satu, order by primary key, error jika tidak ada
+// 1. First: Mengambil 1 baris pertama berdasarkan primary key, mengembalikan error `gorm.ErrRecordNotFound` jika tidak ditemukan.
 var user User
-db.First(&user, "id = ?", id)
+err := db.First(&user, "id = ?", id).Error
 
-// Find — ambil banyak, tidak error jika kosong
+// 2. Find: Mengambil banyak baris, tidak akan mengembalikan error jika data kosong (mengembalikan slice kosong).
 var users []User
-db.Find(&users)
+err := db.Find(&users).Error
 
-// Where
+// 3. Where: Menyaring data secara terstruktur
 db.Where("email = ? AND deleted_at IS NULL", email).First(&user)
 ```
 
-**Update:**
+### C. Update (Mutasi)
 ```go
-// Updates dengan map — hanya update field yang ada di map
+// Updates (Menggunakan Map): Mengubah kolom spesifik secara aman
 db.Model(&user).Updates(map[string]any{
-    "full_name": "John",
-    "username":  "john",
+    "full_name": "John Doe Updated",
+    "username":  "john_updated",
 })
 
-// Save — update semua field (hati-hati, bisa overwrite data)
+// Save: Menyimpan seluruh field struct (Hati-hati! Field kosong pada struct akan menimpa data di database)
 db.Save(&user)
 ```
 
-**Delete:**
+### D. Delete (Penghapusan)
 ```go
-// Soft delete — set deleted_at = NOW() jika struct punya gorm.DeletedAt
+// 1. Soft Delete: Jika model memiliki DeletedAt, data tidak dihapus secara fisik melainkan diperbarui timestamp penghapusannya.
 db.Delete(&user)
 
-// Hard delete — bypass soft delete
+// 2. Hard Delete: Menghapus data secara fisik dan permanen dari database.
 db.Unscoped().Delete(&user)
 ```
 
 ---
 
-**Soft Delete**
+## 6. Fitur Soft Delete
 
-Kalau struct punya field `DeletedAt gorm.DeletedAt`, GORM otomatis:
-- `Delete()` → set `deleted_at = NOW()`, tidak hapus row
-- Semua query (`Find`, `First`, dll) otomatis tambah `WHERE deleted_at IS NULL`
-- Untuk query include soft-deleted: pakai `db.Unscoped()`
+Jika model memiliki bidang `DeletedAt gorm.DeletedAt`, GORM akan menyesuaikan kueri penghapusan:
+- Operasi `Delete()` akan mengeksekusi kueri `UPDATE` untuk mengisi kolom `deleted_at` dengan waktu saat ini.
+- Semua kueri pencarian bawaan (`Find`, `First`, dll.) secara otomatis disisipi kondisi `WHERE deleted_at IS NULL`.
+- Jika ingin mengambil data yang telah dihapus sementara, gunakan filter **`Unscoped()`**:
 
 ```go
-// Hanya return user yang tidak soft-deleted
+// Hanya menampilkan data yang aktif (belum dihapus)
 db.Find(&users)
 
-// Return semua termasuk soft-deleted
+// Menampilkan seluruh data, termasuk yang sudah dihapus sementara (soft delete)
 db.Unscoped().Find(&users)
 ```
 
 ---
 
-**Hooks**
+## 7. Penanganan Hook Lifecycle
 
-Function yang dipanggil otomatis sebelum/sesudah operasi DB:
+Hook adalah fungsi yang dieksekusi secara otomatis oleh GORM sebelum atau sesudah operasi database tertentu dijalankan.
 
 ```go
-// BeforeCreate — dipanggil sebelum INSERT
-func (u *User) BeforeCreate(_ *gorm.DB) error {
+// BeforeCreate: Dipanggil otomatis sebelum baris baru dimasukkan ke database (INSERT)
+func (u *User) BeforeCreate(tx *gorm.DB) error {
     if u.ID == uuid.Nil {
-        u.ID = uuid.New() // generate UUID sebelum insert
+        u.ID = uuid.New() // Membuat UUID baru jika kosong
     }
     return nil
 }
-
-// Hook lain yang tersedia:
-// BeforeSave, AfterSave
-// BeforeCreate, AfterCreate
-// BeforeUpdate, AfterUpdate
-// BeforeDelete, AfterDelete
-// AfterFind
 ```
+
+Daftar hook yang tersedia:
+- **Create**: `BeforeSave`, `BeforeCreate`, `AfterCreate`, `AfterSave`
+- **Update**: `BeforeSave`, `BeforeUpdate`, `AfterUpdate`, `AfterSave`
+- **Delete**: `BeforeDelete`, `AfterDelete`
+- **Query**: `AfterFind`
 
 ---
 
-**Associations**
+## 8. Manajemen Relasi Asosiasi
 
-**BelongsTo** — User belongs to Role:
+### Belongs To
+Model `User` memiliki satu `Role`:
 ```go
 type User struct {
     RoleID *uuid.UUID
-    Role   *Role      `gorm:"foreignKey:RoleID"`
+    Role   *Role `gorm:"foreignKey:RoleID"`
 }
 ```
 
-**HasMany** — Role has many Users:
+### Has Many
+Satu `Role` dapat dimiliki oleh banyak `User`:
 ```go
 type Role struct {
     Users []User `gorm:"foreignKey:RoleID"`
 }
 ```
 
-**Many2Many** — Role ↔ Permission:
+### Many to Many
+Relasi banyak-ke-banyak (misalnya `Role` memiliki banyak `Permission`):
 ```go
 type Role struct {
     Permissions []Permission `gorm:"many2many:role_permissions;"`
 }
+// GORM otomatis membuat join-table bernama `role_permissions`
 ```
-GORM otomatis buat join table `role_permissions` dengan kolom `role_id` dan `permission_id`.
 
-**Preload** — load association saat query:
+### Eager Loading (Preload)
+Secara default, GORM tidak memuat data relasi untuk efisiensi performa. Gunakan `Preload` untuk mengambil data relasi terkait:
+
 ```go
-// Load Role beserta semua Permissions-nya
-db.Preload("Permissions").Where("id = ?", id).First(&role)
+// Mengambil Role beserta seluruh data list Permissions sekaligus
+db.Preload("Permissions").Where("id = ?", roleID).First(&role)
 
-// Load nested
+// Mengambil User beserta data Role dan nested Permission di dalam Role tersebut
 db.Preload("Role.Permissions").First(&user)
 ```
 
-**Association operations:**
-```go
-// Tambah permission ke role (insert ke join table)
-db.Model(&role).Association("Permissions").Append(&permission)
-
-// Hapus permission dari role (delete dari join table)
-db.Model(&role).Association("Permissions").Delete(&permission)
-
-// Replace semua permissions
-db.Model(&role).Association("Permissions").Replace(&newPermissions)
-```
-
 ---
 
-**Transactions**
+## 9. Penggunaan Transaksi
+
+Transaksi memastikan prinsip ACID. Jika salah satu operasi database gagal di dalam blok transaksi, seluruh rangkaian perubahan akan dibatalkan secara otomatis (*rollback*).
 
 ```go
 err := db.Transaction(func(tx *gorm.DB) error {
+    // Gunakan objek `tx` di dalam blok transaksi, bukan `db`
     if err := tx.Create(&user).Error; err != nil {
-        return err // auto rollback
+        return err // Mengembalikan error otomatis memicu ROLLBACK
     }
+    
     if err := tx.Create(&profile).Error; err != nil {
-        return err // auto rollback
+        return err // Mengembalikan error otomatis memicu ROLLBACK
     }
-    return nil // auto commit
+    
+    return nil // Mengembalikan nil memicu COMMIT
 })
 ```
 
-Manual transaction:
-```go
-tx := db.Begin()
-if err := tx.Create(&user).Error; err != nil {
-    tx.Rollback()
-    return err
-}
-tx.Commit()
-```
-
 ---
 
-**Scopes**
+## 10. Kendala Umum yang Wajib Dihindari
 
-Reusable query conditions:
+### 1. Masalah N+1 Query
+Terjadi saat Anda melakukan iterasi hasil kueri untuk mengambil relasi tanpa menggunakan eager loading `Preload()`.
 ```go
-func ActiveUsers(db *gorm.DB) *gorm.DB {
-    return db.Where("is_active = ?", true)
-}
-
-func Paginate(page, pageSize int) func(*gorm.DB) *gorm.DB {
-    return func(db *gorm.DB) *gorm.DB {
-        return db.Limit(pageSize).Offset((page - 1) * pageSize)
-    }
-}
-
-// Pemakaian
-db.Scopes(ActiveUsers, Paginate(1, 20)).Find(&users)
-```
-
----
-
-**Raw SQL**
-
-Kalau query terlalu kompleks untuk GORM API:
-```go
-// Raw query
-db.Raw("SELECT * FROM users WHERE email = ?", email).Scan(&user)
-
-// Exec untuk non-select
-db.Exec("UPDATE users SET role_id = NULL WHERE role_id = ?", roleID)
-```
-
----
-
-**Hal yang Perlu Diwaspadai**
-
-**1. N+1 query** — paling umum terjadi saat load association tanpa Preload:
-```go
-// BAD — query N+1: 1 query untuk users, N query untuk setiap role
+// Kurang Baik: Memicu N+1 Query (1 query untuk mengambil daftar user, N query tambahan untuk setiap Role)
 for _, user := range users {
-    fmt.Println(user.Role.Name) // query per user
+    fmt.Println(user.Role.Name) // Mengakses bidang relasi memicu kueri SQL terpisah
 }
 
-// GOOD — 2 query saja
+// Baik: Hanya mengeksekusi total 2 kueri SQL secara efisien
 db.Preload("Role").Find(&users)
 ```
 
-**2. `Updates` vs `Save`:**
+### 2. Nilai Nol (Zero Value) Diabaikan oleh `Updates()` via Struct
+Saat melakukan pembaruan data menggunakan struct, GORM secara default **tidak akan mengubah** data di database jika nilai bidang adalah *zero value* (seperti `false`, `0`, `""`).
 ```go
-// Updates — hanya update field yang di-pass, aman
-db.Model(&user).Updates(map[string]any{"full_name": "John"})
-
-// Save — update SEMUA field, field kosong akan overwrite data existing
-db.Save(&user) // hati-hati
-```
-
-**3. Zero value diabaikan oleh `Updates`:**
-```go
-// Ini TIDAK akan update is_active ke false karena false adalah zero value
+// Salah: Tidak akan memperbarui is_active menjadi false
 db.Model(&user).Updates(User{IsActive: false})
 
-// Gunakan map untuk update zero value
+// Benar: Gunakan Map untuk memperbarui zero value
 db.Model(&user).Updates(map[string]any{"is_active": false})
 ```
 
-**4. `First` vs `Find`:**
+### 3. Tidak Menyertakan Go Context
+GORM memerlukan context (`ctx`) untuk menyalurkan informasi Distributed Tracing (Span OTel) dan penanganan pembatalan (timeout).
 ```go
-// First — error ErrRecordNotFound jika tidak ada
-db.First(&user, "id = ?", id) // harus handle not found
+// Kurang Baik: Tracing terputus di tingkat database
+db.First(&user)
 
-// Find — tidak error jika kosong, slice tetap kosong
-db.Find(&users) // aman untuk list query
-```
-
----
-
-**Singkatnya:**
-
-```
-GORM = struct tag sebagai schema
-     + hooks untuk lifecycle
-     + associations untuk relasi
-     + soft delete otomatis via DeletedAt
-     + transaction support
-     + raw SQL kalau butuh
+// Baik: Query tercatat dengan terstruktur di Jaeger UI
+db.WithContext(ctx).First(&user)
 ```

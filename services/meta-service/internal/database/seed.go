@@ -17,7 +17,7 @@ func Seed(db *gorm.DB) error {
 }
 
 func SeedStatuses(uc usecase.StatusUseCase) error {
-	createdBy, err := uuid.Parse("c677557c-895e-49db-936e-001fbc1e0b69")
+	createdBy, err := uuid.Parse("389d7e0d-4bdd-4ecc-9d7b-88ad8a8055db")
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func SeedStatuses(uc usecase.StatusUseCase) error {
 				Type:        s.Type,
 				Name:        s.Name,
 				Slug:        slug,
-				CreatedByID: uuid.MustParse("c677557c-895e-49db-936e-001fbc1e0b69"),
+				CreatedByID: uuid.MustParse("389d7e0d-4bdd-4ecc-9d7b-88ad8a8055db"),
 			})
 			if err != nil {
 				return err

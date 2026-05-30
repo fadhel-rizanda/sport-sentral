@@ -17,6 +17,8 @@ type Config struct {
 	AppURL      string
 	MetaService MetaServiceConfig
 	MetaNats    NatsConfig
+	Telemetry   TelemetryConfig
+	MetricsPort string
 }
 
 type GRPCConfig struct {
@@ -80,6 +82,11 @@ type NatsConfig struct {
 	DefaultMaxAckPending int
 }
 
+type TelemetryConfig struct {
+	Enabled        bool
+	JaegerEndpoint string
+}
+
 func Load() (*Config, error) {
 	redisHost := envConfig.GetEnv("REDIS_HOST", "localhost")
 	redisPort := envConfig.GetEnvInt("REDIS_PORT", 6379)
@@ -89,6 +96,12 @@ func Load() (*Config, error) {
 
 	identityNatsHost := envConfig.GetEnv("IDENTITY_NATS_HOST", "nats://localhost")
 	identityNatsPort := envConfig.GetEnvInt("IDENTITY_NATS_PORT", 4222)
+
+	jaegerHost := envConfig.GetEnv("JAEGER_HOST", "localhost")
+	jaegerPort := envConfig.GetEnvInt("JAEGER_PORT", 4317)
+
+	metricPort := envConfig.GetEnv("METRIC_PORT", "9001")
+
 	return &Config{
 		GRPC: GRPCConfig{
 			Port: envConfig.GetEnvInt("GRPC_PORT", 50051),
@@ -136,5 +149,10 @@ func Load() (*Config, error) {
 			DefaultMaxDeliver:    5,
 			DefaultMaxAckPending: 100,
 		},
+		Telemetry: TelemetryConfig{
+			Enabled:        envConfig.GetEnvBool("TELEMETRY_ENABLED", false),
+			JaegerEndpoint: fmt.Sprintf("%s:%d", jaegerHost, jaegerPort),
+		},
+		MetricsPort: fmt.Sprintf(":%s", metricPort),
 	}, nil
 }
