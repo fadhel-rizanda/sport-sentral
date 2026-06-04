@@ -3,13 +3,14 @@ package database
 import (
 	"errors"
 	"fmt"
+	"log"
+	"microservice-golang/services/identity-service/internal/entity"
+	"os"
+
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"gorm.io/gorm"
-	"log"
-	"microservice-golang/services/identity-service/internal/entity"
-	"os"
 )
 
 func RunExternalMigrations(dsn string) error {
@@ -42,6 +43,6 @@ func Migrate(db *gorm.DB) error {
 		&entity.Permission{},
 		&entity.Role{},
 		&entity.UserRole{},
-		&entity.StatusCache{},
+		&entity.Status{},
 	)
 }

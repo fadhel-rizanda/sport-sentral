@@ -62,7 +62,6 @@ Proyek ini dikembangkan di dalam satu repositori tunggal (*monorepo*) dengan pem
 
 ```
 microservice-golang/
-├── .gemini/                       # Berkas metadata sistem asisten
 ├── documentation/                 # Dokumentasi panduan teknis proyek
 ├── gen/                           # Berkas kode Go hasil generate dari proto (Modul Go)
 ├── proto/                         # Defenisi kontrak API Protocol Buffers (Modul Go)

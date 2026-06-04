@@ -1,9 +1,10 @@
 package entity
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"time"
 )
 
 type Status struct {
@@ -19,7 +20,7 @@ type Status struct {
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 
-	CreatedBy *UserCache `gorm:"-"`
-	UpdatedBy *UserCache `gorm:"-"`
-	DeletedBy *UserCache `gorm:"-"`
+	CreatedBy *User `gorm:"-"`
+	UpdatedBy *User `gorm:"-"`
+	DeletedBy *User `gorm:"-"`
 }

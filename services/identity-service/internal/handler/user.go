@@ -2,12 +2,15 @@ package handler
 
 import (
 	"context"
+	"microservice-golang/services/identity-service/internal/dto"
+	"microservice-golang/services/identity-service/internal/mapper"
 
-	"github.com/google/uuid"
-	"google.golang.org/grpc"
 	userv1 "microservice-golang/gen/user/v1"
 	"microservice-golang/services/identity-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
+
+	"github.com/google/uuid"
+	"google.golang.org/grpc"
 )
 
 type UserHandler struct {
@@ -29,7 +32,7 @@ func (h *UserHandler) CreateUser(ctx context.Context, req *userv1.CreateUserRequ
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid role id"))
 	}
 
-	res, err := h.uc.Create(ctx, usecase.CreateUserRequest{
+	res, err := h.uc.Create(ctx, dto.CreateUserRequest{
 		Email:    req.Email,
 		Username: req.Username,
 		FullName: req.FullName,
@@ -40,7 +43,7 @@ func (h *UserHandler) CreateUser(ctx context.Context, req *userv1.CreateUserRequ
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &userv1.CreateUserResponse{User: toProtoUser(res)}, nil
+	return &userv1.CreateUserResponse{User: mapper.ToProtoUser(res)}, nil
 }
 
 func (h *UserHandler) GetUser(ctx context.Context, req *userv1.GetUserRequest) (*userv1.GetUserResponse, error) {
@@ -54,7 +57,7 @@ func (h *UserHandler) GetUser(ctx context.Context, req *userv1.GetUserRequest) (
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &userv1.GetUserResponse{User: toProtoUser(res)}, nil
+	return &userv1.GetUserResponse{User: mapper.ToProtoUser(res)}, nil
 }
 
 func (h *UserHandler) UpdateUser(ctx context.Context, req *userv1.UpdateUserRequest) (*userv1.UpdateUserResponse, error) {
@@ -63,7 +66,7 @@ func (h *UserHandler) UpdateUser(ctx context.Context, req *userv1.UpdateUserRequ
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid user id"))
 	}
 
-	res, err := h.uc.Update(ctx, usecase.UpdateUserRequest{
+	res, err := h.uc.Update(ctx, dto.UpdateUserRequest{
 		ID:       id,
 		FullName: req.FullName,
 		Username: req.Username,
@@ -72,7 +75,7 @@ func (h *UserHandler) UpdateUser(ctx context.Context, req *userv1.UpdateUserRequ
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &userv1.UpdateUserResponse{User: toProtoUser(res)}, nil
+	return &userv1.UpdateUserResponse{User: mapper.ToProtoUser(res)}, nil
 }
 
 func (h *UserHandler) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequest) (*userv1.DeleteUserResponse, error) {
@@ -81,7 +84,7 @@ func (h *UserHandler) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequ
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid user id"))
 	}
 
-	if err := h.uc.SoftDelete(ctx, usecase.DeleteUserRequest{
+	if err := h.uc.SoftDelete(ctx, dto.DeleteUserRequest{
 		ID:       id,
 		Password: req.Password,
 	}); err != nil {
@@ -92,7 +95,7 @@ func (h *UserHandler) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequ
 }
 
 func (h *UserHandler) ListUsers(ctx context.Context, req *userv1.ListUsersRequest) (*userv1.ListUsersResponse, error) {
-	res, err := h.uc.List(ctx, usecase.ListRequest{
+	res, err := h.uc.List(ctx, dto.ListRequest{
 		Page:     int(req.Page),
 		PageSize: int(req.PageSize),
 	})
@@ -102,7 +105,7 @@ func (h *UserHandler) ListUsers(ctx context.Context, req *userv1.ListUsersReques
 
 	users := make([]*userv1.User, len(res.Users))
 	for i, u := range res.Users {
-		users[i] = toProtoUser(u)
+		users[i] = mapper.ToProtoUser(u)
 	}
 
 	return &userv1.ListUsersResponse{

@@ -3,19 +3,21 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"microservice-golang/services/identity-service/internal/dto"
 	"microservice-golang/shared/pkg/constants"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"microservice-golang/services/identity-service/internal/repository"
 	apperr "microservice-golang/shared/pkg/errors"
 	"microservice-golang/shared/pkg/jwt"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type AuthUseCase interface {
-	Login(ctx context.Context, req LoginRequest) (*LoginResponse, error)
+	Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error)
 	Logout(ctx context.Context, refreshToken string) error
-	RefreshToken(ctx context.Context, refreshToken string) (*RefreshTokenResponse, error)
+	RefreshToken(ctx context.Context, refreshToken string) (*dto.RefreshTokenResponse, error)
 	ValidateToken(_ context.Context, accessToken string) (*jwt.Claims, error)
 }
 
@@ -25,7 +27,7 @@ type authUseCase struct {
 	jwtManager      *jwt.Manager
 	redis           *redis.Client
 	refreshTTL      time.Duration
-	statusCacheRepo repository.StatusCacheRepository
+	statusCacheRepo repository.StatusRepository
 }
 
 func NewAuthUseCase(
@@ -34,7 +36,7 @@ func NewAuthUseCase(
 	jwtManager *jwt.Manager,
 	redis *redis.Client,
 	refreshTTL time.Duration,
-	statusCacheRepo repository.StatusCacheRepository,
+	statusCacheRepo repository.StatusRepository,
 ) AuthUseCase {
 	return &authUseCase{
 		userRepo:        userRepo,
@@ -46,7 +48,7 @@ func NewAuthUseCase(
 	}
 }
 
-func (uc *authUseCase) Login(ctx context.Context, req LoginRequest) (*LoginResponse, error) {
+func (uc *authUseCase) Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error) {
 	user, err := uc.userRepo.GetByEmail(ctx, req.Email)
 	if err != nil {
 		return nil, apperr.Unauthorized("invalid email or password")
@@ -96,7 +98,7 @@ func (uc *authUseCase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 		return nil, apperr.Internal(err)
 	}
 
-	return &LoginResponse{
+	return &dto.LoginResponse{
 		AccessToken:  tokens.AccessToken,
 		RefreshToken: tokens.RefreshToken,
 		ExpiresAt:    tokens.ExpiresAt,
@@ -104,13 +106,13 @@ func (uc *authUseCase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 		FullName:     user.FullName,
 		Email:        user.Email,
 		Username:     user.Username,
-		ActiveRole: RoleSimpleResponse{
+		ActiveRole: dto.RoleSimpleResponse{
 			Name:           activeRole.Role.Name,
 			Slug:           activeRole.Role.Slug,
 			ID:             activeRole.Role.ID,
 			PermissionsIDs: roleIDs,
 		},
-		Status: StatusSimpleResponse{
+		Status: dto.StatusSimpleResponse{
 			ID:   status.ID,
 			Name: status.Name,
 			Slug: status.Slug,
@@ -133,7 +135,7 @@ func (uc *authUseCase) Logout(ctx context.Context, refreshToken string) error {
 	return nil
 }
 
-func (uc *authUseCase) RefreshToken(ctx context.Context, refreshToken string) (*RefreshTokenResponse, error) {
+func (uc *authUseCase) RefreshToken(ctx context.Context, refreshToken string) (*dto.RefreshTokenResponse, error) {
 	claims, err := uc.jwtManager.ValidateRefresh(refreshToken)
 	if err != nil {
 		return nil, apperr.Unauthorized("invalid refresh token")
@@ -169,7 +171,7 @@ func (uc *authUseCase) RefreshToken(ctx context.Context, refreshToken string) (*
 		return nil, apperr.Internal(err)
 	}
 
-	return &RefreshTokenResponse{
+	return &dto.RefreshTokenResponse{
 		AccessToken:  tokens.AccessToken,
 		RefreshToken: tokens.RefreshToken,
 		ExpiresAt:    tokens.ExpiresAt,

@@ -2,17 +2,18 @@ package repository
 
 import (
 	"context"
+	"microservice-golang/services/identity-service/internal/entity"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"microservice-golang/services/identity-service/internal/entity"
 )
 
 type userWithStatus struct {
 	entity.User
-	StatusCacheID   uuid.UUID `gorm:"column:status_cache_id"`
-	StatusCacheType string    `gorm:"column:status_cache_type"`
-	StatusCacheName string    `gorm:"column:status_cache_name"`
-	StatusCacheSlug string    `gorm:"column:status_cache_slug"`
+	StatusID   uuid.UUID `gorm:"column:status_id"`
+	StatusType string    `gorm:"column:status_type"`
+	StatusName string    `gorm:"column:status_name"`
+	StatusSlug string    `gorm:"column:status_slug"`
 }
 
 type UserRepository interface {
@@ -46,8 +47,8 @@ func (r *userRepository) List(ctx context.Context, page, pageSize int) ([]*entit
 		Table("users").
 		Preload("UserRoles", "is_active = ?", true).
 		Preload("UserRoles.Role").
-		Joins("LEFT JOIN status_caches sc ON sc.id = users.status_id").
-		Select("users.*, sc.id AS status_cache_id, sc.type AS status_cache_type, sc.name AS status_cache_name, sc.slug AS status_cache_slug").
+		Joins("LEFT JOIN statuses sc ON sc.id = users.status_id").
+		Select("users.*, sc.id AS status_id, sc.type AS status_type, sc.name AS status_name, sc.slug AS status_slug").
 		Offset(offset).Limit(pageSize).
 		Find(&rows).Error
 
@@ -57,11 +58,11 @@ func (r *userRepository) List(ctx context.Context, page, pageSize int) ([]*entit
 
 	users := make([]*entity.User, len(rows))
 	for i := range rows {
-		rows[i].User.Status = entity.StatusCache{
-			ID:   rows[i].StatusCacheID,
-			Type: rows[i].StatusCacheType,
-			Name: rows[i].StatusCacheName,
-			Slug: rows[i].StatusCacheSlug,
+		rows[i].User.Status = entity.Status{
+			ID:   rows[i].StatusID,
+			Type: rows[i].StatusType,
+			Name: rows[i].StatusName,
+			Slug: rows[i].StatusSlug,
 		}
 		users[i] = &rows[i].User
 	}
@@ -75,15 +76,15 @@ func (r *userRepository) List(ctx context.Context, page, pageSize int) ([]*entit
 		}
 
 		if len(statusIDs) > 0 {
-			var statuses []entity.StatusCache
+			var statuses []entity.Status
 			if err := r.db.WithContext(ctx).
-				Table("status_caches").
+				Table("statuses").
 				Where("id IN ?", statusIDs).
 				Find(&statuses).Error; err != nil {
 				return nil, 0, err
 			}
 
-			statusMap := make(map[uuid.UUID]entity.StatusCache)
+			statusMap := make(map[uuid.UUID]entity.Status)
 			for _, s := range statuses {
 				statusMap[s.ID] = s
 			}
@@ -110,8 +111,8 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Use
 			return db.Order("user_roles.created_at DESC")
 		}).
 		Preload("UserRoles.Role").
-		Joins("LEFT JOIN status_caches sc ON sc.id = users.status_id").
-		Select("users.*, sc.id AS status_cache_id, sc.type AS status_cache_type, sc.name AS status_cache_name, sc.slug AS status_cache_slug").
+		Joins("LEFT JOIN statuses sc ON sc.id = users.status_id").
+		Select("users.*, sc.id AS status_id, sc.type AS status_type, sc.name AS status_name, sc.slug AS status_slug").
 		First(&row, "users.id = ?", id).Error
 
 	if err != nil {
@@ -119,12 +120,12 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Use
 	}
 
 	// Only set status if the join returned a valid record
-	if row.StatusCacheID != uuid.Nil {
-		row.User.Status = entity.StatusCache{
-			ID:   row.StatusCacheID,
-			Type: row.StatusCacheType,
-			Name: row.StatusCacheName,
-			Slug: row.StatusCacheSlug,
+	if row.StatusID != uuid.Nil {
+		row.User.Status = entity.Status{
+			ID:   row.StatusID,
+			Type: row.StatusType,
+			Name: row.StatusName,
+			Slug: row.StatusSlug,
 		}
 	}
 
@@ -136,15 +137,15 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Use
 			roleIDs[i] = ur.RoleID
 		}
 
-		var statuses []entity.StatusCache
+		var statuses []entity.Status
 		if err := r.db.WithContext(ctx).
-			Table("status_caches").
+			Table("statuses").
 			Where("id IN ?", statusIDs).
 			Find(&statuses).Error; err != nil {
 			return nil, err
 		}
 
-		statusMap := make(map[uuid.UUID]entity.StatusCache)
+		statusMap := make(map[uuid.UUID]entity.Status)
 		for _, s := range statuses {
 			statusMap[s.ID] = s
 		}
@@ -184,8 +185,8 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.
 			return db.Order("user_roles.created_at DESC")
 		}).
 		Preload("UserRoles.Role").
-		Joins("LEFT JOIN status_caches sc ON sc.id = users.status_id").
-		Select("users.*, sc.id AS status_cache_id, sc.type AS status_cache_type, sc.name AS status_cache_name, sc.slug AS status_cache_slug").
+		Joins("LEFT JOIN statuses sc ON sc.id = users.status_id").
+		Select("users.*, sc.id AS status_id, sc.type AS status_type, sc.name AS status_name, sc.slug AS status_slug").
 		First(&row, "users.email = ?", email).Error
 
 	if err != nil {
@@ -193,12 +194,12 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.
 	}
 
 	// Only set status if the join returned a valid record
-	if row.StatusCacheID != uuid.Nil {
-		row.User.Status = entity.StatusCache{
-			ID:   row.StatusCacheID,
-			Type: row.StatusCacheType,
-			Name: row.StatusCacheName,
-			Slug: row.StatusCacheSlug,
+	if row.StatusID != uuid.Nil {
+		row.User.Status = entity.Status{
+			ID:   row.StatusID,
+			Type: row.StatusType,
+			Name: row.StatusName,
+			Slug: row.StatusSlug,
 		}
 	}
 
@@ -210,15 +211,15 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.
 			roleIDs[i] = ur.RoleID
 		}
 
-		var statuses []entity.StatusCache
+		var statuses []entity.Status
 		if err := r.db.WithContext(ctx).
-			Table("status_caches").
+			Table("statuses").
 			Where("id IN ?", statusIDs).
 			Find(&statuses).Error; err != nil {
 			return nil, err
 		}
 
-		statusMap := make(map[uuid.UUID]entity.StatusCache)
+		statusMap := make(map[uuid.UUID]entity.Status)
 		for _, s := range statuses {
 			statusMap[s.ID] = s
 		}

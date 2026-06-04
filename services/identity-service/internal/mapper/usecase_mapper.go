@@ -1,17 +1,18 @@
-package usecase
+package mapper
 
 import (
+	"microservice-golang/services/identity-service/internal/dto"
 	"microservice-golang/services/identity-service/internal/entity"
 )
 
-func ToUserResponse(user *entity.User) *UserResponse {
-	roles := make([]UserRoleSimpleResponse, len(user.UserRoles))
-	var activeRole RoleSimpleResponse
+func ToUserResponse(user *entity.User) *dto.UserResponse {
+	roles := make([]dto.UserRoleSimpleResponse, len(user.UserRoles))
+	var activeRole dto.RoleSimpleResponse
 
 	for i, ur := range user.UserRoles {
-		permissions := make([]PermissionSimpleResponse, len(ur.Role.Permissions))
+		permissions := make([]dto.PermissionSimpleResponse, len(ur.Role.Permissions))
 		for j, p := range ur.Role.Permissions {
-			permissions[j] = PermissionSimpleResponse{
+			permissions[j] = dto.PermissionSimpleResponse{
 				ID:       p.ID,
 				Resource: p.Resource,
 				Action:   p.Action,
@@ -19,16 +20,16 @@ func ToUserResponse(user *entity.User) *UserResponse {
 			}
 		}
 
-		roleSimple := RoleSimpleResponse{
+		roleSimple := dto.RoleSimpleResponse{
 			ID:          ur.Role.ID,
 			Name:        ur.Role.Name,
 			Slug:        ur.Role.Slug,
 			Permissions: permissions,
 		}
 
-		roles[i] = UserRoleSimpleResponse{
+		roles[i] = dto.UserRoleSimpleResponse{
 			Role: roleSimple,
-			Status: StatusSimpleResponse{
+			Status: dto.StatusSimpleResponse{
 				ID:   ur.Status.ID,
 				Type: ur.Status.Type,
 				Name: ur.Status.Name,
@@ -42,12 +43,12 @@ func ToUserResponse(user *entity.User) *UserResponse {
 		}
 	}
 
-	res := &UserResponse{
+	res := &dto.UserResponse{
 		ID:       user.ID,
 		Email:    user.Email,
 		Username: user.Username,
 		FullName: user.FullName,
-		Status: StatusSimpleResponse{
+		Status: dto.StatusSimpleResponse{
 			ID:   user.Status.ID,
 			Type: user.Status.Type,
 			Name: user.Status.Name,
@@ -67,10 +68,10 @@ func ToUserResponse(user *entity.User) *UserResponse {
 	return res
 }
 
-func ToRoleResponse(role *entity.Role) *RoleResponse {
-	permissions := make([]PermissionSimpleResponse, len(role.Permissions))
+func ToRoleResponse(role *entity.Role) *dto.RoleResponse {
+	permissions := make([]dto.PermissionSimpleResponse, len(role.Permissions))
 	for i, p := range role.Permissions {
-		permissions[i] = PermissionSimpleResponse{
+		permissions[i] = dto.PermissionSimpleResponse{
 			ID:       p.ID,
 			Resource: p.Resource,
 			Action:   p.Action,
@@ -78,19 +79,19 @@ func ToRoleResponse(role *entity.Role) *RoleResponse {
 		}
 	}
 
-	res := &RoleResponse{
+	res := &dto.RoleResponse{
 		ID:          role.ID,
 		Name:        role.Name,
 		Description: role.Description,
 		Slug:        role.Slug,
 		Permissions: permissions,
-		CreatedBy: UserSimpleResponse{
+		CreatedBy: dto.UserSimpleResponse{
 			ID:       role.CreatedByID,
 			Email:    role.CreatedBy.Email,
 			Username: role.CreatedBy.Username,
 			FullName: role.CreatedBy.FullName,
 		},
-		UpdatedBy: UserSimpleResponse{
+		UpdatedBy: dto.UserSimpleResponse{
 			ID:       role.UpdatedByID,
 			Email:    role.UpdatedBy.Email,
 			Username: role.UpdatedBy.Username,
@@ -103,7 +104,7 @@ func ToRoleResponse(role *entity.Role) *RoleResponse {
 	if role.DeletedAt.Valid {
 		res.DeletedAt = &role.DeletedAt.Time
 		if role.DeletedByID != nil {
-			res.DeletedBy = &UserSimpleResponse{
+			res.DeletedBy = &dto.UserSimpleResponse{
 				ID:       *role.DeletedByID,
 				Email:    role.DeletedBy.Email,
 				Username: role.DeletedBy.Username,
@@ -115,20 +116,20 @@ func ToRoleResponse(role *entity.Role) *RoleResponse {
 	return res
 }
 
-func ToPermissionResponse(permission *entity.Permission) *PermissionResponse {
-	res := &PermissionResponse{
+func ToPermissionResponse(permission *entity.Permission) *dto.PermissionResponse {
+	res := &dto.PermissionResponse{
 		ID:          permission.ID,
 		Resource:    permission.Resource,
 		Action:      permission.Action,
 		Description: permission.Description,
 		Slug:        permission.Slug,
-		CreatedBy: UserSimpleResponse{
+		CreatedBy: dto.UserSimpleResponse{
 			ID:       permission.CreatedByID,
 			Email:    permission.CreatedBy.Email,
 			Username: permission.CreatedBy.Username,
 			FullName: permission.CreatedBy.FullName,
 		},
-		UpdatedBy: UserSimpleResponse{
+		UpdatedBy: dto.UserSimpleResponse{
 			ID:       permission.UpdatedByID,
 			Email:    permission.UpdatedBy.Email,
 			Username: permission.UpdatedBy.Username,
@@ -141,7 +142,7 @@ func ToPermissionResponse(permission *entity.Permission) *PermissionResponse {
 	if permission.DeletedAt.Valid {
 		res.DeletedAt = &permission.DeletedAt.Time
 		if permission.DeletedByID != nil {
-			res.DeletedBy = &UserSimpleResponse{
+			res.DeletedBy = &dto.UserSimpleResponse{
 				ID:       *permission.DeletedByID,
 				Email:    permission.DeletedBy.Email,
 				Username: permission.DeletedBy.Username,

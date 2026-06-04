@@ -2,6 +2,8 @@ package handler
 
 import (
 	"context"
+	"microservice-golang/services/identity-service/internal/mapper"
+
 	"github.com/google/uuid"
 
 	"google.golang.org/grpc"
@@ -31,7 +33,7 @@ func (h *UserInternalHandler) GetUserByEmailInternal(ctx context.Context, req *u
 	}
 
 	return &userv1.GetUserByEmailInternalResponse{
-		User: toProtoUserInternal(user),
+		User: mapper.ToProtoUserInternal(user),
 	}, nil
 }
 
@@ -47,6 +49,6 @@ func (h *UserInternalHandler) GetUserByIDInternal(ctx context.Context, req *user
 	}
 
 	return &userv1.GetUserByIDInternalResponse{
-		User: toProtoUserInternal(user),
+		User: mapper.ToProtoUserInternal(user),
 	}, nil
 }

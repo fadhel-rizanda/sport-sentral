@@ -20,8 +20,8 @@ type User struct {
 	DeletedAt      gorm.DeletedAt `gorm:"index"`
 	VerifiedAt     *time.Time
 
-	Status    StatusCache `gorm:"-"`
-	UserRoles []UserRole  `gorm:"foreignKey:UserID"`
+	Status    Status     `gorm:"-"`
+	UserRoles []UserRole `gorm:"foreignKey:UserID"`
 }
 
 func (u *User) BeforeCreate(_ *gorm.DB) error {

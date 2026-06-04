@@ -78,21 +78,19 @@ func (UserEventType) EnumDescriptor() ([]byte, []int) {
 
 // ─── Event envelope ───────────────────────────────────────────────────────────
 type UserEvent struct {
-	state      protoimpl.MessageState `protogen:"open.v1"`
-	EventId    string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
-	EventType  UserEventType          `protobuf:"varint,2,opt,name=event_type,json=eventType,proto3,enum=user.v1.UserEventType" json:"event_type,omitempty"`
-	OccurredAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
-	// The ID of the user associated with this event
-	UserId             string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	UserEmail          string                 `protobuf:"bytes,5,opt,name=user_email,json=userEmail,proto3" json:"user_email,omitempty"`
-	UserUsername       string                 `protobuf:"bytes,6,opt,name=user_username,json=userUsername,proto3" json:"user_username,omitempty"`
-	UserFullName       string                 `protobuf:"bytes,7,opt,name=user_full_name,json=userFullName,proto3" json:"user_full_name,omitempty"`
-	UserActiveRoleId   string                 `protobuf:"bytes,8,opt,name=user_active_role_id,json=userActiveRoleId,proto3" json:"user_active_role_id,omitempty"`
-	UserActiveRoleName string                 `protobuf:"bytes,9,opt,name=user_active_role_name,json=userActiveRoleName,proto3" json:"user_active_role_name,omitempty"`
-	UserStatusId       string                 `protobuf:"bytes,10,opt,name=user_status_id,json=userStatusId,proto3" json:"user_status_id,omitempty"`
-	DeletedAt          *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	EventId          string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	EventType        UserEventType          `protobuf:"varint,2,opt,name=event_type,json=eventType,proto3,enum=user.v1.UserEventType" json:"event_type,omitempty"`
+	OccurredAt       *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
+	UserId           string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserEmail        string                 `protobuf:"bytes,5,opt,name=user_email,json=userEmail,proto3" json:"user_email,omitempty"`
+	UserUsername     string                 `protobuf:"bytes,6,opt,name=user_username,json=userUsername,proto3" json:"user_username,omitempty"`
+	UserFullName     string                 `protobuf:"bytes,7,opt,name=user_full_name,json=userFullName,proto3" json:"user_full_name,omitempty"`
+	UserActiveRoleId string                 `protobuf:"bytes,8,opt,name=user_active_role_id,json=userActiveRoleId,proto3" json:"user_active_role_id,omitempty"`
+	UserStatusId     string                 `protobuf:"bytes,9,opt,name=user_status_id,json=userStatusId,proto3" json:"user_status_id,omitempty"`
+	DeletedAt        *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *UserEvent) Reset() {
@@ -181,13 +179,6 @@ func (x *UserEvent) GetUserActiveRoleId() string {
 	return ""
 }
 
-func (x *UserEvent) GetUserActiveRoleName() string {
-	if x != nil {
-		return x.UserActiveRoleName
-	}
-	return ""
-}
-
 func (x *UserEvent) GetUserStatusId() string {
 	if x != nil {
 		return x.UserStatusId
@@ -206,7 +197,7 @@ var File_user_v1_user_events_proto protoreflect.FileDescriptor
 
 const file_user_v1_user_events_proto_rawDesc = "" +
 	"\n" +
-	"\x19user/v1/user_events.proto\x12\auser.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd2\x04\n" +
+	"\x19user/v1/user_events.proto\x12\auser.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x96\x04\n" +
 	"\tUserEvent\x12#\n" +
 	"\bevent_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\aeventId\x12?\n" +
 	"\n" +
@@ -218,12 +209,11 @@ const file_user_v1_user_events_proto_rawDesc = "" +
 	"user_email\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tuserEmail\x12,\n" +
 	"\ruser_username\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\fuserUsername\x12-\n" +
 	"\x0euser_full_name\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\fuserFullName\x127\n" +
-	"\x13user_active_role_id\x18\b \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x10userActiveRoleId\x12:\n" +
-	"\x15user_active_role_name\x18\t \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x12userActiveRoleName\x12.\n" +
-	"\x0euser_status_id\x18\n" +
-	" \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\fuserStatusId\x12>\n" +
+	"\x13user_active_role_id\x18\b \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x10userActiveRoleId\x12.\n" +
+	"\x0euser_status_id\x18\t \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\fuserStatusId\x12>\n" +
 	"\n" +
-	"deleted_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampH\x00R\tdeletedAt\x88\x01\x01B\r\n" +
+	"deleted_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampH\x00R\tdeletedAt\x88\x01\x01B\r\n" +
 	"\v_deleted_at*\x87\x01\n" +
 	"\rUserEventType\x12\x1f\n" +
 	"\x1bUSER_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x1b\n" +

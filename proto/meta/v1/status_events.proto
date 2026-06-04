@@ -46,7 +46,5 @@ message StatusEvent {
     (buf.validate.field).string.min_len = 1
   ];
 
-  optional string deleted_by_id = 8 [
-    (buf.validate.field).string.uuid = true
-  ];
+  optional google.protobuf.Timestamp deleted_at = 8;
 }

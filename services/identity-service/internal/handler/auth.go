@@ -3,11 +3,13 @@ package handler
 import (
 	"context"
 	commonv1 "microservice-golang/gen/common/v1"
+	"microservice-golang/services/identity-service/internal/dto"
 
-	"google.golang.org/grpc"
 	authv1 "microservice-golang/gen/auth/v1"
 	"microservice-golang/services/identity-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
+
+	"google.golang.org/grpc"
 )
 
 type AuthHandler struct {
@@ -24,7 +26,7 @@ func (h *AuthHandler) RegisterGRPC(s *grpc.Server) {
 }
 
 func (h *AuthHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.LoginResponse, error) {
-	res, err := h.uc.Login(ctx, usecase.LoginRequest{
+	res, err := h.uc.Login(ctx, dto.LoginRequest{
 		Email:    req.Email,
 		Password: req.Password,
 	})

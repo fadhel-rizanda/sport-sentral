@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"microservice-golang/services/identity-service/internal/dto"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -35,7 +36,7 @@ func (h *ProfileHandler) ApplyProfile(ctx context.Context, req *rbacv1.ApplyProf
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid role id"))
 	}
 
-	if err := h.uc.ApplyProfile(ctx, usecase.ApplyProfileRequest{
+	if err := h.uc.ApplyProfile(ctx, dto.ApplyProfileRequest{
 		UserID: userID,
 		RoleID: roleID,
 	}); err != nil {
@@ -56,7 +57,7 @@ func (h *ProfileHandler) ToggleProfile(ctx context.Context, req *rbacv1.TogglePr
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid role id"))
 	}
 
-	if err := h.uc.ToggleProfile(ctx, usecase.ToggleProfileRequest{
+	if err := h.uc.ToggleProfile(ctx, dto.ToggleProfileRequest{
 		UserID: userID,
 		RoleID: roleID,
 	}); err != nil {
@@ -77,7 +78,7 @@ func (h *ProfileHandler) ApproveProfile(ctx context.Context, req *rbacv1.Approve
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid role id"))
 	}
 
-	if err := h.uc.ApproveProfile(ctx, usecase.ApproveProfileRequest{
+	if err := h.uc.ApproveProfile(ctx, dto.ApproveProfileRequest{
 		UserID: userID,
 		RoleID: roleID,
 	}); err != nil {
@@ -98,7 +99,7 @@ func (h *ProfileHandler) RejectProfile(ctx context.Context, req *rbacv1.RejectPr
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid role id"))
 	}
 
-	if err := h.uc.RejectProfile(ctx, usecase.ApproveProfileRequest{
+	if err := h.uc.RejectProfile(ctx, dto.ApproveProfileRequest{
 		UserID: userID,
 		RoleID: roleID,
 	}); err != nil {

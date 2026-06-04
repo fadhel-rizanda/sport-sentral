@@ -2,11 +2,14 @@ package handler
 
 import (
 	"context"
-	"github.com/google/uuid"
-	"google.golang.org/grpc"
 	rbacv1 "microservice-golang/gen/rbac/v1"
+	"microservice-golang/services/identity-service/internal/dto"
+	"microservice-golang/services/identity-service/internal/mapper"
 	"microservice-golang/services/identity-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
+
+	"github.com/google/uuid"
+	"google.golang.org/grpc"
 )
 
 type PermissionHandler struct {
@@ -27,7 +30,7 @@ func (h *PermissionHandler) CreatePermission(ctx context.Context, req *rbacv1.Cr
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid created_by id"))
 	}
-	res, err := h.uc.Create(ctx, usecase.CreatePermissionRequest{
+	res, err := h.uc.Create(ctx, dto.CreatePermissionRequest{
 		Action:      req.GetAction(),
 		Resource:    req.GetResource(),
 		Description: req.GetDescription(),
@@ -38,7 +41,7 @@ func (h *PermissionHandler) CreatePermission(ctx context.Context, req *rbacv1.Cr
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &rbacv1.CreatePermissionResponse{Permission: toProtoPermission(res)}, nil
+	return &rbacv1.CreatePermissionResponse{Permission: mapper.ToProtoPermission(res)}, nil
 }
 
 func (h *PermissionHandler) GetPermission(ctx context.Context, req *rbacv1.GetPermissionRequest) (*rbacv1.GetPermissionResponse, error) {
@@ -51,7 +54,7 @@ func (h *PermissionHandler) GetPermission(ctx context.Context, req *rbacv1.GetPe
 		return nil, apperr.ToGRPC(err)
 	}
 	return &rbacv1.GetPermissionResponse{
-		Permission: toProtoPermission(res),
+		Permission: mapper.ToProtoPermission(res),
 	}, nil
 }
 
@@ -65,7 +68,7 @@ func (h *PermissionHandler) UpdatePermission(ctx context.Context, req *rbacv1.Up
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid updated_by id"))
 	}
-	res, err := h.uc.Update(ctx, usecase.UpdatePermissionRequest{
+	res, err := h.uc.Update(ctx, dto.UpdatePermissionRequest{
 		ID:          id,
 		Action:      req.Action,
 		Resource:    req.Resource,
@@ -77,7 +80,7 @@ func (h *PermissionHandler) UpdatePermission(ctx context.Context, req *rbacv1.Up
 		return nil, apperr.ToGRPC(err)
 	}
 	return &rbacv1.UpdatePermissionResponse{
-		Permission: toProtoPermission(res),
+		Permission: mapper.ToProtoPermission(res),
 	}, nil
 }
 
@@ -94,7 +97,7 @@ func (h *PermissionHandler) DeletePermission(ctx context.Context, req *rbacv1.De
 	if req.GetIsPermanent() {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("permanent delete is not allowed for roles"))
 	} else {
-		err = h.uc.SoftDelete(ctx, usecase.DeleteRequest{
+		err = h.uc.SoftDelete(ctx, dto.DeleteRequest{
 			ID:          id,
 			DeletedByID: deletedBy,
 		})
@@ -114,7 +117,7 @@ func (h *PermissionHandler) ListPermissions(ctx context.Context, req *rbacv1.Lis
 		}
 		roleId = &id
 	}
-	res, err := h.uc.List(ctx, usecase.ListPermissionRequest{
+	res, err := h.uc.List(ctx, dto.ListPermissionRequest{
 		RoleId:   roleId,
 		Page:     int(req.Page),
 		PageSize: int(req.PageSize),
@@ -124,7 +127,7 @@ func (h *PermissionHandler) ListPermissions(ctx context.Context, req *rbacv1.Lis
 	}
 	permissions := make([]*rbacv1.Permission, 0, res.Total)
 	for _, p := range res.Permissions {
-		permissions = append(permissions, toProtoPermission(p))
+		permissions = append(permissions, mapper.ToProtoPermission(p))
 	}
 	return &rbacv1.ListPermissionsResponse{
 		Permissions: permissions,

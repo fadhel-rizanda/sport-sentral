@@ -78,16 +78,15 @@ func (StatusEventType) EnumDescriptor() ([]byte, []int) {
 
 // ─── Event envelope ───────────────────────────────────────────────────────────
 type StatusEvent struct {
-	state      protoimpl.MessageState `protogen:"open.v1"`
-	EventId    string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
-	EventType  StatusEventType        `protobuf:"varint,2,opt,name=event_type,json=eventType,proto3,enum=meta.v1.StatusEventType" json:"event_type,omitempty"`
-	OccurredAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
-	// The ID of the status associated with this event
-	StatusId      string  `protobuf:"bytes,4,opt,name=status_id,json=statusId,proto3" json:"status_id,omitempty"`
-	StatusType    string  `protobuf:"bytes,5,opt,name=status_type,json=statusType,proto3" json:"status_type,omitempty"`
-	StatusName    string  `protobuf:"bytes,6,opt,name=status_name,json=statusName,proto3" json:"status_name,omitempty"`
-	StatusSlug    string  `protobuf:"bytes,7,opt,name=status_slug,json=statusSlug,proto3" json:"status_slug,omitempty"`
-	DeletedById   *string `protobuf:"bytes,8,opt,name=deleted_by_id,json=deletedById,proto3,oneof" json:"deleted_by_id,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	EventType     StatusEventType        `protobuf:"varint,2,opt,name=event_type,json=eventType,proto3,enum=meta.v1.StatusEventType" json:"event_type,omitempty"`
+	OccurredAt    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
+	StatusId      string                 `protobuf:"bytes,4,opt,name=status_id,json=statusId,proto3" json:"status_id,omitempty"`
+	StatusType    string                 `protobuf:"bytes,5,opt,name=status_type,json=statusType,proto3" json:"status_type,omitempty"`
+	StatusName    string                 `protobuf:"bytes,6,opt,name=status_name,json=statusName,proto3" json:"status_name,omitempty"`
+	StatusSlug    string                 `protobuf:"bytes,7,opt,name=status_slug,json=statusSlug,proto3" json:"status_slug,omitempty"`
+	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -171,18 +170,18 @@ func (x *StatusEvent) GetStatusSlug() string {
 	return ""
 }
 
-func (x *StatusEvent) GetDeletedById() string {
-	if x != nil && x.DeletedById != nil {
-		return *x.DeletedById
+func (x *StatusEvent) GetDeletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DeletedAt
 	}
-	return ""
+	return nil
 }
 
 var File_meta_v1_status_events_proto protoreflect.FileDescriptor
 
 const file_meta_v1_status_events_proto_rawDesc = "" +
 	"\n" +
-	"\x1bmeta/v1/status_events.proto\x12\ameta.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa4\x03\n" +
+	"\x1bmeta/v1/status_events.proto\x12\ameta.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xae\x03\n" +
 	"\vStatusEvent\x12#\n" +
 	"\bevent_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\aeventId\x12A\n" +
 	"\n" +
@@ -195,9 +194,10 @@ const file_meta_v1_status_events_proto_rawDesc = "" +
 	"\vstatus_name\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
 	"statusName\x12(\n" +
 	"\vstatus_slug\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
-	"statusSlug\x121\n" +
-	"\rdeleted_by_id\x18\b \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01H\x00R\vdeletedById\x88\x01\x01B\x10\n" +
-	"\x0e_deleted_by_id*\x91\x01\n" +
+	"statusSlug\x12>\n" +
+	"\n" +
+	"deleted_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampH\x00R\tdeletedAt\x88\x01\x01B\r\n" +
+	"\v_deleted_at*\x91\x01\n" +
 	"\x0fStatusEventType\x12!\n" +
 	"\x1dSTATUS_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19STATUS_EVENT_TYPE_CREATED\x10\x01\x12\x1d\n" +
@@ -226,11 +226,12 @@ var file_meta_v1_status_events_proto_goTypes = []any{
 var file_meta_v1_status_events_proto_depIdxs = []int32{
 	0, // 0: meta.v1.StatusEvent.event_type:type_name -> meta.v1.StatusEventType
 	2, // 1: meta.v1.StatusEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	2, // 2: meta.v1.StatusEvent.deleted_at:type_name -> google.protobuf.Timestamp
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_meta_v1_status_events_proto_init() }

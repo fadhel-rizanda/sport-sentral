@@ -2,12 +2,13 @@ package nats
 
 import (
 	"context"
-	"go.uber.org/zap"
-	"google.golang.org/protobuf/proto"
 	userv1 "microservice-golang/gen/user/v1"
 	"microservice-golang/services/meta-service/internal/usecase"
 	"microservice-golang/shared/pkg/events"
 	"microservice-golang/shared/pkg/messaging"
+
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 )
 
 type UserSubscriber struct {
@@ -41,7 +42,7 @@ func (s *UserSubscriber) handleMessage(ctx context.Context, subject string, data
 		return nil
 	}
 
-	return s.syncUC.SyncUser(ctx, &evt)
+	return s.syncUC.Sync(ctx, &evt)
 }
 
 func (s *UserSubscriber) Listen(ctx context.Context) error {

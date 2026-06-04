@@ -2,23 +2,24 @@ package nats
 
 import (
 	"context"
-	"go.uber.org/zap"
-	"google.golang.org/protobuf/proto"
 	metav1 "microservice-golang/gen/meta/v1"
 	"microservice-golang/services/identity-service/internal/usecase"
 	"microservice-golang/shared/pkg/events"
 	"microservice-golang/shared/pkg/messaging"
+
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 )
 
 type StatusSubscriber struct {
-	syncUC      *usecase.StatusSyncUseCase
+	syncUC      *usecase.StatusUseCase
 	nats        *messaging.Client
 	logger      *zap.Logger
 	durableName string
 }
 
 func NewStatusSubscriber(
-	syncUC *usecase.StatusSyncUseCase,
+	syncUC *usecase.StatusUseCase,
 	nats *messaging.Client,
 	logger *zap.Logger,
 	durableName string,
@@ -41,7 +42,7 @@ func (s *StatusSubscriber) handleMessage(ctx context.Context, subject string, da
 		return nil
 	}
 
-	return s.syncUC.SyncStatus(ctx, &evt)
+	return s.syncUC.Sync(ctx, &evt)
 }
 
 func (s *StatusSubscriber) Listen(ctx context.Context) error {

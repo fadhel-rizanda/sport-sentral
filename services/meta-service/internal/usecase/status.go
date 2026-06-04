@@ -2,47 +2,51 @@ package usecase
 
 import (
 	"context"
-	"gorm.io/gorm"
+	"microservice-golang/services/meta-service/internal/dto"
+	"microservice-golang/services/meta-service/internal/mapper"
 	"time"
 
-	"github.com/google/uuid"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"gorm.io/gorm"
+
 	metav1 "microservice-golang/gen/meta/v1"
 	"microservice-golang/services/meta-service/internal/entity"
 	"microservice-golang/services/meta-service/internal/repository"
 	"microservice-golang/shared/infrastructure/postgres"
 	apperr "microservice-golang/shared/pkg/errors"
+
+	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type StatusUseCase interface {
-	Create(ctx context.Context, req CreateStatusRequest) (*StatusResponse, error)
-	GetByTypeAndName(ctx context.Context, statusType, name string) (*StatusResponse, error)
-	GetByID(ctx context.Context, id uuid.UUID) (*StatusResponse, error)
-	List(ctx context.Context, req ListStatusesRequest) (*ListStatusesResponse, error)
-	Update(ctx context.Context, id uuid.UUID, req UpdateStatusRequest) (*StatusResponse, error)
-	SoftDelete(ctx context.Context, req DeleteStatusRequest) error
-	HardDelete(ctx context.Context, req DeleteStatusRequest) error
+	Create(ctx context.Context, req dto.CreateStatusRequest) (*dto.StatusResponse, error)
+	GetByTypeAndName(ctx context.Context, statusType, name string) (*dto.StatusResponse, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*dto.StatusResponse, error)
+	List(ctx context.Context, req dto.ListStatusesRequest) (*dto.ListStatusesResponse, error)
+	Update(ctx context.Context, id uuid.UUID, req dto.UpdateStatusRequest) (*dto.StatusResponse, error)
+	SoftDelete(ctx context.Context, req dto.DeleteStatusRequest) error
+	HardDelete(ctx context.Context, req dto.DeleteStatusRequest) error
 }
 
 type statusUseCase struct {
 	repo      repository.StatusRepository
-	publisher EventPublisher
+	publisher StatusEventPublisher
 }
 
-func NewStatusUseCase(repo repository.StatusRepository, publisher EventPublisher) StatusUseCase {
+func NewStatusUseCase(repo repository.StatusRepository, publisher StatusEventPublisher) StatusUseCase {
 	return &statusUseCase{
 		repo:      repo,
 		publisher: publisher,
 	}
 }
 
-func (uc *statusUseCase) Create(ctx context.Context, req CreateStatusRequest) (*StatusResponse, error) {
+func (uc *statusUseCase) Create(ctx context.Context, req dto.CreateStatusRequest) (*dto.StatusResponse, error) {
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
 
-	status := entity.Status{
+	status := &entity.Status{
 		ID:          id,
 		Type:        req.Type,
 		Name:        req.Name,
@@ -59,18 +63,18 @@ func (uc *statusUseCase) Create(ctx context.Context, req CreateStatusRequest) (*
 	}
 
 	// Build event
-	evt := uc.buildStatusEvent(
+	evt := uc.buildEvent(
 		metav1.StatusEventType_STATUS_EVENT_TYPE_CREATED,
-		&status,
+		status,
 	)
 	if err := uc.publisher.PublishStatusCreated(ctx, evt); err != nil {
 		return nil, apperr.Internal(err)
 	}
 
-	return toStatusResponse(&status), nil
+	return mapper.ToStatusResponse(status), nil
 }
 
-func (uc *statusUseCase) GetByTypeAndName(ctx context.Context, statusType, name string) (*StatusResponse, error) {
+func (uc *statusUseCase) GetByTypeAndName(ctx context.Context, statusType, name string) (*dto.StatusResponse, error) {
 	s, err := uc.repo.GetByTypeAndName(ctx, statusType, name)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -78,10 +82,10 @@ func (uc *statusUseCase) GetByTypeAndName(ctx context.Context, statusType, name 
 		}
 		return nil, apperr.Internal(err)
 	}
-	return toStatusResponse(s), nil
+	return mapper.ToStatusResponse(s), nil
 }
 
-func (uc *statusUseCase) GetByID(ctx context.Context, id uuid.UUID) (*StatusResponse, error) {
+func (uc *statusUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.StatusResponse, error) {
 	s, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -89,21 +93,21 @@ func (uc *statusUseCase) GetByID(ctx context.Context, id uuid.UUID) (*StatusResp
 		}
 		return nil, apperr.Internal(err)
 	}
-	return toStatusResponse(s), nil
+	return mapper.ToStatusResponse(s), nil
 }
 
-func (uc *statusUseCase) List(ctx context.Context, req ListStatusesRequest) (*ListStatusesResponse, error) {
+func (uc *statusUseCase) List(ctx context.Context, req dto.ListStatusesRequest) (*dto.ListStatusesResponse, error) {
 	statuses, total, err := uc.repo.List(ctx, req.Type, req.Page, req.PageSize)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
 
-	result := make([]*StatusResponse, len(statuses))
+	result := make([]*dto.StatusResponse, len(statuses))
 	for i, s := range statuses {
-		result[i] = toStatusResponse(s)
+		result[i] = mapper.ToStatusResponse(s)
 	}
 
-	return &ListStatusesResponse{
+	return &dto.ListStatusesResponse{
 		Statuses: result,
 		Total:    total,
 		Page:     req.Page,
@@ -111,7 +115,7 @@ func (uc *statusUseCase) List(ctx context.Context, req ListStatusesRequest) (*Li
 	}, nil
 }
 
-func (uc *statusUseCase) Update(ctx context.Context, id uuid.UUID, req UpdateStatusRequest) (*StatusResponse, error) {
+func (uc *statusUseCase) Update(ctx context.Context, id uuid.UUID, req dto.UpdateStatusRequest) (*dto.StatusResponse, error) {
 	status, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -140,7 +144,7 @@ func (uc *statusUseCase) Update(ctx context.Context, id uuid.UUID, req UpdateSta
 		return nil, apperr.Internal(err)
 	}
 
-	evt := uc.buildStatusEvent(
+	evt := uc.buildEvent(
 		metav1.StatusEventType_STATUS_EVENT_TYPE_UPDATED,
 		status,
 	)
@@ -149,10 +153,10 @@ func (uc *statusUseCase) Update(ctx context.Context, id uuid.UUID, req UpdateSta
 		return nil, apperr.Internal(err)
 	}
 
-	return toStatusResponse(status), nil
+	return mapper.ToStatusResponse(status), nil
 }
 
-func (uc *statusUseCase) SoftDelete(ctx context.Context, req DeleteStatusRequest) error {
+func (uc *statusUseCase) SoftDelete(ctx context.Context, req dto.DeleteStatusRequest) error {
 	status, err := uc.repo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -168,7 +172,7 @@ func (uc *statusUseCase) SoftDelete(ctx context.Context, req DeleteStatusRequest
 		return apperr.Internal(err)
 	}
 
-	evt := uc.buildStatusEvent(
+	evt := uc.buildEvent(
 		metav1.StatusEventType_STATUS_EVENT_TYPE_DELETED,
 		status,
 	)
@@ -180,7 +184,7 @@ func (uc *statusUseCase) SoftDelete(ctx context.Context, req DeleteStatusRequest
 	return nil
 }
 
-func (uc *statusUseCase) HardDelete(ctx context.Context, req DeleteStatusRequest) error {
+func (uc *statusUseCase) HardDelete(ctx context.Context, req dto.DeleteStatusRequest) error {
 	status, err := uc.repo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -201,7 +205,7 @@ func (uc *statusUseCase) HardDelete(ctx context.Context, req DeleteStatusRequest
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-func (uc *statusUseCase) buildStatusEvent(
+func (uc *statusUseCase) buildEvent(
 	eventType metav1.StatusEventType,
 	s *entity.Status,
 ) *metav1.StatusEvent {
@@ -216,10 +220,8 @@ func (uc *statusUseCase) buildStatusEvent(
 		StatusName: s.Name,
 		StatusSlug: s.Slug,
 	}
-
-	if s.DeletedByID != nil {
-		deletedByID := s.DeletedByID.String()
-		evt.DeletedById = &deletedByID
+	if s.DeletedAt.Valid {
+		evt.DeletedAt = timestamppb.New(s.DeletedAt.Time)
 	}
 
 	return evt

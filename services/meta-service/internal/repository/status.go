@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"microservice-golang/services/meta-service/internal/entity"
 	"microservice-golang/shared/pkg/redisclient"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 const (
@@ -22,11 +23,11 @@ func listByTypeKey(statusType string) string {
 }
 
 type StatusRepository interface {
-	Create(ctx context.Context, entity entity.Status) error
+	Create(ctx context.Context, entity *entity.Status) error
 	GetByTypeAndName(ctx context.Context, statusType, name string) (*entity.Status, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*entity.Status, error)
 	List(ctx context.Context, statusType *string, page, pageSize int) ([]*entity.Status, int64, error)
-	Update(ctx context.Context, entity entity.Status) error
+	Update(ctx context.Context, status entity.Status) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
@@ -39,11 +40,11 @@ func NewStatusRepository(db *gorm.DB, redis redisclient.Client) StatusRepository
 	return &statusRepository{db: db, redis: redis}
 }
 
-func (r *statusRepository) Create(ctx context.Context, e entity.Status) error {
-	if err := r.db.WithContext(ctx).Create(&e).Error; err != nil {
+func (r *statusRepository) Create(ctx context.Context, status *entity.Status) error {
+	if err := r.db.WithContext(ctx).Create(status).Error; err != nil {
 		return err
 	}
-	r.invalidateListCache(ctx, e.Type)
+	r.invalidateListCache(ctx, status.Type)
 	return nil
 }
 
@@ -77,9 +78,9 @@ func (r *statusRepository) GetByTypeAndName(ctx context.Context, statusType, nam
 			db.username AS deleted_by_username,
 			db.full_name AS deleted_by_full_name
 		`).
-		Joins("LEFT JOIN user_caches cb ON cb.id = statuses.created_by_id").
-		Joins("LEFT JOIN user_caches ub ON ub.id = statuses.updated_by_id").
-		Joins("LEFT JOIN user_caches db ON db.id = statuses.deleted_by_id").
+		Joins("LEFT JOIN users cb ON cb.id = statuses.created_by_id").
+		Joins("LEFT JOIN users ub ON ub.id = statuses.updated_by_id").
+		Joins("LEFT JOIN users db ON db.id = statuses.deleted_by_id").
 		Where("type = ? AND name = ?", statusType, name).
 		First(&row).Error
 
@@ -87,20 +88,20 @@ func (r *statusRepository) GetByTypeAndName(ctx context.Context, statusType, nam
 		return nil, err
 	}
 
-	row.Status.CreatedBy = &entity.UserCache{
+	row.Status.CreatedBy = &entity.User{
 		ID:       row.CreatedByID,
 		Email:    row.CreatedByEmail,
 		Username: row.CreatedByUsername,
 		FullName: row.CreatedByFullName,
 	}
-	row.Status.UpdatedBy = &entity.UserCache{
+	row.Status.UpdatedBy = &entity.User{
 		ID:       row.UpdatedByID,
 		Email:    row.UpdatedByEmail,
 		Username: row.UpdatedByUsername,
 		FullName: row.UpdatedByFullName,
 	}
 	if row.DeletedByID != nil && row.DeletedByEmail != "" {
-		row.Status.DeletedBy = &entity.UserCache{
+		row.Status.DeletedBy = &entity.User{
 			ID:       *row.DeletedByID,
 			Email:    row.DeletedByEmail,
 			Username: row.DeletedByUsername,
@@ -128,9 +129,9 @@ func (r *statusRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.S
 			db.username AS deleted_by_username,
 			db.full_name AS deleted_by_full_name
 		`).
-		Joins("LEFT JOIN user_caches cb ON cb.id = statuses.created_by_id").
-		Joins("LEFT JOIN user_caches ub ON ub.id = statuses.updated_by_id").
-		Joins("LEFT JOIN user_caches db ON db.id = statuses.deleted_by_id").
+		Joins("LEFT JOIN users cb ON cb.id = statuses.created_by_id").
+		Joins("LEFT JOIN users ub ON ub.id = statuses.updated_by_id").
+		Joins("LEFT JOIN users db ON db.id = statuses.deleted_by_id").
 		Where("statuses.id = ?", id).
 		First(&row).Error
 
@@ -138,20 +139,20 @@ func (r *statusRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.S
 		return nil, err
 	}
 
-	row.Status.CreatedBy = &entity.UserCache{
+	row.Status.CreatedBy = &entity.User{
 		ID:       row.CreatedByID,
 		Email:    row.CreatedByEmail,
 		Username: row.CreatedByUsername,
 		FullName: row.CreatedByFullName,
 	}
-	row.Status.UpdatedBy = &entity.UserCache{
+	row.Status.UpdatedBy = &entity.User{
 		ID:       row.UpdatedByID,
 		Email:    row.UpdatedByEmail,
 		Username: row.UpdatedByUsername,
 		FullName: row.UpdatedByFullName,
 	}
 	if row.DeletedByID != nil && row.DeletedByEmail != "" {
-		row.Status.DeletedBy = &entity.UserCache{
+		row.Status.DeletedBy = &entity.User{
 			ID:       *row.DeletedByID,
 			Email:    row.DeletedByEmail,
 			Username: row.DeletedByUsername,
@@ -202,9 +203,9 @@ func (r *statusRepository) List(ctx context.Context, statusType *string, page, p
           db.username AS deleted_by_username,
           db.full_name AS deleted_by_full_name
        `).
-		Joins("LEFT JOIN user_caches cb ON cb.id = statuses.created_by_id").
-		Joins("LEFT JOIN user_caches ub ON ub.id = statuses.updated_by_id").
-		Joins("LEFT JOIN user_caches db ON db.id = statuses.deleted_by_id")
+		Joins("LEFT JOIN users cb ON cb.id = statuses.created_by_id").
+		Joins("LEFT JOIN users ub ON ub.id = statuses.updated_by_id").
+		Joins("LEFT JOIN users db ON db.id = statuses.deleted_by_id")
 
 	if statusType != nil && *statusType != "" {
 		listQuery = listQuery.Where("statuses.type = ?", *statusType)
@@ -221,20 +222,20 @@ func (r *statusRepository) List(ctx context.Context, statusType *string, page, p
 
 	items := make([]*entity.Status, len(rows))
 	for i := range rows {
-		rows[i].Status.CreatedBy = &entity.UserCache{
+		rows[i].Status.CreatedBy = &entity.User{
 			ID:       rows[i].CreatedByID,
 			Email:    rows[i].CreatedByEmail,
 			Username: rows[i].CreatedByUsername,
 			FullName: rows[i].CreatedByFullName,
 		}
-		rows[i].Status.UpdatedBy = &entity.UserCache{
+		rows[i].Status.UpdatedBy = &entity.User{
 			ID:       rows[i].UpdatedByID,
 			Email:    rows[i].UpdatedByEmail,
 			Username: rows[i].UpdatedByUsername,
 			FullName: rows[i].UpdatedByFullName,
 		}
 		if rows[i].DeletedByID != nil && rows[i].DeletedByEmail != "" {
-			rows[i].Status.DeletedBy = &entity.UserCache{
+			rows[i].Status.DeletedBy = &entity.User{
 				ID:       *rows[i].DeletedByID,
 				Email:    rows[i].DeletedByEmail,
 				Username: rows[i].DeletedByUsername,
@@ -251,11 +252,11 @@ func (r *statusRepository) List(ctx context.Context, statusType *string, page, p
 	return items, total, nil
 }
 
-func (r *statusRepository) Update(ctx context.Context, e entity.Status) error {
-	if err := r.db.WithContext(ctx).Model(&e).Updates(e).Error; err != nil {
+func (r *statusRepository) Update(ctx context.Context, status entity.Status) error {
+	if err := r.db.WithContext(ctx).Model(&status).Updates(status).Error; err != nil {
 		return err
 	}
-	r.invalidateListCache(ctx, e.Type)
+	r.invalidateListCache(ctx, status.Type)
 	return nil
 }
 
@@ -311,14 +312,14 @@ func (r *statusRepository) loadUserCaches(ctx context.Context, statuses []*entit
 		return nil
 	}
 
-	var users []entity.UserCache
+	var users []entity.User
 	if err := r.db.WithContext(ctx).
 		Where("id IN ?", userIDs).
 		Find(&users).Error; err != nil {
 		return err
 	}
 
-	userMap := make(map[uuid.UUID]*entity.UserCache)
+	userMap := make(map[uuid.UUID]*entity.User)
 	for i := range users {
 		userMap[users[i].ID] = &users[i]
 	}

@@ -880,7 +880,7 @@ var File_rbac_v1_role_proto protoreflect.FileDescriptor
 
 const file_rbac_v1_role_proto_rawDesc = "" +
 	"\n" +
-	"\x12rbac/v1/role.proto\x12\arbac.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\x1a\x18rbac/v1/permission.proto\x1a\x16common/v1/common.proto\"\x9a\x04\n" +
+	"\x12rbac/v1/role.proto\x12\arbac.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bbuf/validate/validate.proto\x1a\x16common/v1/common.proto\"\x9a\x04\n" +
 	"\x04Role\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -1032,7 +1032,6 @@ func file_rbac_v1_role_proto_init() {
 	if File_rbac_v1_role_proto != nil {
 		return
 	}
-	file_rbac_v1_permission_proto_init()
 	file_rbac_v1_role_proto_msgTypes[0].OneofWrappers = []any{}
 	file_rbac_v1_role_proto_msgTypes[3].OneofWrappers = []any{}
 	type x struct{}
