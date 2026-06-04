@@ -2,11 +2,14 @@ package handler
 
 import (
 	"context"
-	"github.com/google/uuid"
-	"google.golang.org/grpc"
 	metav1 "microservice-golang/gen/meta/v1"
+	"microservice-golang/services/meta-service/internal/dto"
+	"microservice-golang/services/meta-service/internal/mapper"
 	"microservice-golang/services/meta-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
+
+	"github.com/google/uuid"
+	"google.golang.org/grpc"
 )
 
 type TagHandler struct {
@@ -28,7 +31,7 @@ func (h *TagHandler) CreateTag(ctx context.Context, req *metav1.CreateTagRequest
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid created_by id"))
 	}
 
-	res, err := h.uc.Create(ctx, usecase.CreateTagRequest{
+	res, err := h.uc.Create(ctx, dto.CreateTagRequest{
 		Type:        req.GetType(),
 		Name:        req.GetName(),
 		Slug:        req.Slug,
@@ -40,7 +43,7 @@ func (h *TagHandler) CreateTag(ctx context.Context, req *metav1.CreateTagRequest
 	}
 
 	return &metav1.CreateTagResponse{
-		Tag: toProtoTag(res),
+		Tag: mapper.ToProtoTag(res),
 	}, nil
 }
 
@@ -50,7 +53,7 @@ func (h *TagHandler) GetTag(ctx context.Context, req *metav1.GetTagRequest) (*me
 		return nil, apperr.ToGRPC(err)
 	}
 	return &metav1.GetTagResponse{
-		Tag: toProtoTag(res),
+		Tag: mapper.ToProtoTag(res),
 	}, nil
 }
 
@@ -65,12 +68,12 @@ func (h *TagHandler) GetTagByID(ctx context.Context, req *metav1.GetTagByIDReque
 		return nil, apperr.ToGRPC(err)
 	}
 	return &metav1.GetTagResponse{
-		Tag: toProtoTag(res),
+		Tag: mapper.ToProtoTag(res),
 	}, nil
 }
 
 func (h *TagHandler) ListTags(ctx context.Context, req *metav1.ListTagsRequest) (*metav1.ListTagsResponse, error) {
-	res, err := h.uc.List(ctx, usecase.ListTagsRequest{
+	res, err := h.uc.List(ctx, dto.ListTagsRequest{
 		Type:     req.Type,
 		Page:     int(req.Page),
 		PageSize: int(req.PageSize),
@@ -81,7 +84,7 @@ func (h *TagHandler) ListTags(ctx context.Context, req *metav1.ListTagsRequest) 
 
 	tags := make([]*metav1.Tag, 0, res.Total)
 	for _, tag := range res.Tags {
-		tags = append(tags, toProtoTag(tag))
+		tags = append(tags, mapper.ToProtoTag(tag))
 	}
 	return &metav1.ListTagsResponse{
 		Tags:     tags,
@@ -101,7 +104,7 @@ func (h *TagHandler) UpdateTag(ctx context.Context, req *metav1.UpdateTagRequest
 		return nil, apperr.ToGRPC(err)
 	}
 
-	res, err := h.uc.Update(ctx, id, usecase.UpdateTagRequest{
+	res, err := h.uc.Update(ctx, id, dto.UpdateTagRequest{
 		Type:        req.Type,
 		Name:        req.Name,
 		Slug:        req.Slug,
@@ -112,7 +115,7 @@ func (h *TagHandler) UpdateTag(ctx context.Context, req *metav1.UpdateTagRequest
 	}
 
 	return &metav1.UpdateTagResponse{
-		Tag: toProtoTag(res),
+		Tag: mapper.ToProtoTag(res),
 	}, nil
 }
 
@@ -123,7 +126,7 @@ func (h *TagHandler) DeleteTag(ctx context.Context, req *metav1.DeleteTagRequest
 	}
 
 	if req.GetIsPermanent() {
-		err = h.uc.HardDelete(ctx, usecase.DeleteTagRequest{
+		err = h.uc.HardDelete(ctx, dto.DeleteTagRequest{
 			ID: id,
 		})
 	} else {
@@ -131,7 +134,7 @@ func (h *TagHandler) DeleteTag(ctx context.Context, req *metav1.DeleteTagRequest
 		if err != nil {
 			return nil, apperr.ToGRPC(err)
 		}
-		err = h.uc.SoftDelete(ctx, usecase.DeleteTagRequest{
+		err = h.uc.SoftDelete(ctx, dto.DeleteTagRequest{
 			ID:          id,
 			DeletedByID: deletedBy,
 		})

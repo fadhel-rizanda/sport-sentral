@@ -1,11 +1,12 @@
-package usecase
+package mapper
 
 import (
+	"microservice-golang/services/meta-service/internal/dto"
 	"microservice-golang/services/meta-service/internal/entity"
 )
 
-func toStatusResponse(status *entity.Status) *StatusResponse {
-	res := &StatusResponse{
+func ToStatusResponse(status *entity.Status) *dto.StatusResponse {
+	res := &dto.StatusResponse{
 		ID:        status.ID,
 		Type:      status.Type,
 		Name:      status.Name,
@@ -15,7 +16,7 @@ func toStatusResponse(status *entity.Status) *StatusResponse {
 	}
 
 	if status.CreatedBy != nil {
-		res.CreatedBy = UserSimpleResponse{
+		res.CreatedBy = dto.UserSimpleResponse{
 			ID:       status.CreatedByID,
 			Email:    status.CreatedBy.Email,
 			Username: status.CreatedBy.Username,
@@ -24,7 +25,7 @@ func toStatusResponse(status *entity.Status) *StatusResponse {
 	}
 
 	if status.UpdatedBy != nil {
-		res.UpdatedBy = UserSimpleResponse{
+		res.UpdatedBy = dto.UserSimpleResponse{
 			ID:       status.UpdatedByID,
 			Email:    status.UpdatedBy.Email,
 			Username: status.UpdatedBy.Username,
@@ -35,7 +36,7 @@ func toStatusResponse(status *entity.Status) *StatusResponse {
 	if status.DeletedAt.Valid {
 		res.DeletedAt = &status.DeletedAt.Time
 		if status.DeletedByID != nil && status.DeletedBy != nil {
-			res.DeletedBy = &UserSimpleResponse{
+			res.DeletedBy = &dto.UserSimpleResponse{
 				ID:       *status.DeletedByID,
 				Email:    status.DeletedBy.Email,
 				Username: status.DeletedBy.Username,
@@ -47,8 +48,8 @@ func toStatusResponse(status *entity.Status) *StatusResponse {
 	return res
 }
 
-func toTagResponse(tag *entity.Tag) *TagResponse {
-	res := &TagResponse{
+func ToTagResponse(tag *entity.Tag) *dto.TagResponse {
+	res := &dto.TagResponse{
 		ID:        tag.ID,
 		Type:      tag.Type,
 		Name:      tag.Name,
@@ -58,7 +59,7 @@ func toTagResponse(tag *entity.Tag) *TagResponse {
 	}
 
 	if tag.CreatedBy != nil {
-		res.CreatedBy = UserSimpleResponse{
+		res.CreatedBy = dto.UserSimpleResponse{
 			ID:       tag.CreatedByID,
 			Email:    tag.CreatedBy.Email,
 			Username: tag.CreatedBy.Username,
@@ -67,7 +68,7 @@ func toTagResponse(tag *entity.Tag) *TagResponse {
 	}
 
 	if tag.UpdatedBy != nil {
-		res.UpdatedBy = UserSimpleResponse{
+		res.UpdatedBy = dto.UserSimpleResponse{
 			ID:       tag.UpdatedByID,
 			Email:    tag.UpdatedBy.Email,
 			Username: tag.UpdatedBy.Username,
@@ -78,7 +79,7 @@ func toTagResponse(tag *entity.Tag) *TagResponse {
 	if tag.DeletedAt.Valid {
 		res.DeletedAt = &tag.DeletedAt.Time
 		if tag.DeletedByID != nil && tag.DeletedBy != nil {
-			res.DeletedBy = &UserSimpleResponse{
+			res.DeletedBy = &dto.UserSimpleResponse{
 				ID:       *tag.DeletedByID,
 				Email:    tag.DeletedBy.Email,
 				Username: tag.DeletedBy.Username,

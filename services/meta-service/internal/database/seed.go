@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"gorm.io/gorm"
+	"microservice-golang/services/meta-service/internal/dto"
 	"microservice-golang/services/meta-service/internal/entity"
 	"microservice-golang/services/meta-service/internal/usecase"
 	"microservice-golang/shared/pkg/constants"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 func Seed(db *gorm.DB) error {
@@ -78,7 +80,7 @@ func SeedStatuses(uc usecase.StatusUseCase) error {
 		if err != nil {
 			slug := fmt.Sprintf("%s-%s", s.Type, s.Name)
 
-			_, err := uc.Create(ctx, usecase.CreateStatusRequest{
+			_, err := uc.Create(ctx, dto.CreateStatusRequest{
 				Type:        s.Type,
 				Name:        s.Name,
 				Slug:        slug,

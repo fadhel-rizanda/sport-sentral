@@ -1,19 +1,9 @@
 package main
 
 import (
-	"buf.build/go/protovalidate"
 	"context"
 	"errors"
 	"fmt"
-	"github.com/joho/godotenv"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/redis/go-redis/v9"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"microservice-golang/services/meta-service/internal/config"
 	"microservice-golang/services/meta-service/internal/database"
 	"microservice-golang/services/meta-service/internal/delivery/nats"
@@ -31,6 +21,17 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"buf.build/go/protovalidate"
+	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -116,16 +117,17 @@ func main() {
 	redisWrapper := redisclient.New(redisClient)
 
 	// ── Event Publisher ───────────────────────────────────────────────────────
-	eventPublisher := nats.NewStatusEventPublisher(natsClient, log)
+	statusEventPublisher := nats.NewStatusEventPublisher(natsClient, log)
+	tagEventPublisher := nats.NewTagEventPublisher(natsClient, log)
 
 	// ── Repository ────────────────────────────────────────────────────────────
 	statusRepo := repository.NewStatusRepository(db, redisWrapper)
 	tagRepo := repository.NewTagRepository(db, redisWrapper)
-	userCacheRepo := repository.NewUserCacheRepository(db)
+	userCacheRepo := repository.NewUserRepository(db)
 
 	// ── UseCase ───────────────────────────────────────────────────────────────
-	statusUC := usecase.NewStatusUseCase(statusRepo, eventPublisher)
-	tagUC := usecase.NewTagUseCase(tagRepo)
+	statusUC := usecase.NewStatusUseCase(statusRepo, statusEventPublisher)
+	tagUC := usecase.NewTagUseCase(tagRepo, tagEventPublisher)
 	userSyncUC := usecase.NewUserSyncUseCase(userCacheRepo, log)
 
 	err = database.SeedStatuses(statusUC)

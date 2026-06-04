@@ -2,11 +2,14 @@ package handler
 
 import (
 	"context"
-	"github.com/google/uuid"
-	"google.golang.org/grpc"
 	metav1 "microservice-golang/gen/meta/v1"
+	"microservice-golang/services/meta-service/internal/dto"
+	"microservice-golang/services/meta-service/internal/mapper"
 	"microservice-golang/services/meta-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
+
+	"github.com/google/uuid"
+	"google.golang.org/grpc"
 )
 
 type StatusHandler struct {
@@ -28,7 +31,7 @@ func (h *StatusHandler) GetStatus(ctx context.Context, req *metav1.GetStatusRequ
 		return nil, err
 	}
 	return &metav1.GetStatusResponse{
-		Status: toProtoStatus(res),
+		Status: mapper.ToProtoStatus(res),
 	}, nil
 }
 
@@ -43,12 +46,12 @@ func (h *StatusHandler) GetStatusByID(ctx context.Context, req *metav1.GetStatus
 		return nil, apperr.ToGRPC(err)
 	}
 	return &metav1.GetStatusByIDResponse{
-		Status: toProtoStatus(res),
+		Status: mapper.ToProtoStatus(res),
 	}, nil
 }
 
 func (h *StatusHandler) ListStatuses(ctx context.Context, req *metav1.ListStatusesRequest) (*metav1.ListStatusesResponse, error) {
-	res, err := h.uc.List(ctx, usecase.ListStatusesRequest{
+	res, err := h.uc.List(ctx, dto.ListStatusesRequest{
 		Type:     req.Type,
 		Page:     int(req.Page),
 		PageSize: int(req.PageSize),
@@ -59,7 +62,7 @@ func (h *StatusHandler) ListStatuses(ctx context.Context, req *metav1.ListStatus
 
 	statuses := make([]*metav1.Status, 0, res.Total)
 	for _, status := range res.Statuses {
-		statuses = append(statuses, toProtoStatus(status))
+		statuses = append(statuses, mapper.ToProtoStatus(status))
 	}
 	return &metav1.ListStatusesResponse{
 		Statuses: statuses,
@@ -74,7 +77,7 @@ func (h *StatusHandler) CreateStatus(ctx context.Context, req *metav1.CreateStat
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid created_by id"))
 	}
-	res, err := h.uc.Create(ctx, usecase.CreateStatusRequest{
+	res, err := h.uc.Create(ctx, dto.CreateStatusRequest{
 		Type:        req.GetType(),
 		Name:        req.GetName(),
 		Slug:        req.GetSlug(),
@@ -84,7 +87,7 @@ func (h *StatusHandler) CreateStatus(ctx context.Context, req *metav1.CreateStat
 		return nil, apperr.ToGRPC(err)
 	}
 	return &metav1.CreateStatusResponse{
-		Status: toProtoStatus(res),
+		Status: mapper.ToProtoStatus(res),
 	}, nil
 }
 
@@ -98,7 +101,7 @@ func (h *StatusHandler) UpdateStatus(ctx context.Context, req *metav1.UpdateStat
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid updated_by id"))
 	}
 
-	res, err := h.uc.Update(ctx, id, usecase.UpdateStatusRequest{
+	res, err := h.uc.Update(ctx, id, dto.UpdateStatusRequest{
 		Type:        req.Type,
 		Name:        req.Name,
 		Slug:        req.Slug,
@@ -109,7 +112,7 @@ func (h *StatusHandler) UpdateStatus(ctx context.Context, req *metav1.UpdateStat
 	}
 
 	return &metav1.UpdateStatusResponse{
-		Status: toProtoStatus(res),
+		Status: mapper.ToProtoStatus(res),
 	}, nil
 }
 
@@ -124,11 +127,11 @@ func (h *StatusHandler) DeleteStatus(ctx context.Context, req *metav1.DeleteStat
 	}
 
 	if req.GetIsPermanent() {
-		err = h.uc.HardDelete(ctx, usecase.DeleteStatusRequest{
+		err = h.uc.HardDelete(ctx, dto.DeleteStatusRequest{
 			ID: id,
 		})
 	} else {
-		err = h.uc.SoftDelete(ctx, usecase.DeleteStatusRequest{
+		err = h.uc.SoftDelete(ctx, dto.DeleteStatusRequest{
 			ID:          id,
 			DeletedByID: deletedBy,
 		})

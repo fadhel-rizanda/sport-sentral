@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type StatusCache struct {
+type Status struct {
 	ID        uuid.UUID      `gorm:"type:uuid;primaryKey"`
 	Type      string         `gorm:"not null"`
 	Name      string         `gorm:"not null"`

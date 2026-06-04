@@ -3,9 +3,10 @@ package repository
 import (
 	"context"
 
+	"microservice-golang/services/identity-service/internal/entity"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"microservice-golang/services/identity-service/internal/entity"
 )
 
 type UserRoleRepository interface {
@@ -107,9 +108,9 @@ func (r *userRoleRepository) Delete(ctx context.Context, userID, roleID uuid.UUI
 }
 
 func (r *userRoleRepository) loadStatus(ctx context.Context, userRole *entity.UserRole) error {
-	var statusCache entity.StatusCache
+	var statusCache entity.Status
 	err := r.db.WithContext(ctx).
-		Table("status_caches").
+		Table("statuses").
 		Where("id = ?", userRole.StatusID).
 		First(&statusCache).Error
 

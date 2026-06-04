@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"microservice-golang/services/meta-service/internal/entity"
 	"microservice-golang/shared/pkg/redisclient"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type TagRepository interface {
@@ -15,7 +16,7 @@ type TagRepository interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*entity.Tag, error)
 	GetByTypeAndName(ctx context.Context, tagType, name string) (*entity.Tag, error)
 	List(ctx context.Context, tagType *string, page, pageSize int) ([]*entity.Tag, int64, error)
-	Update(ctx context.Context, e entity.Tag) error
+	Update(ctx context.Context, tag entity.Tag) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
@@ -69,9 +70,9 @@ func (r *tagRepository) GetByTypeAndName(ctx context.Context, tagType, name stri
 			db.username AS deleted_by_username,
 			db.full_name AS deleted_by_full_name
 		`).
-		Joins("LEFT JOIN user_caches cb ON cb.id = tags.created_by_id").
-		Joins("LEFT JOIN user_caches ub ON ub.id = tags.updated_by_id").
-		Joins("LEFT JOIN user_caches db ON db.id = tags.deleted_by_id").
+		Joins("LEFT JOIN users cb ON cb.id = tags.created_by_id").
+		Joins("LEFT JOIN users ub ON ub.id = tags.updated_by_id").
+		Joins("LEFT JOIN users db ON db.id = tags.deleted_by_id").
 		Where("type = ? AND name = ?", tagType, name).
 		First(&row).Error
 
@@ -79,20 +80,20 @@ func (r *tagRepository) GetByTypeAndName(ctx context.Context, tagType, name stri
 		return nil, err
 	}
 
-	row.Tag.CreatedBy = &entity.UserCache{
+	row.Tag.CreatedBy = &entity.User{
 		ID:       row.CreatedByID,
 		Email:    row.CreatedByEmail,
 		Username: row.CreatedByUsername,
 		FullName: row.CreatedByFullName,
 	}
-	row.Tag.UpdatedBy = &entity.UserCache{
+	row.Tag.UpdatedBy = &entity.User{
 		ID:       row.UpdatedByID,
 		Email:    row.UpdatedByEmail,
 		Username: row.UpdatedByUsername,
 		FullName: row.UpdatedByFullName,
 	}
 	if row.DeletedByID != nil && row.DeletedByEmail != "" {
-		row.Tag.DeletedBy = &entity.UserCache{
+		row.Tag.DeletedBy = &entity.User{
 			ID:       *row.DeletedByID,
 			Email:    row.DeletedByEmail,
 			Username: row.DeletedByUsername,
@@ -120,9 +121,9 @@ func (r *tagRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Tag,
 			db.username AS deleted_by_username,
 			db.full_name AS deleted_by_full_name
 		`).
-		Joins("LEFT JOIN user_caches cb ON cb.id = tags.created_by_id").
-		Joins("LEFT JOIN user_caches ub ON ub.id = tags.updated_by_id").
-		Joins("LEFT JOIN user_caches db ON db.id = tags.deleted_by_id").
+		Joins("LEFT JOIN users cb ON cb.id = tags.created_by_id").
+		Joins("LEFT JOIN users ub ON ub.id = tags.updated_by_id").
+		Joins("LEFT JOIN users db ON db.id = tags.deleted_by_id").
 		Where("tags.id = ?", id).
 		First(&row).Error
 
@@ -130,20 +131,20 @@ func (r *tagRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Tag,
 		return nil, err
 	}
 
-	row.Tag.CreatedBy = &entity.UserCache{
+	row.Tag.CreatedBy = &entity.User{
 		ID:       row.CreatedByID,
 		Email:    row.CreatedByEmail,
 		Username: row.CreatedByUsername,
 		FullName: row.CreatedByFullName,
 	}
-	row.Tag.UpdatedBy = &entity.UserCache{
+	row.Tag.UpdatedBy = &entity.User{
 		ID:       row.UpdatedByID,
 		Email:    row.UpdatedByEmail,
 		Username: row.UpdatedByUsername,
 		FullName: row.UpdatedByFullName,
 	}
 	if row.DeletedByID != nil && row.DeletedByEmail != "" {
-		row.Tag.DeletedBy = &entity.UserCache{
+		row.Tag.DeletedBy = &entity.User{
 			ID:       *row.DeletedByID,
 			Email:    row.DeletedByEmail,
 			Username: row.DeletedByUsername,
@@ -194,9 +195,9 @@ func (r *tagRepository) List(ctx context.Context, tagType *string, page, pageSiz
 			db.username AS deleted_by_username,
 			db.full_name AS deleted_by_full_name
 		`).
-		Joins("LEFT JOIN user_caches cb ON cb.id = tags.created_by_id").
-		Joins("LEFT JOIN user_caches ub ON ub.id = tags.updated_by_id").
-		Joins("LEFT JOIN user_caches db ON db.id = tags.deleted_by_id")
+		Joins("LEFT JOIN users cb ON cb.id = tags.created_by_id").
+		Joins("LEFT JOIN users ub ON ub.id = tags.updated_by_id").
+		Joins("LEFT JOIN users db ON db.id = tags.deleted_by_id")
 
 	if tagType != nil && *tagType != "" {
 		listQuery = listQuery.Where("tags.type = ?", *tagType)
@@ -213,20 +214,20 @@ func (r *tagRepository) List(ctx context.Context, tagType *string, page, pageSiz
 
 	items := make([]*entity.Tag, len(rows))
 	for i := range rows {
-		rows[i].Tag.CreatedBy = &entity.UserCache{
+		rows[i].Tag.CreatedBy = &entity.User{
 			ID:       rows[i].CreatedByID,
 			Email:    rows[i].CreatedByEmail,
 			Username: rows[i].CreatedByUsername,
 			FullName: rows[i].CreatedByFullName,
 		}
-		rows[i].Tag.UpdatedBy = &entity.UserCache{
+		rows[i].Tag.UpdatedBy = &entity.User{
 			ID:       rows[i].UpdatedByID,
 			Email:    rows[i].UpdatedByEmail,
 			Username: rows[i].UpdatedByUsername,
 			FullName: rows[i].UpdatedByFullName,
 		}
 		if rows[i].DeletedByID != nil && rows[i].DeletedByEmail != "" {
-			rows[i].Tag.DeletedBy = &entity.UserCache{
+			rows[i].Tag.DeletedBy = &entity.User{
 				ID:       *rows[i].DeletedByID,
 				Email:    rows[i].DeletedByEmail,
 				Username: rows[i].DeletedByUsername,
@@ -303,14 +304,14 @@ func (r *tagRepository) loadUserCaches(ctx context.Context, tags []*entity.Tag) 
 		return nil
 	}
 
-	var users []entity.UserCache
+	var users []entity.User
 	if err := r.db.WithContext(ctx).
 		Where("id IN ?", userIDs).
 		Find(&users).Error; err != nil {
 		return err
 	}
 
-	userMap := make(map[uuid.UUID]*entity.UserCache)
+	userMap := make(map[uuid.UUID]*entity.User)
 	for i := range users {
 		userMap[users[i].ID] = &users[i]
 	}

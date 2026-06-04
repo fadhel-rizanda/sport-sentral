@@ -2,10 +2,11 @@ package nats
 
 import (
 	"context"
-	"go.uber.org/zap"
 	userv1 "microservice-golang/gen/user/v1"
 	"microservice-golang/shared/pkg/events"
 	"microservice-golang/shared/pkg/messaging"
+
+	"go.uber.org/zap"
 )
 
 type UserEventPublisher struct {

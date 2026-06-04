@@ -4,31 +4,32 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"go.uber.org/zap"
-	"gorm.io/gorm"
 	userv1 "microservice-golang/gen/user/v1"
 	"microservice-golang/services/meta-service/internal/entity"
 	"microservice-golang/services/meta-service/internal/repository"
 	apperr "microservice-golang/shared/pkg/errors"
+
+	"github.com/google/uuid"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 type UserSyncUseCase struct {
-	cacheRepo repository.UserCacheRepository
-	logger    *zap.Logger
+	userRepo repository.UserRepository
+	logger   *zap.Logger
 }
 
 func NewUserSyncUseCase(
-	cacheRepo repository.UserCacheRepository,
+	userRepo repository.UserRepository,
 	logger *zap.Logger,
 ) *UserSyncUseCase {
 	return &UserSyncUseCase{
-		cacheRepo: cacheRepo,
-		logger:    logger,
+		userRepo: userRepo,
+		logger:   logger,
 	}
 }
 
-func (uc *UserSyncUseCase) upsertCache(ctx context.Context, evt *userv1.UserEvent) error {
+func (uc *UserSyncUseCase) upsert(ctx context.Context, evt *userv1.UserEvent) error {
 	if evt.UserId == "" || evt.UserEmail == "" || evt.UserUsername == "" {
 		uc.logger.Warn("incomplete event – skipping", zap.String("event_id", evt.EventId))
 		return nil
@@ -59,27 +60,26 @@ func (uc *UserSyncUseCase) upsertCache(ctx context.Context, evt *userv1.UserEven
 		return nil
 	}
 
-	userCache := entity.UserCache{
-		ID:             id,
-		Email:          evt.UserEmail,
-		Username:       evt.UserUsername,
-		FullName:       evt.UserFullName,
-		ActiveRoleID:   roleId,
-		ActiveRoleName: evt.UserActiveRoleName,
-		StatusID:       statusId,
+	user := entity.User{
+		ID:           id,
+		Email:        evt.UserEmail,
+		Username:     evt.UserUsername,
+		FullName:     evt.UserFullName,
+		ActiveRoleID: roleId,
+		StatusID:     statusId,
 	}
 	if evt.DeletedAt != nil {
-		userCache.DeletedAt = gorm.DeletedAt{
+		user.DeletedAt = gorm.DeletedAt{
 			Time:  evt.DeletedAt.AsTime(),
 			Valid: true,
 		}
 	}
 
-	if err := uc.cacheRepo.Upsert(ctx, userCache); err != nil {
-		return apperr.Internal(fmt.Errorf("upsert user cache: %w", err))
+	if err := uc.userRepo.Upsert(ctx, user); err != nil {
+		return apperr.Internal(fmt.Errorf("upsert user: %w", err))
 	}
 
-	uc.logger.Info("user cache upserted",
+	uc.logger.Info("user upserted",
 		zap.String("event_id", evt.EventId),
 		zap.String("user_id", evt.UserId),
 	)
@@ -87,7 +87,7 @@ func (uc *UserSyncUseCase) upsertCache(ctx context.Context, evt *userv1.UserEven
 	return nil
 }
 
-func (uc *UserSyncUseCase) deleteCache(ctx context.Context, evt *userv1.UserEvent) error {
+func (uc *UserSyncUseCase) delete(ctx context.Context, evt *userv1.UserEvent) error {
 	if evt.UserId == "" || evt.UserEmail == "" || evt.UserUsername == "" {
 		uc.logger.Warn("incomplete event – skipping", zap.String("event_id", evt.EventId))
 		return nil
@@ -102,15 +102,15 @@ func (uc *UserSyncUseCase) deleteCache(ctx context.Context, evt *userv1.UserEven
 		return nil
 	}
 
-	if err := uc.cacheRepo.Delete(ctx, id); err != nil {
+	if err := uc.userRepo.Delete(ctx, id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			uc.logger.Debug("user already deleted", zap.String("user_id", evt.UserId))
 			return nil
 		}
-		return apperr.Internal(fmt.Errorf("delete user cache: %w", err))
+		return apperr.Internal(fmt.Errorf("delete user: %w", err))
 	}
 
-	uc.logger.Info("user cache deleted",
+	uc.logger.Info("user deleted",
 		zap.String("event_id", evt.EventId),
 		zap.String("user_id", evt.UserId),
 	)
@@ -118,7 +118,7 @@ func (uc *UserSyncUseCase) deleteCache(ctx context.Context, evt *userv1.UserEven
 	return nil
 }
 
-func (uc *UserSyncUseCase) SyncUser(ctx context.Context, evt *userv1.UserEvent) error {
+func (uc *UserSyncUseCase) Sync(ctx context.Context, evt *userv1.UserEvent) error {
 	uc.logger.Info("processing user event",
 		zap.String("event_id", evt.EventId),
 		zap.Any("type", evt.EventType),
@@ -128,10 +128,10 @@ func (uc *UserSyncUseCase) SyncUser(ctx context.Context, evt *userv1.UserEvent) 
 	switch evt.EventType {
 	case userv1.UserEventType_USER_EVENT_TYPE_CREATED,
 		userv1.UserEventType_USER_EVENT_TYPE_UPDATED:
-		return uc.upsertCache(ctx, evt)
+		return uc.upsert(ctx, evt)
 
 	case userv1.UserEventType_USER_EVENT_TYPE_DELETED:
-		return uc.deleteCache(ctx, evt)
+		return uc.delete(ctx, evt)
 
 	default:
 		uc.logger.Warn("unknown event type – skipping", zap.Any("type", evt.EventType))

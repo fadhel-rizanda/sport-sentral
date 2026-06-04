@@ -3,9 +3,13 @@ package usecase
 import (
 	"context"
 	"errors"
+	metav1 "microservice-golang/gen/meta/v1"
+	"microservice-golang/services/meta-service/internal/dto"
+	"microservice-golang/services/meta-service/internal/mapper"
 	"time"
 
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 
 	"microservice-golang/services/meta-service/internal/entity"
@@ -15,24 +19,28 @@ import (
 )
 
 type TagUseCase interface {
-	Create(ctx context.Context, req CreateTagRequest) (*TagResponse, error)
-	GetByID(ctx context.Context, id uuid.UUID) (*TagResponse, error)
-	GetByTypeAndName(ctx context.Context, tagType string, name string) (*TagResponse, error)
-	List(ctx context.Context, req ListTagsRequest) (*ListTagsResponse, error)
-	Update(ctx context.Context, id uuid.UUID, req UpdateTagRequest) (*TagResponse, error)
-	SoftDelete(ctx context.Context, req DeleteTagRequest) error
-	HardDelete(ctx context.Context, req DeleteTagRequest) error
+	Create(ctx context.Context, req dto.CreateTagRequest) (*dto.TagResponse, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*dto.TagResponse, error)
+	GetByTypeAndName(ctx context.Context, tagType string, name string) (*dto.TagResponse, error)
+	List(ctx context.Context, req dto.ListTagsRequest) (*dto.ListTagsResponse, error)
+	Update(ctx context.Context, id uuid.UUID, req dto.UpdateTagRequest) (*dto.TagResponse, error)
+	SoftDelete(ctx context.Context, req dto.DeleteTagRequest) error
+	HardDelete(ctx context.Context, req dto.DeleteTagRequest) error
 }
 
 type tagUseCase struct {
-	repo repository.TagRepository
+	repo      repository.TagRepository
+	publisher TagEventPublisher
 }
 
-func NewTagUseCase(repo repository.TagRepository) TagUseCase {
-	return &tagUseCase{repo: repo}
+func NewTagUseCase(repo repository.TagRepository, publisher TagEventPublisher) TagUseCase {
+	return &tagUseCase{
+		repo:      repo,
+		publisher: publisher,
+	}
 }
 
-func (uc *tagUseCase) Create(ctx context.Context, req CreateTagRequest) (*TagResponse, error) {
+func (uc *tagUseCase) Create(ctx context.Context, req dto.CreateTagRequest) (*dto.TagResponse, error) {
 	tag := &entity.Tag{
 		ID:          uuid.New(),
 		Type:        req.Type,
@@ -51,15 +59,16 @@ func (uc *tagUseCase) Create(ctx context.Context, req CreateTagRequest) (*TagRes
 		return nil, apperr.Internal(err)
 	}
 
-	newTag, err := uc.repo.GetByID(ctx, tag.ID)
-	if err != nil {
+	// Build event
+	evt := uc.buildEvent(metav1.TagEventType_TAG_EVENT_TYPE_CREATED, tag)
+	if err := uc.publisher.PublishTagCreated(ctx, evt); err != nil {
 		return nil, apperr.Internal(err)
 	}
 
-	return toTagResponse(newTag), nil
+	return mapper.ToTagResponse(tag), nil
 }
 
-func (uc *tagUseCase) GetByID(ctx context.Context, id uuid.UUID) (*TagResponse, error) {
+func (uc *tagUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.TagResponse, error) {
 	tag, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -67,10 +76,10 @@ func (uc *tagUseCase) GetByID(ctx context.Context, id uuid.UUID) (*TagResponse, 
 		}
 		return nil, apperr.Internal(err)
 	}
-	return toTagResponse(tag), nil
+	return mapper.ToTagResponse(tag), nil
 }
 
-func (uc *tagUseCase) GetByTypeAndName(ctx context.Context, tagType string, name string) (*TagResponse, error) {
+func (uc *tagUseCase) GetByTypeAndName(ctx context.Context, tagType string, name string) (*dto.TagResponse, error) {
 	tags, err := uc.repo.GetByTypeAndName(ctx, tagType, name)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -78,21 +87,21 @@ func (uc *tagUseCase) GetByTypeAndName(ctx context.Context, tagType string, name
 		}
 		return nil, apperr.Internal(err)
 	}
-	return toTagResponse(tags), nil
+	return mapper.ToTagResponse(tags), nil
 }
 
-func (uc *tagUseCase) List(ctx context.Context, req ListTagsRequest) (*ListTagsResponse, error) {
+func (uc *tagUseCase) List(ctx context.Context, req dto.ListTagsRequest) (*dto.ListTagsResponse, error) {
 	tags, total, err := uc.repo.List(ctx, req.Type, req.Page, req.PageSize)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
 
-	result := make([]*TagResponse, len(tags))
+	result := make([]*dto.TagResponse, len(tags))
 	for i, t := range tags {
-		result[i] = toTagResponse(t)
+		result[i] = mapper.ToTagResponse(t)
 	}
 
-	return &ListTagsResponse{
+	return &dto.ListTagsResponse{
 		Tags:     result,
 		Total:    total,
 		Page:     req.Page,
@@ -100,7 +109,7 @@ func (uc *tagUseCase) List(ctx context.Context, req ListTagsRequest) (*ListTagsR
 	}, nil
 }
 
-func (uc *tagUseCase) Update(ctx context.Context, id uuid.UUID, req UpdateTagRequest) (*TagResponse, error) {
+func (uc *tagUseCase) Update(ctx context.Context, id uuid.UUID, req dto.UpdateTagRequest) (*dto.TagResponse, error) {
 	tag, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -134,10 +143,16 @@ func (uc *tagUseCase) Update(ctx context.Context, id uuid.UUID, req UpdateTagReq
 		}
 		return nil, apperr.Internal(err)
 	}
-	return toTagResponse(tag), nil
+
+	evt := uc.buildEvent(metav1.TagEventType_TAG_EVENT_TYPE_UPDATED, tag)
+	if err := uc.publisher.PublishTagUpdated(ctx, evt); err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	return mapper.ToTagResponse(tag), nil
 }
 
-func (uc *tagUseCase) SoftDelete(ctx context.Context, req DeleteTagRequest) error {
+func (uc *tagUseCase) SoftDelete(ctx context.Context, req dto.DeleteTagRequest) error {
 	tag, err := uc.repo.GetByID(ctx, req.ID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -152,10 +167,15 @@ func (uc *tagUseCase) SoftDelete(ctx context.Context, req DeleteTagRequest) erro
 		return apperr.Internal(err)
 	}
 
+	evt := uc.buildEvent(metav1.TagEventType_TAG_EVENT_TYPE_DELETED, tag)
+	if err := uc.publisher.PublishTagDeleted(ctx, evt); err != nil {
+		return apperr.Internal(err)
+	}
+
 	return nil
 }
 
-func (uc *tagUseCase) HardDelete(ctx context.Context, req DeleteTagRequest) error {
+func (uc *tagUseCase) HardDelete(ctx context.Context, req dto.DeleteTagRequest) error {
 	if err := uc.repo.Delete(ctx, req.ID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return apperr.NotFound("tag")
@@ -163,4 +183,29 @@ func (uc *tagUseCase) HardDelete(ctx context.Context, req DeleteTagRequest) erro
 		return apperr.Internal(err)
 	}
 	return nil
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+func (uc *tagUseCase) buildEvent(
+	eventType metav1.TagEventType,
+	t *entity.Tag,
+) *metav1.TagEvent {
+	evtID, _ := uuid.NewV7()
+
+	evt := &metav1.TagEvent{
+		EventId:    evtID.String(),
+		EventType:  eventType,
+		OccurredAt: timestamppb.Now(),
+		TagId:      t.ID.String(),
+		TagType:    t.Type,
+		TagName:    t.Name,
+		TagSlug:    t.Slug,
+	}
+
+	if t.DeletedAt.Valid {
+		evt.DeletedAt = timestamppb.New(t.DeletedAt.Time)
+	}
+
+	return evt
 }

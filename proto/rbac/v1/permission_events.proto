@@ -1,27 +1,27 @@
 syntax = "proto3";
 
-package user.v1;
+package rbac.v1;
 
-option go_package = "microservice-golang/gen/user/v1;userv1";
+option go_package = "microservice-golang/gen/rbac/v1;rbacv1";
 
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 
 // ─── Enum ─────────────────────────────────────────────────────────────────────
-enum UserEventType {
-  USER_EVENT_TYPE_UNSPECIFIED = 0;
-  USER_EVENT_TYPE_CREATED     = 1;
-  USER_EVENT_TYPE_UPDATED     = 2;
-  USER_EVENT_TYPE_DELETED     = 3;
+enum PermissionEventType {
+  PERMISSION_EVENT_TYPE_UNSPECIFIED = 0;
+  PERMISSION_EVENT_TYPE_CREATED     = 1;
+  PERMISSION_EVENT_TYPE_UPDATED     = 2;
+  PERMISSION_EVENT_TYPE_DELETED     = 3;
 }
 
 // ─── Event envelope ───────────────────────────────────────────────────────────
-message UserEvent {
+message PermissionEvent {
   string event_id = 1 [
     (buf.validate.field).string.uuid = true
   ];
 
-  UserEventType event_type = 2 [
+  PermissionEventType event_type = 2 [
     (buf.validate.field).enum.defined_only = true
   ];
 
@@ -29,30 +29,22 @@ message UserEvent {
     (buf.validate.field).required = true
   ];
 
-  // The ID of the user associated with this event
-  string user_id = 4 [
+  // The ID of the permission associated with this event
+  string permission_id = 4 [
     (buf.validate.field).string.uuid = true
   ];
 
-  string user_email = 5 [
+  string permission_resource = 6 [
     (buf.validate.field).string.min_len = 1
   ];
 
-  string user_username = 6 [
+  string permission_action = 7 [
     (buf.validate.field).string.min_len = 1
   ];
 
-  string user_full_name = 7 [
+  string permission_slug = 8 [
     (buf.validate.field).string.min_len = 1
   ];
 
-  string user_active_role_id = 8 [
-    (buf.validate.field).string.uuid = true
-  ];
-
-  string user_status_id = 9 [
-    (buf.validate.field).string.uuid = true
-  ];
-
-  optional google.protobuf.Timestamp deleted_at = 10;
+  optional google.protobuf.Timestamp deleted_at = 9;
 }

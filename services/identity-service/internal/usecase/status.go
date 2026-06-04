@@ -4,31 +4,32 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"go.uber.org/zap"
-	"gorm.io/gorm"
 	metav1 "microservice-golang/gen/meta/v1"
 	"microservice-golang/services/identity-service/internal/entity"
 	"microservice-golang/services/identity-service/internal/repository"
 	apperr "microservice-golang/shared/pkg/errors"
+
+	"github.com/google/uuid"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
-type StatusSyncUseCase struct {
-	cacheRepo repository.StatusCacheRepository
-	logger    *zap.Logger
+type StatusUseCase struct {
+	statusRepo repository.StatusRepository
+	logger     *zap.Logger
 }
 
-func NewStatusSyncUseCase(
-	cacheRepo repository.StatusCacheRepository,
+func NewStatusUseCase(
+	statusRepo repository.StatusRepository,
 	logger *zap.Logger,
-) *StatusSyncUseCase {
-	return &StatusSyncUseCase{
-		cacheRepo: cacheRepo,
-		logger:    logger,
+) *StatusUseCase {
+	return &StatusUseCase{
+		statusRepo: statusRepo,
+		logger:     logger,
 	}
 }
 
-func (uc *StatusSyncUseCase) upsertCache(ctx context.Context, evt *metav1.StatusEvent) error {
+func (uc *StatusUseCase) upsert(ctx context.Context, evt *metav1.StatusEvent) error {
 	if evt.StatusId == "" || evt.StatusName == "" || evt.StatusSlug == "" {
 		uc.logger.Warn("incomplete event – skipping", zap.String("event_id", evt.EventId))
 		return nil
@@ -43,16 +44,16 @@ func (uc *StatusSyncUseCase) upsertCache(ctx context.Context, evt *metav1.Status
 		return nil
 	}
 
-	if err := uc.cacheRepo.Upsert(ctx, entity.StatusCache{
+	if err := uc.statusRepo.Upsert(ctx, entity.Status{
 		ID:   id,
 		Type: evt.StatusType,
 		Name: evt.StatusName,
 		Slug: evt.StatusSlug,
 	}); err != nil {
-		return apperr.Internal(fmt.Errorf("upsert status cache: %w", err))
+		return apperr.Internal(fmt.Errorf("upsert status replicas: %w", err))
 	}
 
-	uc.logger.Info("status cache upserted",
+	uc.logger.Info("status replicas upserted",
 		zap.String("event_id", evt.EventId),
 		zap.String("status_id", evt.StatusId),
 	)
@@ -60,7 +61,7 @@ func (uc *StatusSyncUseCase) upsertCache(ctx context.Context, evt *metav1.Status
 	return nil
 }
 
-func (uc *StatusSyncUseCase) deleteCache(ctx context.Context, evt *metav1.StatusEvent) error {
+func (uc *StatusUseCase) delete(ctx context.Context, evt *metav1.StatusEvent) error {
 	if evt.StatusId == "" {
 		uc.logger.Warn("missing status_id – skipping", zap.String("event_id", evt.EventId))
 		return nil
@@ -75,15 +76,15 @@ func (uc *StatusSyncUseCase) deleteCache(ctx context.Context, evt *metav1.Status
 		return nil
 	}
 
-	if err := uc.cacheRepo.Delete(ctx, id); err != nil {
+	if err := uc.statusRepo.Delete(ctx, id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			uc.logger.Debug("status already deleted", zap.String("status_id", evt.StatusId))
 			return nil
 		}
-		return apperr.Internal(fmt.Errorf("delete status cache: %w", err))
+		return apperr.Internal(fmt.Errorf("delete status replicas: %w", err))
 	}
 
-	uc.logger.Info("status cache deleted",
+	uc.logger.Info("status replicas deleted",
 		zap.String("event_id", evt.EventId),
 		zap.String("status_id", evt.StatusId),
 	)
@@ -91,7 +92,7 @@ func (uc *StatusSyncUseCase) deleteCache(ctx context.Context, evt *metav1.Status
 	return nil
 }
 
-func (uc *StatusSyncUseCase) SyncStatus(ctx context.Context, evt *metav1.StatusEvent) error {
+func (uc *StatusUseCase) Sync(ctx context.Context, evt *metav1.StatusEvent) error {
 	uc.logger.Info("processing status event",
 		zap.String("event_id", evt.EventId),
 		zap.Any("type", evt.EventType),
@@ -101,10 +102,10 @@ func (uc *StatusSyncUseCase) SyncStatus(ctx context.Context, evt *metav1.StatusE
 	switch evt.EventType {
 	case metav1.StatusEventType_STATUS_EVENT_TYPE_CREATED,
 		metav1.StatusEventType_STATUS_EVENT_TYPE_UPDATED:
-		return uc.upsertCache(ctx, evt)
+		return uc.upsert(ctx, evt)
 
 	case metav1.StatusEventType_STATUS_EVENT_TYPE_DELETED:
-		return uc.deleteCache(ctx, evt)
+		return uc.delete(ctx, evt)
 
 	default:
 		uc.logger.Warn("unknown event type – skipping", zap.Any("type", evt.EventType))

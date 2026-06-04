@@ -7,4 +7,5 @@ use (
 	./services/identity-service
 	./services/meta-service
 	./shared
+	services/academy-service
 )

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"microservice-golang/services/identity-service/internal/dto"
 	"microservice-golang/shared/pkg/constants"
 
 	"microservice-golang/services/identity-service/internal/entity"
@@ -11,24 +12,24 @@ import (
 )
 
 type ProfileUseCase interface {
-	ApplyProfile(ctx context.Context, req ApplyProfileRequest) error
-	ToggleProfile(ctx context.Context, req ToggleProfileRequest) error
-	ApproveProfile(ctx context.Context, req ApproveProfileRequest) error
-	RejectProfile(ctx context.Context, req ApproveProfileRequest) error
+	ApplyProfile(ctx context.Context, req dto.ApplyProfileRequest) error
+	ToggleProfile(ctx context.Context, req dto.ToggleProfileRequest) error
+	ApproveProfile(ctx context.Context, req dto.ApproveProfileRequest) error
+	RejectProfile(ctx context.Context, req dto.ApproveProfileRequest) error
 }
 
 type profileUseCase struct {
 	userRepo        repository.UserRepository
 	userRoleRepo    repository.UserRoleRepository
 	roleRepo        repository.RoleRepository
-	statusCacheRepo repository.StatusCacheRepository
+	statusCacheRepo repository.StatusRepository
 }
 
 func NewProfileUseCase(
 	userRepo repository.UserRepository,
 	userRoleRepo repository.UserRoleRepository,
 	roleRepo repository.RoleRepository,
-	statusCacheRepo repository.StatusCacheRepository,
+	statusCacheRepo repository.StatusRepository,
 ) ProfileUseCase {
 	return &profileUseCase{
 		userRepo:        userRepo,
@@ -38,7 +39,7 @@ func NewProfileUseCase(
 	}
 }
 
-func (uc *profileUseCase) ApplyProfile(ctx context.Context, req ApplyProfileRequest) error {
+func (uc *profileUseCase) ApplyProfile(ctx context.Context, req dto.ApplyProfileRequest) error {
 	user, err := uc.userRepo.GetByID(ctx, req.UserID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -110,7 +111,7 @@ func (uc *profileUseCase) ApplyProfile(ctx context.Context, req ApplyProfileRequ
 	return uc.userRoleRepo.Add(ctx, userRole)
 }
 
-func (uc *profileUseCase) ToggleProfile(ctx context.Context, req ToggleProfileRequest) error {
+func (uc *profileUseCase) ToggleProfile(ctx context.Context, req dto.ToggleProfileRequest) error {
 	user, err := uc.userRepo.GetByID(ctx, req.UserID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -137,7 +138,7 @@ func (uc *profileUseCase) ToggleProfile(ctx context.Context, req ToggleProfileRe
 	return uc.userRoleRepo.SetActive(ctx, user.ID, targetRole.ID)
 }
 
-func (uc *profileUseCase) ApproveProfile(ctx context.Context, req ApproveProfileRequest) error {
+func (uc *profileUseCase) ApproveProfile(ctx context.Context, req dto.ApproveProfileRequest) error {
 	targetRole, err := uc.roleRepo.GetByID(ctx, req.RoleID)
 	if err != nil {
 		return apperr.NotFound("role")
@@ -161,7 +162,7 @@ func (uc *profileUseCase) ApproveProfile(ctx context.Context, req ApproveProfile
 	return uc.userRoleRepo.Update(ctx, userRole)
 }
 
-func (uc *profileUseCase) RejectProfile(ctx context.Context, req ApproveProfileRequest) error {
+func (uc *profileUseCase) RejectProfile(ctx context.Context, req dto.ApproveProfileRequest) error {
 	targetRole, err := uc.roleRepo.GetByID(ctx, req.RoleID)
 	if err != nil {
 		return apperr.NotFound("role")

@@ -2,11 +2,14 @@ package handler
 
 import (
 	"context"
-	"github.com/google/uuid"
-	"google.golang.org/grpc"
 	rbacv1 "microservice-golang/gen/rbac/v1"
+	"microservice-golang/services/identity-service/internal/dto"
+	"microservice-golang/services/identity-service/internal/mapper"
 	"microservice-golang/services/identity-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
+
+	"github.com/google/uuid"
+	"google.golang.org/grpc"
 )
 
 type RoleHandler struct {
@@ -33,7 +36,7 @@ func (h *RoleHandler) GetRole(ctx context.Context, req *rbacv1.GetRoleRequest) (
 		return nil, apperr.ToGRPC(err)
 	}
 	return &rbacv1.GetRoleResponse{
-		Role: toProtoRole(res),
+		Role: mapper.ToProtoRole(res),
 	}, nil
 }
 
@@ -50,7 +53,7 @@ func (h *RoleHandler) CreateRole(ctx context.Context, req *rbacv1.CreateRoleRequ
 		}
 		permissionIDs[i] = &id
 	}
-	res, err := h.uc.Create(ctx, usecase.CreateRoleRequest{
+	res, err := h.uc.Create(ctx, dto.CreateRoleRequest{
 		Name:          req.GetName(),
 		Description:   req.Description,
 		CreatedByID:   createdBy,
@@ -61,7 +64,7 @@ func (h *RoleHandler) CreateRole(ctx context.Context, req *rbacv1.CreateRoleRequ
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &rbacv1.CreateRoleResponse{Role: toProtoRole(res)}, nil
+	return &rbacv1.CreateRoleResponse{Role: mapper.ToProtoRole(res)}, nil
 }
 
 func (h *RoleHandler) UpdateRole(ctx context.Context, req *rbacv1.UpdateRoleRequest) (*rbacv1.UpdateRoleResponse, error) {
@@ -82,7 +85,7 @@ func (h *RoleHandler) UpdateRole(ctx context.Context, req *rbacv1.UpdateRoleRequ
 		}
 		permissionIDs[i] = &id
 	}
-	res, err := h.uc.Update(ctx, usecase.UpdateRoleRequest{
+	res, err := h.uc.Update(ctx, dto.UpdateRoleRequest{
 		ID:            id,
 		Name:          req.Name,
 		Description:   req.Description,
@@ -95,7 +98,7 @@ func (h *RoleHandler) UpdateRole(ctx context.Context, req *rbacv1.UpdateRoleRequ
 	}
 
 	return &rbacv1.UpdateRoleResponse{
-		Role: toProtoRole(res),
+		Role: mapper.ToProtoRole(res),
 	}, nil
 }
 
@@ -112,7 +115,7 @@ func (h *RoleHandler) DeleteRole(ctx context.Context, req *rbacv1.DeleteRoleRequ
 	if req.GetIsPermanent() {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("permanent delete is not allowed for roles"))
 	} else {
-		err = h.uc.SoftDelete(ctx, usecase.DeleteRequest{
+		err = h.uc.SoftDelete(ctx, dto.DeleteRequest{
 			ID:          id,
 			DeletedByID: deletedBy,
 		})
@@ -124,7 +127,7 @@ func (h *RoleHandler) DeleteRole(ctx context.Context, req *rbacv1.DeleteRoleRequ
 }
 
 func (h *RoleHandler) ListRoles(ctx context.Context, req *rbacv1.ListRolesRequest) (*rbacv1.ListRolesResponse, error) {
-	res, err := h.uc.List(ctx, usecase.ListRequest{
+	res, err := h.uc.List(ctx, dto.ListRequest{
 		Page:     int(req.Page),
 		PageSize: int(req.PageSize),
 	})
@@ -133,7 +136,7 @@ func (h *RoleHandler) ListRoles(ctx context.Context, req *rbacv1.ListRolesReques
 	}
 	roles := make([]*rbacv1.Role, 0, res.Total)
 	for _, role := range res.Roles {
-		roles = append(roles, toProtoRole(role))
+		roles = append(roles, mapper.ToProtoRole(role))
 	}
 	return &rbacv1.ListRolesResponse{
 		Roles:    roles,

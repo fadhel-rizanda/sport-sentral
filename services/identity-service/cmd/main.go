@@ -1,20 +1,9 @@
 package main
 
 import (
-	"buf.build/go/protovalidate"
 	"context"
 	"errors"
 	"fmt"
-	"github.com/joho/godotenv"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/redis/go-redis/v9"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/reflection"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	metav1 "microservice-golang/gen/meta/v1"
 	"microservice-golang/services/identity-service/internal/config"
 	"microservice-golang/services/identity-service/internal/database"
@@ -35,6 +24,18 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"buf.build/go/protovalidate"
+	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/reflection"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -143,14 +144,16 @@ func main() {
 	_ = metav1.NewStatusServiceClient(metaConn) // not yet implement
 
 	// ── Event Publisher ───────────────────────────────────────────────────────
-	eventPublisher := nats.NewUserEventPublisher(natsClient, log)
+	userEventPublisher := nats.NewUserEventPublisher(natsClient, log)
+	roleEventPublisher := nats.NewRoleEventPublisher(natsClient, log)
+	permissionEventPublisher := nats.NewPermissionEventPublisher(natsClient, log)
 
 	// ── Repositories ──────────────────────────────────────────────────────────
 	userRepo := repository.NewUserRepository(db)
 	userRoleRepo := repository.NewUserRoleRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
 	permissionRepo := repository.NewPermissionRepository(db)
-	statusCacheRepo := repository.NewStatusCacheRepository(db)
+	statusCacheRepo := repository.NewStatusRepository(db)
 
 	// ── Use Cases ─────────────────────────────────────────────────────────────
 	authUC := usecase.NewAuthUseCase(
@@ -171,7 +174,7 @@ func main() {
 		cfg.AppURL,
 		log,
 		statusCacheRepo,
-		eventPublisher,
+		userEventPublisher,
 	)
 	profileUC := usecase.NewProfileUseCase(
 		userRepo,
@@ -179,9 +182,9 @@ func main() {
 		roleRepo,
 		statusCacheRepo,
 	)
-	roleUC := usecase.NewRoleUseCase(roleRepo, permissionRepo, userRepo, log)
-	permissionUC := usecase.NewPermissionUseCase(permissionRepo)
-	statusSyncUC := usecase.NewStatusSyncUseCase(statusCacheRepo, log)
+	roleUC := usecase.NewRoleUseCase(roleRepo, permissionRepo, userRepo, log, roleEventPublisher)
+	permissionUC := usecase.NewPermissionUseCase(permissionRepo, permissionEventPublisher)
+	statusSyncUC := usecase.NewStatusUseCase(statusCacheRepo, log)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	authHandler := handler.NewAuthHandler(authUC)

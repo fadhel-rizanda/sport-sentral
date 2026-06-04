@@ -3,10 +3,13 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	userv1 "microservice-golang/gen/user/v1"
+	"microservice-golang/services/identity-service/internal/dto"
+	"microservice-golang/services/identity-service/internal/mapper"
 	"microservice-golang/shared/pkg/constants"
 	"time"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -23,12 +26,12 @@ import (
 )
 
 type UserUseCase interface {
-	Create(ctx context.Context, req CreateUserRequest) (*UserResponse, error)
-	GetByID(ctx context.Context, id uuid.UUID) (*UserResponse, error)
-	GetByEmail(ctx context.Context, email string) (*UserResponse, error)
-	Update(ctx context.Context, req UpdateUserRequest) (*UserResponse, error)
-	SoftDelete(ctx context.Context, req DeleteUserRequest) error
-	List(ctx context.Context, req ListRequest) (*ListUsersResponse, error)
+	Create(ctx context.Context, req dto.CreateUserRequest) (*dto.UserResponse, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*dto.UserResponse, error)
+	GetByEmail(ctx context.Context, email string) (*dto.UserResponse, error)
+	Update(ctx context.Context, req dto.UpdateUserRequest) (*dto.UserResponse, error)
+	SoftDelete(ctx context.Context, req dto.DeleteUserRequest) error
+	List(ctx context.Context, req dto.ListRequest) (*dto.ListUsersResponse, error)
 	SendVerifyEmail(ctx context.Context, email string) error
 	VerifyAccount(ctx context.Context, tokenStr string) error
 	ForgotPassword(ctx context.Context, email string) error
@@ -47,8 +50,8 @@ type userUseCase struct {
 	redis           redisclient.Client
 	AppURL          string
 	logger          *zap.Logger
-	statusCacheRepo repository.StatusCacheRepository
-	publisher       EventPublisher
+	statusCacheRepo repository.StatusRepository
+	publisher       UserEventPublisher
 }
 
 func NewUserUseCase(
@@ -60,8 +63,8 @@ func NewUserUseCase(
 	redis redisclient.Client,
 	AppURL string,
 	logger *zap.Logger,
-	statusCacheRepo repository.StatusCacheRepository,
-	publisher EventPublisher,
+	statusCacheRepo repository.StatusRepository,
+	publisher UserEventPublisher,
 ) UserUseCase {
 	return &userUseCase{
 		db:              db,
@@ -77,7 +80,7 @@ func NewUserUseCase(
 	}
 }
 
-func (uc *userUseCase) Create(ctx context.Context, req CreateUserRequest) (*UserResponse, error) {
+func (uc *userUseCase) Create(ctx context.Context, req dto.CreateUserRequest) (*dto.UserResponse, error) {
 	role, err := uc.roleRepo.GetByID(ctx, req.RoleID)
 	if err != nil {
 		return nil, apperr.NotFound("role")
@@ -169,7 +172,7 @@ func (uc *userUseCase) Create(ctx context.Context, req CreateUserRequest) (*User
 	return uc.GetByID(ctx, user.ID)
 }
 
-func (uc *userUseCase) GetByID(ctx context.Context, id uuid.UUID) (*UserResponse, error) {
+func (uc *userUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.UserResponse, error) {
 	user, err := uc.userRepo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -177,10 +180,10 @@ func (uc *userUseCase) GetByID(ctx context.Context, id uuid.UUID) (*UserResponse
 		}
 		return nil, apperr.Internal(err)
 	}
-	return ToUserResponse(user), nil
+	return mapper.ToUserResponse(user), nil
 }
 
-func (uc *userUseCase) GetByEmail(ctx context.Context, email string) (*UserResponse, error) {
+func (uc *userUseCase) GetByEmail(ctx context.Context, email string) (*dto.UserResponse, error) {
 	user, err := uc.userRepo.GetByEmail(ctx, email)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -188,10 +191,10 @@ func (uc *userUseCase) GetByEmail(ctx context.Context, email string) (*UserRespo
 		}
 		return nil, apperr.Internal(err)
 	}
-	return ToUserResponse(user), nil
+	return mapper.ToUserResponse(user), nil
 }
 
-func (uc *userUseCase) Update(ctx context.Context, req UpdateUserRequest) (*UserResponse, error) {
+func (uc *userUseCase) Update(ctx context.Context, req dto.UpdateUserRequest) (*dto.UserResponse, error) {
 	user, err := uc.userRepo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -228,10 +231,10 @@ func (uc *userUseCase) Update(ctx context.Context, req UpdateUserRequest) (*User
 		return nil, apperr.Internal(err)
 	}
 
-	return ToUserResponse(user), nil
+	return mapper.ToUserResponse(user), nil
 }
 
-func (uc *userUseCase) SoftDelete(ctx context.Context, req DeleteUserRequest) error {
+func (uc *userUseCase) SoftDelete(ctx context.Context, req dto.DeleteUserRequest) error {
 	user, err := uc.userRepo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -267,18 +270,18 @@ func (uc *userUseCase) SoftDelete(ctx context.Context, req DeleteUserRequest) er
 	return nil
 }
 
-func (uc *userUseCase) List(ctx context.Context, req ListRequest) (*ListUsersResponse, error) {
+func (uc *userUseCase) List(ctx context.Context, req dto.ListRequest) (*dto.ListUsersResponse, error) {
 	users, total, err := uc.userRepo.List(ctx, req.Page, req.PageSize)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
 
-	result := make([]*UserResponse, len(users))
+	result := make([]*dto.UserResponse, len(users))
 	for i, u := range users {
-		result[i] = ToUserResponse(u)
+		result[i] = mapper.ToUserResponse(u)
 	}
 
-	return &ListUsersResponse{
+	return &dto.ListUsersResponse{
 		Users:    result,
 		Total:    total,
 		Page:     req.Page,
@@ -497,16 +500,15 @@ func (uc *userUseCase) buildUserEvent(
 	evtID, _ := uuid.NewV7()
 
 	evt := &userv1.UserEvent{
-		EventId:            evtID.String(),
-		EventType:          eventType,
-		OccurredAt:         timestamppb.Now(),
-		UserId:             user.ID.String(),
-		UserEmail:          user.Email,
-		UserUsername:       user.Username,
-		UserFullName:       user.FullName,
-		UserActiveRoleId:   role.ID.String(),
-		UserActiveRoleName: role.Name,
-		UserStatusId:       user.StatusID.String(),
+		EventId:          evtID.String(),
+		EventType:        eventType,
+		OccurredAt:       timestamppb.Now(),
+		UserId:           user.ID.String(),
+		UserEmail:        user.Email,
+		UserUsername:     user.Username,
+		UserFullName:     user.FullName,
+		UserActiveRoleId: role.ID.String(),
+		UserStatusId:     user.StatusID.String(),
 	}
 
 	if user.DeletedAt.Valid {
