@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package meta.v1;
+
+option go_package = "microservice-golang/gen/meta/v1;metav1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ─── Enum ─────────────────────────────────────────────────────────────────────
+enum AdministrativeDivisionEventType {
+  ADMINISTRATIVE_DIVISION_EVENT_TYPE_UNSPECIFIED = 0;
+  ADMINISTRATIVE_DIVISION_EVENT_TYPE_CREATED     = 1;
+  ADMINISTRATIVE_DIVISION_EVENT_TYPE_UPDATED     = 2;
+  ADMINISTRATIVE_DIVISION_EVENT_TYPE_DELETED     = 3;
+}
+
+// ─── Event envelope ───────────────────────────────────────────────────────────
+message AdministrativeDivisionEvent {
+  string event_id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+
+  AdministrativeDivisionEventType event_type = 2 [
+    (buf.validate.field).enum.defined_only = true
+  ];
+
+  google.protobuf.Timestamp occurred_at = 3 [
+    (buf.validate.field).required = true
+  ];
+
+  // The ID of the administrative division associated with this event
+  string administrative_division_id = 4 [
+    (buf.validate.field).string.uuid = true
+  ];
+
+  string administrative_division_name = 5 [
+    (buf.validate.field).string.min_len = 1
+  ];
+
+  string administrative_division_level = 6 [
+    (buf.validate.field).string.min_len = 1
+  ];
+
+  string administrative_division_postal_code = 7 [
+    (buf.validate.field).string.min_len = 1
+  ];
+
+  string administrative_division_country_id = 8 [
+    (buf.validate.field).string.uuid = true
+  ];
+
+  string administrative_division_parent_id = 9 [
+    (buf.validate.field).string.uuid = true
+  ];
+
+  optional google.protobuf.Timestamp deleted_at = 10;
+}

@@ -9,7 +9,9 @@ import (
 	"microservice-golang/services/meta-service/internal/delivery/nats"
 	"microservice-golang/services/meta-service/internal/handler"
 	"microservice-golang/services/meta-service/internal/repository"
+	"microservice-golang/services/meta-service/internal/repository/replicated"
 	"microservice-golang/services/meta-service/internal/usecase"
+	replicated2 "microservice-golang/services/meta-service/internal/usecase/replicated"
 	envConfig "microservice-golang/shared/pkg/config"
 	"microservice-golang/shared/pkg/grpc/interceptor"
 	"microservice-golang/shared/pkg/logger"
@@ -119,16 +121,22 @@ func main() {
 	// ── Event Publisher ───────────────────────────────────────────────────────
 	statusEventPublisher := nats.NewStatusEventPublisher(natsClient, log)
 	tagEventPublisher := nats.NewTagEventPublisher(natsClient, log)
+	countryEventPublisher := nats.NewCountryEventPublisher(natsClient, log)
+	adminDivEventPublisher := nats.NewAdministrativeDivisionPublisher(natsClient, log)
 
 	// ── Repository ────────────────────────────────────────────────────────────
 	statusRepo := repository.NewStatusRepository(db, redisWrapper)
 	tagRepo := repository.NewTagRepository(db, redisWrapper)
-	userCacheRepo := repository.NewUserRepository(db)
+	countryRepo := repository.NewCountryRepository(db, redisWrapper)
+	adminDivRepo := repository.NewAdministrativeDivisionRepository(db, redisWrapper)
+	userCacheRepo := replicated.NewUserRepository(db)
 
 	// ── UseCase ───────────────────────────────────────────────────────────────
 	statusUC := usecase.NewStatusUseCase(statusRepo, statusEventPublisher)
 	tagUC := usecase.NewTagUseCase(tagRepo, tagEventPublisher)
-	userSyncUC := usecase.NewUserSyncUseCase(userCacheRepo, log)
+	countryUC := usecase.NewCountryUseCase(countryRepo, countryEventPublisher)
+	adminDivUC := usecase.NewAdministrativeDivisionUseCase(adminDivRepo, adminDivEventPublisher)
+	userSyncUC := replicated2.NewUserSyncUseCase(userCacheRepo, log)
 
 	err = database.SeedStatuses(statusUC)
 	if err != nil {
@@ -138,6 +146,8 @@ func main() {
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	statusHandler := handler.NewStatusHandler(statusUC)
 	tagHandler := handler.NewTagHandler(tagUC)
+	countryHandler := handler.NewCountryHandler(countryUC)
+	adminDivHandler := handler.NewAdministrativeDivisionHandler(adminDivUC)
 
 	// ── gRPC Server ───────────────────────────────────────────────────────────
 	v, err := protovalidate.New()
@@ -155,6 +165,8 @@ func main() {
 	)
 	statusHandler.RegisterGRPC(grpcServer)
 	tagHandler.RegisterGRPC(grpcServer)
+	countryHandler.RegisterGRPC(grpcServer)
+	adminDivHandler.RegisterGRPC(grpcServer)
 
 	reflection.Register(grpcServer)
 
@@ -179,10 +191,10 @@ func main() {
 
 	// ── NATS Subscriber ────────────────────────────────────────────────────────────────
 	userDurableName := envConfig.GetEnv("USER_DURABLE_NAME", "meta-service-user-sync")
-	userSub := nats.NewUserSubscriber(userSyncUC, natsClient, log, userDurableName)
+	identitySub := nats.NewIdentitySubscriber(userSyncUC, natsClient, log, userDurableName)
 
 	log.Info("starting user event consumer")
-	if err := userSub.Listen(ctx); err != nil {
+	if err := identitySub.Listen(ctx); err != nil {
 		log.Error("consumer stopped", zap.Error(err))
 	}
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/gofiber/fiber/v2"
 	userv1 "microservice-golang/gen/user/v1"
+	"microservice-golang/services/gateway/internal/dto"
+	"microservice-golang/services/gateway/internal/mapper"
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/services/gateway/internal/request"
 	"microservice-golang/services/gateway/internal/response"
@@ -51,7 +53,7 @@ func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.OK(c, fiber.Map{"user": toUserResponse(resp.User)})
+	return response.OK(c, fiber.Map{"user": mapper.ToUserResponse(resp.User)})
 }
 
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
@@ -74,7 +76,7 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.OK(c, fiber.Map{"user": toUserResponse(resp.User)})
+	return response.OK(c, fiber.Map{"user": mapper.ToUserResponse(resp.User)})
 }
 
 func (h *UserHandler) ListUsers(c *fiber.Ctx) error {
@@ -89,9 +91,9 @@ func (h *UserHandler) ListUsers(c *fiber.Ctx) error {
 		return err
 	}
 
-	users := make([]UserResponse, len(resp.Users))
+	users := make([]dto.UserResponse, len(resp.Users))
 	for i, u := range resp.Users {
-		users[i] = toUserResponse(u)
+		users[i] = mapper.ToUserResponse(u)
 	}
 
 	return response.OKWithMeta(c, users, response.Meta{
@@ -143,7 +145,7 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, fiber.Map{"user": toUserResponse(resp.User)})
+	return response.OK(c, fiber.Map{"user": mapper.ToUserResponse(resp.User)})
 }
 
 func (h *UserHandler) SendVerifyEmail(c *fiber.Ctx) error {

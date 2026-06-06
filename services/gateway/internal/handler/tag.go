@@ -3,6 +3,8 @@ package handler
 import (
 	"github.com/gofiber/fiber/v2"
 	metav1 "microservice-golang/gen/meta/v1"
+	"microservice-golang/services/gateway/internal/dto"
+	"microservice-golang/services/gateway/internal/mapper"
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/services/gateway/internal/response"
 )
@@ -47,9 +49,9 @@ func (h *TagHandler) ListTags(c *fiber.Ctx) error {
 		return err
 	}
 
-	tags := make([]TagResponse, len(resp.Tags))
+	tags := make([]dto.TagResponse, len(resp.Tags))
 	for i, tag := range resp.Tags {
-		tags[i] = toTagResponse(tag)
+		tags[i] = mapper.ToTagResponse(tag)
 	}
 
 	return response.OKWithMeta(c, tags, response.Meta{
@@ -68,7 +70,7 @@ func (h *TagHandler) GetTagByID(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, toTagResponse(resp.Tag))
+	return response.OK(c, mapper.ToTagResponse(resp.Tag))
 }
 
 func (h *TagHandler) CreateTag(c *fiber.Ctx) error {
@@ -92,7 +94,7 @@ func (h *TagHandler) CreateTag(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, toTagResponse(res.Tag))
+	return response.OK(c, mapper.ToTagResponse(res.Tag))
 }
 
 func (h *TagHandler) UpdateTag(c *fiber.Ctx) error {
@@ -116,7 +118,7 @@ func (h *TagHandler) UpdateTag(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, toTagResponse(res.Tag))
+	return response.OK(c, mapper.ToTagResponse(res.Tag))
 }
 
 func (h *TagHandler) DeleteTag(c *fiber.Ctx) error {

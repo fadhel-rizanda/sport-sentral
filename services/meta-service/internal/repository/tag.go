@@ -70,9 +70,9 @@ func (r *tagRepository) GetByTypeAndName(ctx context.Context, tagType, name stri
 			db.username AS deleted_by_username,
 			db.full_name AS deleted_by_full_name
 		`).
-		Joins("LEFT JOIN users cb ON cb.id = tags.created_by_id").
-		Joins("LEFT JOIN users ub ON ub.id = tags.updated_by_id").
-		Joins("LEFT JOIN users db ON db.id = tags.deleted_by_id").
+		Joins("LEFT JOIN replicated_users cb ON cb.id = tags.created_by_id").
+		Joins("LEFT JOIN replicated_users ub ON ub.id = tags.updated_by_id").
+		Joins("LEFT JOIN replicated_users db ON db.id = tags.deleted_by_id").
 		Where("type = ? AND name = ?", tagType, name).
 		First(&row).Error
 
@@ -121,9 +121,9 @@ func (r *tagRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Tag,
 			db.username AS deleted_by_username,
 			db.full_name AS deleted_by_full_name
 		`).
-		Joins("LEFT JOIN users cb ON cb.id = tags.created_by_id").
-		Joins("LEFT JOIN users ub ON ub.id = tags.updated_by_id").
-		Joins("LEFT JOIN users db ON db.id = tags.deleted_by_id").
+		Joins("LEFT JOIN replicated_users cb ON cb.id = tags.created_by_id").
+		Joins("LEFT JOIN replicated_users ub ON ub.id = tags.updated_by_id").
+		Joins("LEFT JOIN replicated_users db ON db.id = tags.deleted_by_id").
 		Where("tags.id = ?", id).
 		First(&row).Error
 
@@ -195,9 +195,9 @@ func (r *tagRepository) List(ctx context.Context, tagType *string, page, pageSiz
 			db.username AS deleted_by_username,
 			db.full_name AS deleted_by_full_name
 		`).
-		Joins("LEFT JOIN users cb ON cb.id = tags.created_by_id").
-		Joins("LEFT JOIN users ub ON ub.id = tags.updated_by_id").
-		Joins("LEFT JOIN users db ON db.id = tags.deleted_by_id")
+		Joins("LEFT JOIN replicated_users cb ON cb.id = tags.created_by_id").
+		Joins("LEFT JOIN replicated_users ub ON ub.id = tags.updated_by_id").
+		Joins("LEFT JOIN replicated_users db ON db.id = tags.deleted_by_id")
 
 	if tagType != nil && *tagType != "" {
 		listQuery = listQuery.Where("tags.type = ?", *tagType)
@@ -304,16 +304,16 @@ func (r *tagRepository) loadUserCaches(ctx context.Context, tags []*entity.Tag) 
 		return nil
 	}
 
-	var users []entity.User
+	var replicatedUsers []entity.User
 	if err := r.db.WithContext(ctx).
 		Where("id IN ?", userIDs).
-		Find(&users).Error; err != nil {
+		Find(&replicatedUsers).Error; err != nil {
 		return err
 	}
 
 	userMap := make(map[uuid.UUID]*entity.User)
-	for i := range users {
-		userMap[users[i].ID] = &users[i]
+	for i := range replicatedUsers {
+		userMap[replicatedUsers[i].ID] = &replicatedUsers[i]
 	}
 
 	for _, tag := range tags {

@@ -13,13 +13,13 @@ const (
 )
 
 const (
-	SubjectRoleCreated = "meta.status.created"
-	SubjectRoleUpdated = "meta.status.updated"
-	SubjectRoleDeleted = "meta.status.deleted"
+	SubjectRoleCreated = "identity.role.created"
+	SubjectRoleUpdated = "identity.role.updated"
+	SubjectRoleDeleted = "identity.role.deleted"
 )
 
 const (
-	SubjectPermissionCreated = "meta.status.created"
-	SubjectPermissionUpdated = "meta.status.updated"
-	SubjectPermissionDeleted = "meta.status.deleted"
+	SubjectPermissionCreated = "identity.permission.created"
+	SubjectPermissionUpdated = "identity.permission.updated"
+	SubjectPermissionDeleted = "identity.permission.deleted"
 )

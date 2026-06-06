@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"microservice-golang/services/identity-service/internal/dto"
+	"microservice-golang/services/identity-service/internal/repository/replicated"
 	"microservice-golang/shared/pkg/constants"
 
 	"microservice-golang/services/identity-service/internal/entity"
@@ -22,14 +23,14 @@ type profileUseCase struct {
 	userRepo        repository.UserRepository
 	userRoleRepo    repository.UserRoleRepository
 	roleRepo        repository.RoleRepository
-	statusCacheRepo repository.StatusRepository
+	statusCacheRepo replicated.StatusRepository
 }
 
 func NewProfileUseCase(
 	userRepo repository.UserRepository,
 	userRoleRepo repository.UserRoleRepository,
 	roleRepo repository.RoleRepository,
-	statusCacheRepo repository.StatusRepository,
+	statusCacheRepo replicated.StatusRepository,
 ) ProfileUseCase {
 	return &profileUseCase{
 		userRepo:        userRepo,

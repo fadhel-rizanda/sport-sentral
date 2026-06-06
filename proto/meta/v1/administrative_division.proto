@@ -1,0 +1,165 @@
+syntax = "proto3";
+
+package meta.v1;
+
+option go_package = "microservice-golang/gen/meta/v1;metav1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
+
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+message AdministrativeDivision {
+  string id                                 = 1;
+  string name                               = 2;
+  string level                              = 3;
+  string postal_code                        = 4;
+  google.protobuf.Timestamp created_at     = 5;
+  google.protobuf.Timestamp updated_at     = 6;
+  optional google.protobuf.Timestamp deleted_at = 7;
+
+  common.v1.UserSimple created_by           = 8;
+  common.v1.UserSimple updated_by           = 9;
+  optional common.v1.UserSimple deleted_by  = 10;
+  common.v1.CountrySimple country = 11;
+  optional common.v1.AdministrativeDivisionSimple parent = 12;
+}
+
+// ─── Requests ────────────────────────────────────────────────────────────────
+
+message CreateAdministrativeDivisionRequest {
+  string name = 1 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 100
+  ];
+  string level = 2 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 50
+  ];
+  string postal_code = 3 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 20
+  ];
+  string country_id = 4 [
+    (buf.validate.field).string.uuid = true
+  ];
+  optional string parent_id = 5 [
+    (buf.validate.field).string.uuid = true
+  ];
+  string created_by_id = 6 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message GetAdministrativeDivisionRequest {
+  string name = 1 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  string level = 2 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  string postal_code = 3 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  string country_id = 4 [
+    (buf.validate.field).string.uuid = true
+  ];
+  optional string parent_id = 5 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message GetAdministrativeDivisionByIDRequest {
+  string id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message ListAdministrativeDivisionsRequest {
+  optional string name = 1 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  optional string level = 2 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  optional string postal_code = 3 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  optional string country_id = 4 [
+    (buf.validate.field).string.uuid = true
+  ];
+  optional string parent_id = 5 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message UpdateAdministrativeDivisionRequest {
+  string id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+  optional string name = 2 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 100
+  ];
+  optional string level = 3 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 50
+  ];
+  optional string postal_code = 4 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 20
+  ];
+  optional string country_id = 5 [
+    (buf.validate.field).string.uuid = true
+  ];
+  optional string parent_id = 6 [
+    (buf.validate.field).string.uuid = true
+  ];
+  string updated_by_id = 7 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeleteAdministrativeDivisionRequest {
+  string id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+  string deleted_by_id = 2 [
+    (buf.validate.field).string.uuid = true
+  ];
+  bool is_permanent = 3;
+}
+
+// ─── Responses ────────────────────────────────────────────────────────────────
+
+message ListAdministrativeDivisionsResponse {
+  repeated AdministrativeDivision administrative_divisions = 1;
+}
+
+message CreateAdministrativeDivisionResponse {
+  AdministrativeDivision administrative_division = 1;
+}
+
+message GetAdministrativeDivisionResponse {
+  AdministrativeDivision administrative_division = 1;
+}
+
+message UpdateAdministrativeDivisionResponse {
+  AdministrativeDivision administrative_division = 1;
+}
+
+message DeleteAdministrativeDivisionResponse {
+  string id = 1;
+}
+
+// ─── Services ────────────────────────────────────────────────────────────────
+
+service AdministrativeDivisionService {
+  rpc CreateAdministrativeDivision(CreateAdministrativeDivisionRequest) returns (CreateAdministrativeDivisionResponse);
+  rpc GetAdministrativeDivision(GetAdministrativeDivisionRequest) returns (GetAdministrativeDivisionResponse);
+  rpc GetAdministrativeDivisionByID(GetAdministrativeDivisionByIDRequest) returns (GetAdministrativeDivisionResponse);
+  rpc ListAdministrativeDivisions(ListAdministrativeDivisionsRequest) returns (ListAdministrativeDivisionsResponse);
+  rpc UpdateAdministrativeDivision(UpdateAdministrativeDivisionRequest) returns (UpdateAdministrativeDivisionResponse);
+  rpc DeleteAdministrativeDivision(DeleteAdministrativeDivisionRequest) returns (DeleteAdministrativeDivisionResponse);
+}

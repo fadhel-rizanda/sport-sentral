@@ -78,10 +78,11 @@ func (UserEventType) EnumDescriptor() ([]byte, []int) {
 
 // ─── Event envelope ───────────────────────────────────────────────────────────
 type UserEvent struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	EventId          string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
-	EventType        UserEventType          `protobuf:"varint,2,opt,name=event_type,json=eventType,proto3,enum=user.v1.UserEventType" json:"event_type,omitempty"`
-	OccurredAt       *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	EventId    string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	EventType  UserEventType          `protobuf:"varint,2,opt,name=event_type,json=eventType,proto3,enum=user.v1.UserEventType" json:"event_type,omitempty"`
+	OccurredAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
+	// The ID of the user associated with this event
 	UserId           string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	UserEmail        string                 `protobuf:"bytes,5,opt,name=user_email,json=userEmail,proto3" json:"user_email,omitempty"`
 	UserUsername     string                 `protobuf:"bytes,6,opt,name=user_username,json=userUsername,proto3" json:"user_username,omitempty"`

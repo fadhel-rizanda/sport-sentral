@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+package academy.v1;
+
+option go_package = "microservice-golang/gen/academy/v1;academyv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
+
+// ─── Enrollment ───────────────────────────────────────────────────────────────
+
+message Enrollment {
+  string id = 1;
+  string academy_branch_id = 2;
+  string athlete_id = 3;
+  google.protobuf.Timestamp joined_at = 4;
+  optional google.protobuf.Timestamp left_at = 5;
+  optional google.protobuf.Timestamp expires_at = 6;
+  optional google.protobuf.Timestamp approved_at = 7;
+  optional string approved_by_id = 8;
+  string status_id = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  optional google.protobuf.Timestamp deleted_at = 12;
+
+  optional common.v1.AcademyBranchSimple academy_branch = 13;
+  common.v1.UserSimple athlete = 14;
+  optional common.v1.UserSimple approved_by = 15;
+  common.v1.StatusSimple status = 16;
+  common.v1.UserSimple created_by = 17;
+  common.v1.UserSimple updated_by = 18;
+  optional common.v1.UserSimple deleted_by = 19;
+}
+
+// ─── Requests & Responses ────────────────────────────────────────────────────
+
+message CreateEnrollmentRequest {
+  string academy_branch_id = 1 [(buf.validate.field).string.uuid = true];
+  string athlete_id = 2 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp joined_at = 3;
+  optional google.protobuf.Timestamp expires_at = 4;
+  string status_id = 5 [(buf.validate.field).string.uuid = true];
+  string created_by_id = 6 [(buf.validate.field).string.uuid = true];
+}
+
+message CreateEnrollmentResponse {
+  Enrollment enrollment = 1;
+}
+
+message GetEnrollmentRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetEnrollmentResponse {
+  Enrollment enrollment = 1;
+}
+
+message GetEnrollmentByBranchAndAthleteRequest {
+  string branch_id = 1 [(buf.validate.field).string.uuid = true];
+  string athlete_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message GetEnrollmentByBranchAndAthleteResponse {
+  Enrollment enrollment = 1;
+}
+
+message ListEnrollmentsRequest {
+  optional string branch_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string athlete_id = 2 [(buf.validate.field).string.uuid = true];
+  optional string status_id = 3 [(buf.validate.field).string.uuid = true];
+  optional string search = 4;
+  int32 page = 5 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 6 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message ListEnrollmentsResponse {
+  repeated Enrollment enrollments = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message UpdateEnrollmentRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  optional google.protobuf.Timestamp left_at = 2;
+  optional google.protobuf.Timestamp expires_at = 3;
+  optional string status_id = 4 [(buf.validate.field).string.uuid = true];
+  string updated_by_id = 5 [(buf.validate.field).string.uuid = true];
+}
+
+message UpdateEnrollmentResponse {
+  Enrollment enrollment = 1;
+}
+
+message DeleteEnrollmentRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string deleted_by_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteEnrollmentResponse {
+  string id = 1;
+}
+
+// ─── Service ─────────────────────────────────────────────────────────────────
+
+service EnrollmentService {
+  rpc CreateEnrollment(CreateEnrollmentRequest) returns (CreateEnrollmentResponse);
+  rpc GetEnrollment(GetEnrollmentRequest) returns (GetEnrollmentResponse);
+  rpc GetEnrollmentByBranchAndAthlete(GetEnrollmentByBranchAndAthleteRequest) returns (GetEnrollmentByBranchAndAthleteResponse);
+  rpc ListEnrollments(ListEnrollmentsRequest) returns (ListEnrollmentsResponse);
+  rpc UpdateEnrollment(UpdateEnrollmentRequest) returns (UpdateEnrollmentResponse);
+  rpc DeleteEnrollment(DeleteEnrollmentRequest) returns (DeleteEnrollmentResponse);
+}

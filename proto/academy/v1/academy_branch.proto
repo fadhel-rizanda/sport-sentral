@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package academy.v1;
+
+option go_package = "microservice-golang/gen/academy/v1;academyv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
+
+// ─── Academy Branch ───────────────────────────────────────────────────────────
+
+message AcademyBranchAddress {
+  string id = 1;
+  string branch_id = 2;
+  bool is_primary = 3;
+  string street_address = 4;
+  optional string notes = 5;
+  optional double latitude = 6;
+  optional double longitude = 7;
+  common.v1.AdministrativeDivisionSimple administrative_division = 8;
+}
+
+message AcademyBranch {
+  string id = 1;
+  string holding_id = 2;
+  string sport_id = 3;
+  string sport_name = 4;
+  string name = 5;
+  string email = 6;
+  string phone_number = 7;
+  string status_id = 8;
+  int64 member_count = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+
+  optional common.v1.AcademyHoldingSimple holding = 12;
+  optional common.v1.SportSimple sport = 13;
+  optional common.v1.StatusSimple status = 14;
+  repeated AcademyBranchAddress addresses = 15;
+  common.v1.UserSimple created_by = 16;
+  common.v1.UserSimple updated_by = 17;
+  optional common.v1.UserSimple deleted_by = 18;
+}
+
+// ─── Requests & Responses ────────────────────────────────────────────────────
+
+message CreateAcademyBranchRequest {
+  string holding_id = 1 [(buf.validate.field).string.uuid = true];
+  string sport_id = 2 [(buf.validate.field).string.uuid = true];
+  string name = 3 [(buf.validate.field).string.min_len = 1];
+  string email = 4 [(buf.validate.field).string.email = true];
+  string phone_number = 5 [(buf.validate.field).string.min_len = 1];
+  string status_id = 6 [(buf.validate.field).string.uuid = true];
+  string street_address = 7 [(buf.validate.field).string.min_len = 1];
+  optional string notes = 8;
+  optional double latitude = 9;
+  optional double longitude = 10;
+  string admin_division_id = 11 [(buf.validate.field).string.uuid = true];
+  string created_by_id = 12 [(buf.validate.field).string.uuid = true];
+}
+
+message CreateAcademyBranchResponse {
+  AcademyBranch branch = 1;
+}
+
+message GetAcademyBranchRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetAcademyBranchResponse {
+  AcademyBranch branch = 1;
+}
+
+message ListAcademyBranchesRequest {
+  optional string holding_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string sport_id = 2 [(buf.validate.field).string.uuid = true];
+  optional string status_id = 3 [(buf.validate.field).string.uuid = true];
+  optional string search = 4;
+  int32 page = 5 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 6 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message ListAcademyBranchesResponse {
+  repeated AcademyBranch branches = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message UpdateAcademyBranchRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  optional string name = 2 [(buf.validate.field).string.min_len = 1];
+  optional string email = 3 [(buf.validate.field).string.email = true];
+  optional string phone_number = 4 [(buf.validate.field).string.min_len = 1];
+  optional string status_id = 5 [(buf.validate.field).string.uuid = true];
+  string updated_by_id = 6 [(buf.validate.field).string.uuid = true];
+}
+
+message UpdateAcademyBranchResponse {
+  AcademyBranch branch = 1;
+}
+
+message DeleteAcademyBranchRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string deleted_by_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteAcademyBranchResponse {
+  string id = 1;
+}
+
+// ─── Service ─────────────────────────────────────────────────────────────────
+
+service AcademyBranchService {
+  rpc CreateAcademyBranch(CreateAcademyBranchRequest) returns (CreateAcademyBranchResponse);
+  rpc GetAcademyBranch(GetAcademyBranchRequest) returns (GetAcademyBranchResponse);
+  rpc ListAcademyBranches(ListAcademyBranchesRequest) returns (ListAcademyBranchesResponse);
+  rpc UpdateAcademyBranch(UpdateAcademyBranchRequest) returns (UpdateAcademyBranchResponse);
+  rpc DeleteAcademyBranch(DeleteAcademyBranchRequest) returns (DeleteAcademyBranchResponse);
+}

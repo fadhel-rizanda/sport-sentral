@@ -24,6 +24,18 @@ type User struct {
 	UserRoles []UserRole `gorm:"foreignKey:UserID"`
 }
 
+type UserRole struct {
+	UserID    uuid.UUID `gorm:"type:uuid;primaryKey"`
+	RoleID    uuid.UUID `gorm:"type:uuid;primaryKey"`
+	IsActive  bool      `gorm:"not null;default:false"`
+	StatusID  uuid.UUID `gorm:"type:uuid;not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
+	Status Status `gorm:"-"`
+	Role   Role   `gorm:"foreignKey:RoleID;references:ID"`
+}
+
 func (u *User) BeforeCreate(_ *gorm.DB) error {
 	if u.ID == uuid.Nil {
 		id, err := uuid.NewV7()

@@ -3,6 +3,8 @@ package handler
 import (
 	"github.com/gofiber/fiber/v2"
 	metav1 "microservice-golang/gen/meta/v1"
+	"microservice-golang/services/gateway/internal/dto"
+	"microservice-golang/services/gateway/internal/mapper"
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/services/gateway/internal/request"
 	"microservice-golang/services/gateway/internal/response"
@@ -52,7 +54,7 @@ func (h *StatusHandler) CreateStatus(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.OK(c, fiber.Map{"status": toStatusResponse(resp.Status)})
+	return response.OK(c, fiber.Map{"status": mapper.ToStatusResponse(resp.Status)})
 }
 
 func (h *StatusHandler) UpdateStatus(c *fiber.Ctx) error {
@@ -77,7 +79,7 @@ func (h *StatusHandler) UpdateStatus(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, fiber.Map{"status": toStatusResponse(resp.Status)})
+	return response.OK(c, fiber.Map{"status": mapper.ToStatusResponse(resp.Status)})
 }
 
 func (h *StatusHandler) DeleteStatus(c *fiber.Ctx) error {
@@ -104,7 +106,7 @@ func (h *StatusHandler) GetStatusByID(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, fiber.Map{"status": toStatusResponse(resp.Status)})
+	return response.OK(c, fiber.Map{"status": mapper.ToStatusResponse(resp.Status)})
 }
 
 func (h *StatusHandler) ListStatuses(c *fiber.Ctx) error {
@@ -125,9 +127,9 @@ func (h *StatusHandler) ListStatuses(c *fiber.Ctx) error {
 		return err
 	}
 
-	statuses := make([]StatusResponse, len(resp.Statuses))
+	statuses := make([]dto.StatusResponse, len(resp.Statuses))
 	for i := range statuses {
-		statuses[i] = toStatusResponse(resp.Statuses[i])
+		statuses[i] = mapper.ToStatusResponse(resp.Statuses[i])
 	}
 
 	return response.OKWithMeta(c, statuses, response.Meta{

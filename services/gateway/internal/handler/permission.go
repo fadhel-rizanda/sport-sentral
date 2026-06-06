@@ -3,6 +3,8 @@ package handler
 import (
 	"github.com/gofiber/fiber/v2"
 	rbacv1 "microservice-golang/gen/rbac/v1"
+	"microservice-golang/services/gateway/internal/dto"
+	"microservice-golang/services/gateway/internal/mapper"
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/services/gateway/internal/response"
 )
@@ -51,7 +53,7 @@ func (h *PermissionHandler) CreatePermission(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, fiber.Map{"permission": toPermissionResponse(res.Permission)})
+	return response.OK(c, fiber.Map{"permission": mapper.ToPermissionResponse(res.Permission)})
 }
 
 func (h *PermissionHandler) UpdatePermission(c *fiber.Ctx) error {
@@ -77,7 +79,7 @@ func (h *PermissionHandler) UpdatePermission(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, fiber.Map{"permission": toPermissionResponse(res.Permission)})
+	return response.OK(c, fiber.Map{"permission": mapper.ToPermissionResponse(res.Permission)})
 }
 
 func (h *PermissionHandler) DeletePermission(c *fiber.Ctx) error {
@@ -107,9 +109,9 @@ func (h *PermissionHandler) ListPermissions(c *fiber.Ctx) error {
 		return err
 	}
 
-	permissions := make([]PermissionResponse, len(resp.Permissions))
+	permissions := make([]dto.PermissionResponse, len(resp.Permissions))
 	for i, permission := range resp.Permissions {
-		permissions[i] = toPermissionResponse(permission)
+		permissions[i] = mapper.ToPermissionResponse(permission)
 	}
 	return response.OKWithMeta(c, permissions, response.Meta{
 		Page:     int(resp.Page),
@@ -126,5 +128,5 @@ func (h *PermissionHandler) GetPermission(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, fiber.Map{"permission": toPermissionResponse(resp.Permission)})
+	return response.OK(c, fiber.Map{"permission": mapper.ToPermissionResponse(resp.Permission)})
 }

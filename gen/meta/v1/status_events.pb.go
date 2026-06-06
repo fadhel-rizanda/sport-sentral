@@ -78,10 +78,11 @@ func (StatusEventType) EnumDescriptor() ([]byte, []int) {
 
 // ─── Event envelope ───────────────────────────────────────────────────────────
 type StatusEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
-	EventType     StatusEventType        `protobuf:"varint,2,opt,name=event_type,json=eventType,proto3,enum=meta.v1.StatusEventType" json:"event_type,omitempty"`
-	OccurredAt    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	EventId    string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	EventType  StatusEventType        `protobuf:"varint,2,opt,name=event_type,json=eventType,proto3,enum=meta.v1.StatusEventType" json:"event_type,omitempty"`
+	OccurredAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
+	// The ID of the status associated with this event
 	StatusId      string                 `protobuf:"bytes,4,opt,name=status_id,json=statusId,proto3" json:"status_id,omitempty"`
 	StatusType    string                 `protobuf:"bytes,5,opt,name=status_type,json=statusType,proto3" json:"status_type,omitempty"`
 	StatusName    string                 `protobuf:"bytes,6,opt,name=status_name,json=statusName,proto3" json:"status_name,omitempty"`

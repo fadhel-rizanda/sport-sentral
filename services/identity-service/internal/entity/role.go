@@ -1,10 +1,11 @@
 package entity
 
 import (
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"microservice-golang/shared/pkg/constants"
 	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type Role struct {
@@ -24,7 +25,7 @@ type Role struct {
 	UpdatedBy User  `gorm:"foreignKey:UpdatedByID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
 	DeletedBy *User `gorm:"foreignKey:DeletedByID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 
-	Permissions []*Permission `gorm:"many2many:role_permissions;"`
+	Permissions []Permission `gorm:"many2many:role_permissions;"`
 }
 
 func (r *Role) BeforeCreate(_ *gorm.DB) error {

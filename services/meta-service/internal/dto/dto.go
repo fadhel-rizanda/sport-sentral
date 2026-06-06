@@ -108,3 +108,137 @@ type TagResponse struct {
 	UpdatedBy UserSimpleResponse
 	DeletedBy *UserSimpleResponse
 }
+
+// ─── Administrative Divisions ───────────────────────────────────────────────
+
+type ListAdministrativeDivisionsRequest struct {
+	Name       *string
+	Level      *string
+	PostalCode *string
+	CountryID  *uuid.UUID
+	ParentID   *uuid.UUID
+	Page       int
+	PageSize   int
+}
+
+type ListAdministrativeDivisionsResponse struct {
+	AdministrativeDivisions []*AdministrativeDivisionResponse
+	Total                   int64
+	Page                    int
+	PageSize                int
+}
+
+type CreateAdministrativeDivisionRequest struct {
+	Name        string
+	Level       string
+	PostalCode  string
+	CountryID   uuid.UUID
+	ParentID    *uuid.UUID
+	CreatedByID uuid.UUID
+}
+
+type UpdateAdministrativeDivisionRequest struct {
+	Name        *string
+	Level       *string
+	PostalCode  *string
+	CountryID   *uuid.UUID
+	ParentID    *uuid.UUID
+	UpdatedByID uuid.UUID
+}
+
+type DeleteAdministrativeDivisionRequest struct {
+	ID          uuid.UUID
+	DeletedByID uuid.UUID
+}
+
+type AdministrativeDivisionSimpleResponse struct {
+	ID         uuid.UUID
+	Name       string
+	Level      string
+	PostalCode string
+	Country    CountrySimpleResponse
+	ParentID   *uuid.UUID
+}
+
+type AdministrativeDivisionResponse struct {
+	ID         uuid.UUID
+	CountryID  uuid.UUID
+	ParentID   *uuid.UUID
+	Name       string
+	Level      string
+	PostalCode string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeletedAt  *time.Time
+	CreatedBy  UserSimpleResponse
+	UpdatedBy  UserSimpleResponse
+	DeletedBy  *UserSimpleResponse
+	Country    CountrySimpleResponse
+	Parent     *AdministrativeDivisionSimpleResponse
+}
+
+// ─── Countries ─────────────────────────────────────────────────────────────
+
+type ListCountriesRequest struct {
+	Name      *string
+	ISOAlpha2 *string
+	ISOAlpha3 *string
+	PhoneCode *string
+	Currency  *string
+	Page      int
+	PageSize  int
+}
+
+type ListCountriesResponse struct {
+	Countries []*CountryResponse
+	Total     int64
+	Page      int
+	PageSize  int
+}
+
+type CreateCountryRequest struct {
+	Name         string
+	ISOAlpha2    string
+	ISOAlpha3    string
+	PhoneCode    string
+	CurrencyCode string
+	CreatedByID  uuid.UUID
+}
+
+type UpdateCountryRequest struct {
+	Name         *string
+	ISOAlpha2    *string
+	ISOAlpha3    *string
+	PhoneCode    *string
+	CurrencyCode *string
+	UpdatedByID  uuid.UUID
+}
+
+type DeleteCountryRequest struct {
+	ID          uuid.UUID
+	DeletedByID uuid.UUID
+}
+
+type CountrySimpleResponse struct {
+	ID           uuid.UUID
+	Name         string
+	ISOAlpha2    string
+	ISOAlpha3    string
+	PhoneCode    string
+	CurrencyCode string
+}
+
+type CountryResponse struct {
+	ID           uuid.UUID
+	Name         string
+	ISOAlpha2    string
+	ISOAlpha3    string
+	PhoneCode    string
+	CurrencyCode string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    *time.Time
+	CreatedBy    UserSimpleResponse
+	UpdatedBy    UserSimpleResponse
+	DeletedBy    *UserSimpleResponse
+}

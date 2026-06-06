@@ -1,0 +1,125 @@
+syntax = "proto3";
+
+package academy.v1;
+
+option go_package = "microservice-golang/gen/academy/v1;academyv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
+
+// ─── Academy Admin ────────────────────────────────────────────────────────────
+
+message AcademyAdmin {
+  string id = 1;
+  string academy_id = 2;
+  optional string branch_id = 3;
+  string user_id = 4;
+  string role_id = 5;
+  optional google.protobuf.Timestamp approved_at = 6;
+  optional string approved_by_id = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  optional google.protobuf.Timestamp deleted_at = 10;
+
+  optional common.v1.AcademyHoldingSimple academy = 11;
+  optional common.v1.AcademyBranchSimple branch = 12;
+  common.v1.UserSimple user = 13;
+  common.v1.RoleSimple role = 14;
+  optional common.v1.UserSimple approved_by = 15;
+  common.v1.UserSimple created_by = 16;
+  common.v1.UserSimple updated_by = 17;
+  optional common.v1.UserSimple deleted_by = 18;
+}
+
+// ─── Requests & Responses ────────────────────────────────────────────────────
+
+message CreateAcademyAdminRequest {
+  string academy_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string branch_id = 2 [(buf.validate.field).string.uuid = true];
+  string user_id = 3 [(buf.validate.field).string.uuid = true];
+  string role_id = 4 [(buf.validate.field).string.uuid = true];
+  string created_by_id = 5 [(buf.validate.field).string.uuid = true];
+}
+
+message CreateAcademyAdminResponse {
+  AcademyAdmin admin = 1;
+}
+
+message GetAcademyAdminRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetAcademyAdminResponse {
+  AcademyAdmin admin = 1;
+}
+
+message ListAcademyAdminsRequest {
+  optional string academy_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string branch_id = 2 [(buf.validate.field).string.uuid = true];
+  optional string status_id = 3 [(buf.validate.field).string.uuid = true];
+  optional string search = 4;
+  int32 page = 5 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 6 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message ListAcademyAdminsResponse {
+  repeated AcademyAdmin admins = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message UpdateAcademyAdminRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string role_id = 2 [(buf.validate.field).string.uuid = true];
+  string updated_by_id = 3 [(buf.validate.field).string.uuid = true];
+}
+
+message UpdateAcademyAdminResponse {
+  AcademyAdmin admin = 1;
+}
+
+message DeleteAcademyAdminRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string deleted_by_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteAcademyAdminResponse {
+  string id = 1;
+}
+
+message GetAcademyAdminByUserRequest {
+  optional string holding_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string branch_id = 2 [(buf.validate.field).string.uuid = true];
+  string user_id = 3 [(buf.validate.field).string.uuid = true];
+}
+
+message GetAcademyAdminByUserResponse {
+  AcademyAdmin admin = 1;
+}
+
+message CheckUserIsAcademyAdminRequest {
+  optional string holding_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string branch_id = 2 [(buf.validate.field).string.uuid = true];
+  string user_id = 3 [(buf.validate.field).string.uuid = true];
+}
+
+message CheckUserIsAcademyAdminResponse {
+  bool is_admin = 1;
+}
+
+// ─── Service ─────────────────────────────────────────────────────────────────
+
+service AcademyAdminService {
+  rpc CreateAcademyAdmin(CreateAcademyAdminRequest) returns (CreateAcademyAdminResponse);
+  rpc GetAcademyAdmin(GetAcademyAdminRequest) returns (GetAcademyAdminResponse);
+  rpc ListAcademyAdmins(ListAcademyAdminsRequest) returns (ListAcademyAdminsResponse);
+  rpc UpdateAcademyAdmin(UpdateAcademyAdminRequest) returns (UpdateAcademyAdminResponse);
+  rpc DeleteAcademyAdmin(DeleteAcademyAdminRequest) returns (DeleteAcademyAdminResponse);
+  rpc GetAcademyAdminByUser(GetAcademyAdminByUserRequest) returns (GetAcademyAdminByUserResponse);
+  rpc CheckUserIsAcademyAdmin(CheckUserIsAcademyAdminRequest) returns (CheckUserIsAcademyAdminResponse);
+}

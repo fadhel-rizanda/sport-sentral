@@ -47,7 +47,7 @@ func (r *userRepository) List(ctx context.Context, page, pageSize int) ([]*entit
 		Table("users").
 		Preload("UserRoles", "is_active = ?", true).
 		Preload("UserRoles.Role").
-		Joins("LEFT JOIN statuses sc ON sc.id = users.status_id").
+		Joins("LEFT JOIN replicated_statuses sc ON sc.id = users.status_id").
 		Select("users.*, sc.id AS status_id, sc.type AS status_type, sc.name AS status_name, sc.slug AS status_slug").
 		Offset(offset).Limit(pageSize).
 		Find(&rows).Error
@@ -76,16 +76,16 @@ func (r *userRepository) List(ctx context.Context, page, pageSize int) ([]*entit
 		}
 
 		if len(statusIDs) > 0 {
-			var statuses []entity.Status
+			var replicatedStatuses []entity.Status
 			if err := r.db.WithContext(ctx).
-				Table("statuses").
+				Table("replicated_statuses").
 				Where("id IN ?", statusIDs).
-				Find(&statuses).Error; err != nil {
+				Find(&replicatedStatuses).Error; err != nil {
 				return nil, 0, err
 			}
 
 			statusMap := make(map[uuid.UUID]entity.Status)
-			for _, s := range statuses {
+			for _, s := range replicatedStatuses {
 				statusMap[s.ID] = s
 			}
 
@@ -111,7 +111,7 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Use
 			return db.Order("user_roles.created_at DESC")
 		}).
 		Preload("UserRoles.Role").
-		Joins("LEFT JOIN statuses sc ON sc.id = users.status_id").
+		Joins("LEFT JOIN replicated_statuses sc ON sc.id = users.status_id").
 		Select("users.*, sc.id AS status_id, sc.type AS status_type, sc.name AS status_name, sc.slug AS status_slug").
 		First(&row, "users.id = ?", id).Error
 
@@ -137,16 +137,16 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Use
 			roleIDs[i] = ur.RoleID
 		}
 
-		var statuses []entity.Status
+		var replicatedStatuses []entity.Status
 		if err := r.db.WithContext(ctx).
-			Table("statuses").
+			Table("replicated_statuses").
 			Where("id IN ?", statusIDs).
-			Find(&statuses).Error; err != nil {
+			Find(&replicatedStatuses).Error; err != nil {
 			return nil, err
 		}
 
 		statusMap := make(map[uuid.UUID]entity.Status)
-		for _, s := range statuses {
+		for _, s := range replicatedStatuses {
 			statusMap[s.ID] = s
 		}
 
@@ -185,7 +185,7 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.
 			return db.Order("user_roles.created_at DESC")
 		}).
 		Preload("UserRoles.Role").
-		Joins("LEFT JOIN statuses sc ON sc.id = users.status_id").
+		Joins("LEFT JOIN replicated_statuses sc ON sc.id = users.status_id").
 		Select("users.*, sc.id AS status_id, sc.type AS status_type, sc.name AS status_name, sc.slug AS status_slug").
 		First(&row, "users.email = ?", email).Error
 
@@ -211,16 +211,16 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.
 			roleIDs[i] = ur.RoleID
 		}
 
-		var statuses []entity.Status
+		var replicatedStatuses []entity.Status
 		if err := r.db.WithContext(ctx).
-			Table("statuses").
+			Table("replicated_statuses").
 			Where("id IN ?", statusIDs).
-			Find(&statuses).Error; err != nil {
+			Find(&replicatedStatuses).Error; err != nil {
 			return nil, err
 		}
 
 		statusMap := make(map[uuid.UUID]entity.Status)
-		for _, s := range statuses {
+		for _, s := range replicatedStatuses {
 			statusMap[s.ID] = s
 		}
 

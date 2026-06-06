@@ -60,3 +60,88 @@ func ToProtoTag(t *dto.TagResponse) *metav1.Tag {
 
 	return res
 }
+
+func ToProtoCountrySimple(c dto.CountrySimpleResponse) *commonv1.CountrySimple {
+	return &commonv1.CountrySimple{
+		Id:           c.ID.String(),
+		Name:         c.Name,
+		IsoAlpha_2:   c.ISOAlpha2,
+		IsoAlpha_3:   c.ISOAlpha3,
+		PhoneCode:    c.PhoneCode,
+		CurrencyCode: c.CurrencyCode,
+	}
+}
+
+func ToProtoCountry(c *dto.CountryResponse) *metav1.Country {
+	if c == nil {
+		return nil
+	}
+	res := &metav1.Country{
+		Id:           c.ID.String(),
+		Name:         c.Name,
+		IsoAlpha_2:   c.ISOAlpha2,
+		IsoAlpha_3:   c.ISOAlpha3,
+		PhoneCode:    c.PhoneCode,
+		CurrencyCode: c.CurrencyCode,
+		CreatedBy:    ToProtoUserSimple(c.CreatedBy),
+		UpdatedBy:    ToProtoUserSimple(c.UpdatedBy),
+		CreatedAt:    timestamppb.New(c.CreatedAt),
+		UpdatedAt:    timestamppb.New(c.UpdatedAt),
+	}
+
+	if c.DeletedAt != nil {
+		res.DeletedAt = timestamppb.New(*c.DeletedAt)
+		if c.DeletedBy != nil {
+			res.DeletedBy = ToProtoUserSimple(*c.DeletedBy)
+		}
+	}
+
+	return res
+}
+
+func ToProtoAdministrativeDivisionSimple(ad *dto.AdministrativeDivisionSimpleResponse) *commonv1.AdministrativeDivisionSimple {
+	if ad == nil {
+		return nil
+	}
+	res := &commonv1.AdministrativeDivisionSimple{
+		Id:         ad.ID.String(),
+		Name:       ad.Name,
+		Level:      ad.Level,
+		PostalCode: ad.PostalCode,
+		Country:    ToProtoCountrySimple(ad.Country),
+	}
+	if ad.ParentID != nil {
+		res.ParentId = ad.ParentID.String()
+	}
+	return res
+}
+
+func ToProtoAdministrativeDivision(ad *dto.AdministrativeDivisionResponse) *metav1.AdministrativeDivision {
+	if ad == nil {
+		return nil
+	}
+	res := &metav1.AdministrativeDivision{
+		Id:         ad.ID.String(),
+		Name:       ad.Name,
+		Level:      ad.Level,
+		PostalCode: ad.PostalCode,
+		CreatedBy:  ToProtoUserSimple(ad.CreatedBy),
+		UpdatedBy:  ToProtoUserSimple(ad.UpdatedBy),
+		CreatedAt:  timestamppb.New(ad.CreatedAt),
+		UpdatedAt:  timestamppb.New(ad.UpdatedAt),
+		Country:    ToProtoCountrySimple(ad.Country),
+	}
+
+	if ad.DeletedAt != nil {
+		res.DeletedAt = timestamppb.New(*ad.DeletedAt)
+		if ad.DeletedBy != nil {
+			res.DeletedBy = ToProtoUserSimple(*ad.DeletedBy)
+		}
+	}
+
+	if ad.Parent != nil {
+		res.Parent = ToProtoAdministrativeDivisionSimple(ad.Parent)
+	}
+
+	return res
+}

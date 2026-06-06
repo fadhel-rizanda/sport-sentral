@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"microservice-golang/services/identity-service/internal/dto"
+	"microservice-golang/services/identity-service/internal/repository/replicated"
 	"microservice-golang/shared/pkg/constants"
 	"time"
 
@@ -27,7 +28,7 @@ type authUseCase struct {
 	jwtManager      *jwt.Manager
 	redis           *redis.Client
 	refreshTTL      time.Duration
-	statusCacheRepo repository.StatusRepository
+	statusCacheRepo replicated.StatusRepository
 }
 
 func NewAuthUseCase(
@@ -36,7 +37,7 @@ func NewAuthUseCase(
 	jwtManager *jwt.Manager,
 	redis *redis.Client,
 	refreshTTL time.Duration,
-	statusCacheRepo repository.StatusRepository,
+	statusCacheRepo replicated.StatusRepository,
 ) AuthUseCase {
 	return &authUseCase{
 		userRepo:        userRepo,
