@@ -2,9 +2,10 @@ package repository
 
 import (
 	"context"
+	"microservice-golang/services/identity-service/internal/entity"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"microservice-golang/services/identity-service/internal/entity"
 )
 
 type RoleRepository interface {
@@ -18,7 +19,7 @@ type RoleRepository interface {
 	RevokePermissions(ctx context.Context, roleID uuid.UUID, permissionIDs []uuid.UUID) error
 	ReplacePermissions(ctx context.Context, roleID uuid.UUID, permissionIDs []uuid.UUID) error
 
-	GetPermissions(ctx context.Context, roleID uuid.UUID) ([]*entity.Permission, error)
+	GetPermissions(ctx context.Context, roleID uuid.UUID) ([]entity.Permission, error)
 }
 
 type roleRepository struct {
@@ -52,6 +53,7 @@ func (r *roleRepository) GetByName(ctx context.Context, name string) (*entity.Ro
 }
 
 func (r *roleRepository) List(ctx context.Context, page, pageSize int) ([]*entity.Role, int64, error) {
+	var roles []*entity.Role
 	var total int64
 	offset := (page - 1) * pageSize
 
@@ -59,7 +61,6 @@ func (r *roleRepository) List(ctx context.Context, page, pageSize int) ([]*entit
 		return nil, 0, err
 	}
 
-	var roles []*entity.Role
 	err := r.db.WithContext(ctx).
 		Preload("Permissions").
 		Offset(offset).Limit(pageSize).
@@ -99,7 +100,7 @@ func (r *roleRepository) ReplacePermissions(ctx context.Context, roleID uuid.UUI
 	return r.db.WithContext(ctx).Model(role).Association("Permissions").Replace(permissions)
 }
 
-func (r *roleRepository) GetPermissions(ctx context.Context, roleID uuid.UUID) ([]*entity.Permission, error) {
+func (r *roleRepository) GetPermissions(ctx context.Context, roleID uuid.UUID) ([]entity.Permission, error) {
 	var role entity.Role
 	if err := r.db.WithContext(ctx).Preload("Permissions").First(&role, "id = ?", roleID).Error; err != nil {
 		return nil, err

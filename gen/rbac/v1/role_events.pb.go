@@ -78,10 +78,11 @@ func (RoleEventType) EnumDescriptor() ([]byte, []int) {
 
 // ─── Event envelope ───────────────────────────────────────────────────────────
 type RoleEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
-	EventType     RoleEventType          `protobuf:"varint,2,opt,name=event_type,json=eventType,proto3,enum=rbac.v1.RoleEventType" json:"event_type,omitempty"`
-	OccurredAt    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	EventId    string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	EventType  RoleEventType          `protobuf:"varint,2,opt,name=event_type,json=eventType,proto3,enum=rbac.v1.RoleEventType" json:"event_type,omitempty"`
+	OccurredAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
+	// The ID of the role associated with this event
 	RoleId        string                 `protobuf:"bytes,4,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 	RoleName      string                 `protobuf:"bytes,5,opt,name=role_name,json=roleName,proto3" json:"role_name,omitempty"`
 	RoleSlug      string                 `protobuf:"bytes,6,opt,name=role_slug,json=roleSlug,proto3" json:"role_slug,omitempty"`

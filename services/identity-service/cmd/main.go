@@ -10,7 +10,9 @@ import (
 	"microservice-golang/services/identity-service/internal/delivery/nats"
 	"microservice-golang/services/identity-service/internal/handler"
 	"microservice-golang/services/identity-service/internal/repository"
+	"microservice-golang/services/identity-service/internal/repository/replicated"
 	"microservice-golang/services/identity-service/internal/usecase"
+	replicated2 "microservice-golang/services/identity-service/internal/usecase/replicated"
 	envConfig "microservice-golang/shared/pkg/config"
 	"microservice-golang/shared/pkg/grpc/interceptor"
 	"microservice-golang/shared/pkg/jwt"
@@ -153,7 +155,7 @@ func main() {
 	userRoleRepo := repository.NewUserRoleRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
 	permissionRepo := repository.NewPermissionRepository(db)
-	statusCacheRepo := repository.NewStatusRepository(db)
+	statusCacheRepo := replicated.NewStatusRepository(db)
 
 	// ── Use Cases ─────────────────────────────────────────────────────────────
 	authUC := usecase.NewAuthUseCase(
@@ -184,7 +186,7 @@ func main() {
 	)
 	roleUC := usecase.NewRoleUseCase(roleRepo, permissionRepo, userRepo, log, roleEventPublisher)
 	permissionUC := usecase.NewPermissionUseCase(permissionRepo, permissionEventPublisher)
-	statusSyncUC := usecase.NewStatusUseCase(statusCacheRepo, log)
+	statusSyncUC := replicated2.NewSyncStatusUseCase(statusCacheRepo, log)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	authHandler := handler.NewAuthHandler(authUC)
@@ -238,10 +240,10 @@ func main() {
 
 	// ── NATS Subscriber ────────────────────────────────────────────────────────────────
 	statusDurableName := envConfig.GetEnv("STATUS_DURABLE_NAME", "identity-service-status-sync")
-	statusSub := nats.NewStatusSubscriber(statusSyncUC, natsClient, log, statusDurableName)
+	metaSub := nats.NewMetaSubscriber(statusSyncUC, natsClient, log, statusDurableName)
 
 	log.Info("starting status event consumer")
-	if err := statusSub.Listen(ctx); err != nil {
+	if err := metaSub.Listen(ctx); err != nil {
 		log.Error("consumer stopped", zap.Error(err))
 	}
 

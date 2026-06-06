@@ -8,7 +8,7 @@ import (
 )
 
 type Status struct {
-	ID   uuid.UUID `gorm:"type:uuid;primary_key"`
+	ID   uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Type string    `gorm:"not null"`
 	Name string    `gorm:"not null"`
 	Slug string    `gorm:"not null;unique"`

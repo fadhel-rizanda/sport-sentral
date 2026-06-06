@@ -16,3 +16,15 @@ type TagEventPublisher interface {
 	PublishTagUpdated(ctx context.Context, evt *metav1.TagEvent) error
 	PublishTagDeleted(ctx context.Context, evt *metav1.TagEvent) error
 }
+
+type CountryEventPublisher interface {
+	PublishCountryCreated(ctx context.Context, evt *metav1.CountryEvent) error
+	PublishCountryUpdated(ctx context.Context, evt *metav1.CountryEvent) error
+	PublishCountryDeleted(ctx context.Context, evt *metav1.CountryEvent) error
+}
+
+type AdministrativeDivisionEventPublisher interface {
+	PublishAdministrativeDivisionCreated(ctx context.Context, evt *metav1.AdministrativeDivisionEvent) error
+	PublishAdministrativeDivisionUpdated(ctx context.Context, evt *metav1.AdministrativeDivisionEvent) error
+	PublishAdministrativeDivisionDeleted(ctx context.Context, evt *metav1.AdministrativeDivisionEvent) error
+}

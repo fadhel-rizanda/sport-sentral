@@ -4,6 +4,8 @@ package common.v1;
 
 option go_package = "microservice-golang/gen/common/v1;commonv1";
 
+import "google/protobuf/timestamp.proto";
+
 message UserSimple {
   string id        = 1;
   string email     = 2;
@@ -39,4 +41,59 @@ message TagSimple {
   string type = 2;
   string name = 3;
   string slug = 4;
+}
+
+message CountrySimple {
+  string id = 1;
+  string name = 2;
+  string iso_alpha_2 = 3;
+  string iso_alpha_3 = 4;
+  string phone_code = 5;
+  string currency_code = 6;
+}
+
+message AdministrativeDivisionSimple {
+  string id = 1;
+  string name = 2;
+  string level = 3;
+  string postal_code = 4;
+  CountrySimple country = 5;
+  string parent_id   = 6;
+}
+
+message AcademyHoldingSimple {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string email = 4;
+  string phone_number = 5;
+  optional string image_attachment_id = 6;
+  int64 branches_count = 7;
+  string status_id = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message AcademyBranchSimple {
+  string id = 1;
+  string holding_id = 2;
+  string sport_id = 3;
+  string sport_name = 4;
+  string name = 5;
+  string email = 6;
+  string phone_number = 7;
+  string status_id = 8;
+  int64 member_count = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+message SportSimple {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+  optional string icon_attachment_id = 4;
+  bool is_verified = 5;
+  optional string regulator_id = 6;
+  string tier = 7;
 }

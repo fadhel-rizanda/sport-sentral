@@ -1,0 +1,183 @@
+syntax = "proto3";
+
+package academy.v1;
+
+option go_package = "microservice-golang/gen/academy/v1;academyv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
+
+// ─── Roster Member ────────────────────────────────────────────────────────────
+
+message RosterMember {
+  string id = 1;
+  string roster_id = 2;
+  string athlete_id = 3;
+  optional int32 jersey_number = 4;
+  string position_id = 5;
+  string status_id = 6;
+  google.protobuf.Timestamp added_at = 7;
+  string added_by_id = 8;
+  optional google.protobuf.Timestamp removed_at = 9;
+  optional string removed_by_id = 10;
+  optional string removal_reason = 11;
+
+  common.v1.UserSimple athlete = 12;
+  common.v1.TagSimple position = 13;
+  common.v1.StatusSimple status = 14;
+  common.v1.UserSimple added_by = 15;
+  optional common.v1.UserSimple removed_by = 16;
+}
+
+// ─── Roster ───────────────────────────────────────────────────────────────────
+
+message Roster {
+  string id = 1;
+  string academy_branch_id = 2;
+  optional string competition_id = 3;
+  string name = 4;
+  string tag_id = 5;
+  string status_id = 6;
+  int32 max_size = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  optional google.protobuf.Timestamp deleted_at = 10;
+  int64 member_count = 11;
+
+  optional common.v1.AcademyBranchSimple academy_branch = 12;
+  repeated RosterMember members = 13;
+  common.v1.TagSimple tag = 14;
+  common.v1.StatusSimple status = 15;
+}
+
+// ─── Requests & Responses ────────────────────────────────────────────────────
+
+message CreateRosterRequest {
+  string academy_branch_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string competition_id = 2 [(buf.validate.field).string.uuid = true];
+  string name = 3 [(buf.validate.field).string.min_len = 1];
+  string tag_id = 4 [(buf.validate.field).string.uuid = true];
+  string status_id = 5 [(buf.validate.field).string.uuid = true];
+  int32 max_size = 6 [(buf.validate.field).int32.gte = 1];
+}
+
+message CreateRosterResponse {
+  Roster roster = 1;
+}
+
+message GetRosterRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetRosterResponse {
+  Roster roster = 1;
+}
+
+message ListRostersRequest {
+  optional string competition_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string branch_id = 2 [(buf.validate.field).string.uuid = true];
+  optional string status_id = 3 [(buf.validate.field).string.uuid = true];
+  optional string tag_id = 4 [(buf.validate.field).string.uuid = true];
+  optional string search = 5;
+  int32 page = 6 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 7 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message ListRostersResponse {
+  repeated Roster rosters = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message UpdateRosterRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  optional string competition_id = 2 [(buf.validate.field).string.uuid = true];
+  optional string name = 3 [(buf.validate.field).string.min_len = 1];
+  optional string tag_id = 4 [(buf.validate.field).string.uuid = true];
+  optional string status_id = 5 [(buf.validate.field).string.uuid = true];
+  optional int32 max_size = 6 [(buf.validate.field).int32.gte = 1];
+}
+
+message UpdateRosterResponse {
+  Roster roster = 1;
+}
+
+message DeleteRosterRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string deleted_by_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteRosterResponse {
+  string id = 1;
+}
+
+message GetRosterMembersRequest {
+  string roster_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetRosterMembersResponse {
+  repeated RosterMember members = 1;
+}
+
+message GetRosterMemberRequest {
+  string roster_id = 1 [(buf.validate.field).string.uuid = true];
+  string member_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message GetRosterMemberResponse {
+  RosterMember member = 1;
+}
+
+message AddRosterMemberRequest {
+  string roster_id = 1 [(buf.validate.field).string.uuid = true];
+  string athlete_id = 2 [(buf.validate.field).string.uuid = true];
+  optional int32 jersey_number = 3;
+  string position_id = 4 [(buf.validate.field).string.uuid = true];
+  string status_id = 5 [(buf.validate.field).string.uuid = true];
+  string added_by_id = 6 [(buf.validate.field).string.uuid = true];
+}
+
+message AddRosterMemberResponse {
+  RosterMember member = 1;
+}
+
+message RemoveRosterMemberRequest {
+  string roster_id = 1 [(buf.validate.field).string.uuid = true];
+  string member_id = 2 [(buf.validate.field).string.uuid = true];
+  string removed_by_id = 3 [(buf.validate.field).string.uuid = true];
+  string removal_reason = 4 [(buf.validate.field).string.min_len = 1];
+}
+
+message RemoveRosterMemberResponse {
+  string member_id = 1;
+}
+
+message DeleteRosterMemberRequest {
+  string roster_id = 1 [(buf.validate.field).string.uuid = true];
+  string member_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteRosterMemberResponse {
+  string member_id = 1;
+}
+
+// ─── Service ─────────────────────────────────────────────────────────────────
+
+service RosterService {
+  rpc CreateRoster(CreateRosterRequest) returns (CreateRosterResponse);
+  rpc GetRoster(GetRosterRequest) returns (GetRosterResponse);
+  rpc ListRosters(ListRostersRequest) returns (ListRostersResponse);
+  rpc UpdateRoster(UpdateRosterRequest) returns (UpdateRosterResponse);
+  rpc DeleteRoster(DeleteRosterRequest) returns (DeleteRosterResponse);
+
+  rpc GetRosterMembers(GetRosterMembersRequest) returns (GetRosterMembersResponse);
+  rpc GetRosterMember(GetRosterMemberRequest) returns (GetRosterMemberResponse);
+  rpc AddRosterMember(AddRosterMemberRequest) returns (AddRosterMemberResponse);
+  rpc RemoveRosterMember(RemoveRosterMemberRequest) returns (RemoveRosterMemberResponse);
+  rpc DeleteRosterMember(DeleteRosterMemberRequest) returns (DeleteRosterMemberResponse);
+}

@@ -9,6 +9,7 @@ package commonv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -377,11 +378,511 @@ func (x *TagSimple) GetSlug() string {
 	return ""
 }
 
+type CountrySimple struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	IsoAlpha_2    string                 `protobuf:"bytes,3,opt,name=iso_alpha_2,json=isoAlpha2,proto3" json:"iso_alpha_2,omitempty"`
+	IsoAlpha_3    string                 `protobuf:"bytes,4,opt,name=iso_alpha_3,json=isoAlpha3,proto3" json:"iso_alpha_3,omitempty"`
+	PhoneCode     string                 `protobuf:"bytes,5,opt,name=phone_code,json=phoneCode,proto3" json:"phone_code,omitempty"`
+	CurrencyCode  string                 `protobuf:"bytes,6,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CountrySimple) Reset() {
+	*x = CountrySimple{}
+	mi := &file_common_v1_common_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CountrySimple) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CountrySimple) ProtoMessage() {}
+
+func (x *CountrySimple) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CountrySimple.ProtoReflect.Descriptor instead.
+func (*CountrySimple) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CountrySimple) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *CountrySimple) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CountrySimple) GetIsoAlpha_2() string {
+	if x != nil {
+		return x.IsoAlpha_2
+	}
+	return ""
+}
+
+func (x *CountrySimple) GetIsoAlpha_3() string {
+	if x != nil {
+		return x.IsoAlpha_3
+	}
+	return ""
+}
+
+func (x *CountrySimple) GetPhoneCode() string {
+	if x != nil {
+		return x.PhoneCode
+	}
+	return ""
+}
+
+func (x *CountrySimple) GetCurrencyCode() string {
+	if x != nil {
+		return x.CurrencyCode
+	}
+	return ""
+}
+
+type AdministrativeDivisionSimple struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Level         string                 `protobuf:"bytes,3,opt,name=level,proto3" json:"level,omitempty"`
+	PostalCode    string                 `protobuf:"bytes,4,opt,name=postal_code,json=postalCode,proto3" json:"postal_code,omitempty"`
+	Country       *CountrySimple         `protobuf:"bytes,5,opt,name=country,proto3" json:"country,omitempty"`
+	ParentId      string                 `protobuf:"bytes,6,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdministrativeDivisionSimple) Reset() {
+	*x = AdministrativeDivisionSimple{}
+	mi := &file_common_v1_common_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdministrativeDivisionSimple) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdministrativeDivisionSimple) ProtoMessage() {}
+
+func (x *AdministrativeDivisionSimple) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdministrativeDivisionSimple.ProtoReflect.Descriptor instead.
+func (*AdministrativeDivisionSimple) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *AdministrativeDivisionSimple) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *AdministrativeDivisionSimple) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AdministrativeDivisionSimple) GetLevel() string {
+	if x != nil {
+		return x.Level
+	}
+	return ""
+}
+
+func (x *AdministrativeDivisionSimple) GetPostalCode() string {
+	if x != nil {
+		return x.PostalCode
+	}
+	return ""
+}
+
+func (x *AdministrativeDivisionSimple) GetCountry() *CountrySimple {
+	if x != nil {
+		return x.Country
+	}
+	return nil
+}
+
+func (x *AdministrativeDivisionSimple) GetParentId() string {
+	if x != nil {
+		return x.ParentId
+	}
+	return ""
+}
+
+type AcademyHoldingSimple struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name              string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description       string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Email             string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
+	PhoneNumber       string                 `protobuf:"bytes,5,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
+	ImageAttachmentId *string                `protobuf:"bytes,6,opt,name=image_attachment_id,json=imageAttachmentId,proto3,oneof" json:"image_attachment_id,omitempty"`
+	BranchesCount     int64                  `protobuf:"varint,7,opt,name=branches_count,json=branchesCount,proto3" json:"branches_count,omitempty"`
+	StatusId          string                 `protobuf:"bytes,8,opt,name=status_id,json=statusId,proto3" json:"status_id,omitempty"`
+	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *AcademyHoldingSimple) Reset() {
+	*x = AcademyHoldingSimple{}
+	mi := &file_common_v1_common_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcademyHoldingSimple) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcademyHoldingSimple) ProtoMessage() {}
+
+func (x *AcademyHoldingSimple) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AcademyHoldingSimple.ProtoReflect.Descriptor instead.
+func (*AcademyHoldingSimple) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *AcademyHoldingSimple) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *AcademyHoldingSimple) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AcademyHoldingSimple) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *AcademyHoldingSimple) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *AcademyHoldingSimple) GetPhoneNumber() string {
+	if x != nil {
+		return x.PhoneNumber
+	}
+	return ""
+}
+
+func (x *AcademyHoldingSimple) GetImageAttachmentId() string {
+	if x != nil && x.ImageAttachmentId != nil {
+		return *x.ImageAttachmentId
+	}
+	return ""
+}
+
+func (x *AcademyHoldingSimple) GetBranchesCount() int64 {
+	if x != nil {
+		return x.BranchesCount
+	}
+	return 0
+}
+
+func (x *AcademyHoldingSimple) GetStatusId() string {
+	if x != nil {
+		return x.StatusId
+	}
+	return ""
+}
+
+func (x *AcademyHoldingSimple) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *AcademyHoldingSimple) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+type AcademyBranchSimple struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	HoldingId     string                 `protobuf:"bytes,2,opt,name=holding_id,json=holdingId,proto3" json:"holding_id,omitempty"`
+	SportId       string                 `protobuf:"bytes,3,opt,name=sport_id,json=sportId,proto3" json:"sport_id,omitempty"`
+	SportName     string                 `protobuf:"bytes,4,opt,name=sport_name,json=sportName,proto3" json:"sport_name,omitempty"`
+	Name          string                 `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
+	Email         string                 `protobuf:"bytes,6,opt,name=email,proto3" json:"email,omitempty"`
+	PhoneNumber   string                 `protobuf:"bytes,7,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
+	StatusId      string                 `protobuf:"bytes,8,opt,name=status_id,json=statusId,proto3" json:"status_id,omitempty"`
+	MemberCount   int64                  `protobuf:"varint,9,opt,name=member_count,json=memberCount,proto3" json:"member_count,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AcademyBranchSimple) Reset() {
+	*x = AcademyBranchSimple{}
+	mi := &file_common_v1_common_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcademyBranchSimple) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcademyBranchSimple) ProtoMessage() {}
+
+func (x *AcademyBranchSimple) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AcademyBranchSimple.ProtoReflect.Descriptor instead.
+func (*AcademyBranchSimple) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *AcademyBranchSimple) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *AcademyBranchSimple) GetHoldingId() string {
+	if x != nil {
+		return x.HoldingId
+	}
+	return ""
+}
+
+func (x *AcademyBranchSimple) GetSportId() string {
+	if x != nil {
+		return x.SportId
+	}
+	return ""
+}
+
+func (x *AcademyBranchSimple) GetSportName() string {
+	if x != nil {
+		return x.SportName
+	}
+	return ""
+}
+
+func (x *AcademyBranchSimple) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AcademyBranchSimple) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *AcademyBranchSimple) GetPhoneNumber() string {
+	if x != nil {
+		return x.PhoneNumber
+	}
+	return ""
+}
+
+func (x *AcademyBranchSimple) GetStatusId() string {
+	if x != nil {
+		return x.StatusId
+	}
+	return ""
+}
+
+func (x *AcademyBranchSimple) GetMemberCount() int64 {
+	if x != nil {
+		return x.MemberCount
+	}
+	return 0
+}
+
+func (x *AcademyBranchSimple) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *AcademyBranchSimple) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+type SportSimple struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name             string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Slug             string                 `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
+	IconAttachmentId *string                `protobuf:"bytes,4,opt,name=icon_attachment_id,json=iconAttachmentId,proto3,oneof" json:"icon_attachment_id,omitempty"`
+	IsVerified       bool                   `protobuf:"varint,5,opt,name=is_verified,json=isVerified,proto3" json:"is_verified,omitempty"`
+	RegulatorId      *string                `protobuf:"bytes,6,opt,name=regulator_id,json=regulatorId,proto3,oneof" json:"regulator_id,omitempty"`
+	Tier             string                 `protobuf:"bytes,7,opt,name=tier,proto3" json:"tier,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *SportSimple) Reset() {
+	*x = SportSimple{}
+	mi := &file_common_v1_common_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SportSimple) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SportSimple) ProtoMessage() {}
+
+func (x *SportSimple) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SportSimple.ProtoReflect.Descriptor instead.
+func (*SportSimple) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *SportSimple) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *SportSimple) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *SportSimple) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
+func (x *SportSimple) GetIconAttachmentId() string {
+	if x != nil && x.IconAttachmentId != nil {
+		return *x.IconAttachmentId
+	}
+	return ""
+}
+
+func (x *SportSimple) GetIsVerified() bool {
+	if x != nil {
+		return x.IsVerified
+	}
+	return false
+}
+
+func (x *SportSimple) GetRegulatorId() string {
+	if x != nil && x.RegulatorId != nil {
+		return *x.RegulatorId
+	}
+	return ""
+}
+
+func (x *SportSimple) GetTier() string {
+	if x != nil {
+		return x.Tier
+	}
+	return ""
+}
+
 var File_common_v1_common_proto protoreflect.FileDescriptor
 
 const file_common_v1_common_proto_rawDesc = "" +
 	"\n" +
-	"\x16common/v1/common.proto\x12\tcommon.v1\"\x86\x01\n" +
+	"\x16common/v1/common.proto\x12\tcommon.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x86\x01\n" +
 	"\n" +
 	"UserSimple\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
@@ -410,7 +911,66 @@ const file_common_v1_common_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x12\n" +
-	"\x04slug\x18\x04 \x01(\tR\x04slugB,Z*microservice-golang/gen/common/v1;commonv1b\x06proto3"
+	"\x04slug\x18\x04 \x01(\tR\x04slug\"\xb7\x01\n" +
+	"\rCountrySimple\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1e\n" +
+	"\viso_alpha_2\x18\x03 \x01(\tR\tisoAlpha2\x12\x1e\n" +
+	"\viso_alpha_3\x18\x04 \x01(\tR\tisoAlpha3\x12\x1d\n" +
+	"\n" +
+	"phone_code\x18\x05 \x01(\tR\tphoneCode\x12#\n" +
+	"\rcurrency_code\x18\x06 \x01(\tR\fcurrencyCode\"\xca\x01\n" +
+	"\x1cAdministrativeDivisionSimple\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
+	"\x05level\x18\x03 \x01(\tR\x05level\x12\x1f\n" +
+	"\vpostal_code\x18\x04 \x01(\tR\n" +
+	"postalCode\x122\n" +
+	"\acountry\x18\x05 \x01(\v2\x18.common.v1.CountrySimpleR\acountry\x12\x1b\n" +
+	"\tparent_id\x18\x06 \x01(\tR\bparentId\"\x9c\x03\n" +
+	"\x14AcademyHoldingSimple\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x14\n" +
+	"\x05email\x18\x04 \x01(\tR\x05email\x12!\n" +
+	"\fphone_number\x18\x05 \x01(\tR\vphoneNumber\x123\n" +
+	"\x13image_attachment_id\x18\x06 \x01(\tH\x00R\x11imageAttachmentId\x88\x01\x01\x12%\n" +
+	"\x0ebranches_count\x18\a \x01(\x03R\rbranchesCount\x12\x1b\n" +
+	"\tstatus_id\x18\b \x01(\tR\bstatusId\x129\n" +
+	"\n" +
+	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\x16\n" +
+	"\x14_image_attachment_id\"\x81\x03\n" +
+	"\x13AcademyBranchSimple\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
+	"\n" +
+	"holding_id\x18\x02 \x01(\tR\tholdingId\x12\x19\n" +
+	"\bsport_id\x18\x03 \x01(\tR\asportId\x12\x1d\n" +
+	"\n" +
+	"sport_name\x18\x04 \x01(\tR\tsportName\x12\x12\n" +
+	"\x04name\x18\x05 \x01(\tR\x04name\x12\x14\n" +
+	"\x05email\x18\x06 \x01(\tR\x05email\x12!\n" +
+	"\fphone_number\x18\a \x01(\tR\vphoneNumber\x12\x1b\n" +
+	"\tstatus_id\x18\b \x01(\tR\bstatusId\x12!\n" +
+	"\fmember_count\x18\t \x01(\x03R\vmemberCount\x129\n" +
+	"\n" +
+	"created_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xfd\x01\n" +
+	"\vSportSimple\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x04slug\x18\x03 \x01(\tR\x04slug\x121\n" +
+	"\x12icon_attachment_id\x18\x04 \x01(\tH\x00R\x10iconAttachmentId\x88\x01\x01\x12\x1f\n" +
+	"\vis_verified\x18\x05 \x01(\bR\n" +
+	"isVerified\x12&\n" +
+	"\fregulator_id\x18\x06 \x01(\tH\x01R\vregulatorId\x88\x01\x01\x12\x12\n" +
+	"\x04tier\x18\a \x01(\tR\x04tierB\x15\n" +
+	"\x13_icon_attachment_idB\x0f\n" +
+	"\r_regulator_idB,Z*microservice-golang/gen/common/v1;commonv1b\x06proto3"
 
 var (
 	file_common_v1_common_proto_rawDescOnce sync.Once
@@ -424,21 +984,32 @@ func file_common_v1_common_proto_rawDescGZIP() []byte {
 	return file_common_v1_common_proto_rawDescData
 }
 
-var file_common_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_common_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_common_v1_common_proto_goTypes = []any{
-	(*UserSimple)(nil),       // 0: common.v1.UserSimple
-	(*StatusSimple)(nil),     // 1: common.v1.StatusSimple
-	(*PermissionSimple)(nil), // 2: common.v1.PermissionSimple
-	(*RoleSimple)(nil),       // 3: common.v1.RoleSimple
-	(*TagSimple)(nil),        // 4: common.v1.TagSimple
+	(*UserSimple)(nil),                   // 0: common.v1.UserSimple
+	(*StatusSimple)(nil),                 // 1: common.v1.StatusSimple
+	(*PermissionSimple)(nil),             // 2: common.v1.PermissionSimple
+	(*RoleSimple)(nil),                   // 3: common.v1.RoleSimple
+	(*TagSimple)(nil),                    // 4: common.v1.TagSimple
+	(*CountrySimple)(nil),                // 5: common.v1.CountrySimple
+	(*AdministrativeDivisionSimple)(nil), // 6: common.v1.AdministrativeDivisionSimple
+	(*AcademyHoldingSimple)(nil),         // 7: common.v1.AcademyHoldingSimple
+	(*AcademyBranchSimple)(nil),          // 8: common.v1.AcademyBranchSimple
+	(*SportSimple)(nil),                  // 9: common.v1.SportSimple
+	(*timestamppb.Timestamp)(nil),        // 10: google.protobuf.Timestamp
 }
 var file_common_v1_common_proto_depIdxs = []int32{
-	2, // 0: common.v1.RoleSimple.permissions:type_name -> common.v1.PermissionSimple
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	2,  // 0: common.v1.RoleSimple.permissions:type_name -> common.v1.PermissionSimple
+	5,  // 1: common.v1.AdministrativeDivisionSimple.country:type_name -> common.v1.CountrySimple
+	10, // 2: common.v1.AcademyHoldingSimple.created_at:type_name -> google.protobuf.Timestamp
+	10, // 3: common.v1.AcademyHoldingSimple.updated_at:type_name -> google.protobuf.Timestamp
+	10, // 4: common.v1.AcademyBranchSimple.created_at:type_name -> google.protobuf.Timestamp
+	10, // 5: common.v1.AcademyBranchSimple.updated_at:type_name -> google.protobuf.Timestamp
+	6,  // [6:6] is the sub-list for method output_type
+	6,  // [6:6] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_common_v1_common_proto_init() }
@@ -446,13 +1017,15 @@ func file_common_v1_common_proto_init() {
 	if File_common_v1_common_proto != nil {
 		return
 	}
+	file_common_v1_common_proto_msgTypes[7].OneofWrappers = []any{}
+	file_common_v1_common_proto_msgTypes[9].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_v1_common_proto_rawDesc), len(file_common_v1_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

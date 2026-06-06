@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+package academy.v1;
+
+option go_package = "microservice-golang/gen/academy/v1;academyv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
+
+// ─── Academy Holding ──────────────────────────────────────────────────────────
+
+message AcademyHoldingAddress {
+  string id = 1;
+  string street_address = 2;
+  optional string notes = 3;
+  optional double latitude = 4;
+  optional double longitude = 5;
+  common.v1.AdministrativeDivisionSimple administrative_division = 6;
+}
+
+message AcademyHolding {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string email = 4;
+  string phone_number = 5;
+  optional string image_attachment_id = 6;
+  repeated common.v1.AcademyBranchSimple branches = 7;
+  optional AcademyHoldingAddress address = 8;
+  optional common.v1.StatusSimple status = 9;
+  string status_id = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+  common.v1.UserSimple created_by = 13;
+  common.v1.UserSimple updated_by = 14;
+  optional common.v1.UserSimple deleted_by = 15;
+}
+
+// ─── Requests & Responses ────────────────────────────────────────────────────
+
+message CreateAcademyHoldingRequest {
+  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string description = 2;
+  string email = 3 [(buf.validate.field).string.email = true];
+  string phone_number = 4 [(buf.validate.field).string.min_len = 1];
+  optional string image_attachment_id = 5 [(buf.validate.field).string.uuid = true];
+  string status_id = 6 [(buf.validate.field).string.uuid = true];
+  string street_address = 7 [(buf.validate.field).string.min_len = 1];
+  optional string notes = 8;
+  optional double latitude = 9;
+  optional double longitude = 10;
+  string admin_division_id = 11 [(buf.validate.field).string.uuid = true];
+  string created_by_id = 12 [(buf.validate.field).string.uuid = true];
+}
+
+message CreateAcademyHoldingResponse {
+  AcademyHolding holding = 1;
+}
+
+message GetAcademyHoldingRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetAcademyHoldingResponse {
+  AcademyHolding holding = 1;
+}
+
+message ListAcademyHoldingsRequest {
+  optional string status_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string search = 2;
+  int32 page = 3 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 4 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message ListAcademyHoldingsResponse {
+  repeated AcademyHolding holdings = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message UpdateAcademyHoldingRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  optional string name = 2 [(buf.validate.field).string.min_len = 1];
+  optional string description = 3;
+  optional string email = 4 [(buf.validate.field).string.email = true];
+  optional string phone_number = 5 [(buf.validate.field).string.min_len = 1];
+  optional string image_attachment_id = 6 [(buf.validate.field).string.uuid = true];
+  string updated_by_id = 7 [(buf.validate.field).string.uuid = true];
+}
+
+message UpdateAcademyHoldingResponse {
+  AcademyHolding holding = 1;
+}
+
+message DeleteAcademyHoldingRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string deleted_by_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteAcademyHoldingResponse {
+  string id = 1;
+}
+
+// ─── Service ─────────────────────────────────────────────────────────────────
+
+service AcademyHoldingService {
+  rpc CreateAcademyHolding(CreateAcademyHoldingRequest) returns (CreateAcademyHoldingResponse);
+  rpc GetAcademyHolding(GetAcademyHoldingRequest) returns (GetAcademyHoldingResponse);
+  rpc ListAcademyHoldings(ListAcademyHoldingsRequest) returns (ListAcademyHoldingsResponse);
+  rpc UpdateAcademyHolding(UpdateAcademyHoldingRequest) returns (UpdateAcademyHoldingResponse);
+  rpc DeleteAcademyHolding(DeleteAcademyHoldingRequest) returns (DeleteAcademyHoldingResponse);
+}

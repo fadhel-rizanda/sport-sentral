@@ -3,6 +3,8 @@ package handler
 import (
 	"github.com/gofiber/fiber/v2"
 	rbacv1 "microservice-golang/gen/rbac/v1"
+	"microservice-golang/services/gateway/internal/dto"
+	"microservice-golang/services/gateway/internal/mapper"
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/services/gateway/internal/response"
 )
@@ -37,7 +39,7 @@ func (h *RoleHandler) GetRoles(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, fiber.Map{"role": toRoleResponse(res.Role)})
+	return response.OK(c, fiber.Map{"role": mapper.ToRoleResponse(res.Role)})
 }
 
 func (h *RoleHandler) CreateRole(c *fiber.Ctx) error {
@@ -61,7 +63,7 @@ func (h *RoleHandler) CreateRole(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, fiber.Map{"role": toRoleResponse(res.Role)})
+	return response.OK(c, fiber.Map{"role": mapper.ToRoleResponse(res.Role)})
 }
 
 func (h *RoleHandler) UpdateRole(c *fiber.Ctx) error {
@@ -87,7 +89,7 @@ func (h *RoleHandler) UpdateRole(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.OK(c, fiber.Map{"role": toRoleResponse(res.Role)})
+	return response.OK(c, fiber.Map{"role": mapper.ToRoleResponse(res.Role)})
 }
 
 func (h *RoleHandler) DeleteRole(c *fiber.Ctx) error {
@@ -117,9 +119,9 @@ func (h *RoleHandler) ListRoles(c *fiber.Ctx) error {
 		return err
 	}
 
-	roles := make([]RoleResponse, len(resp.Roles))
+	roles := make([]dto.RoleResponse, len(resp.Roles))
 	for i := range resp.Roles {
-		roles[i] = toRoleResponse(resp.Roles[i])
+		roles[i] = mapper.ToRoleResponse(resp.Roles[i])
 	}
 
 	return response.OKWithMeta(c, roles, response.Meta{

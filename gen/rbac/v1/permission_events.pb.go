@@ -78,10 +78,11 @@ func (PermissionEventType) EnumDescriptor() ([]byte, []int) {
 
 // ─── Event envelope ───────────────────────────────────────────────────────────
 type PermissionEvent struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	EventId            string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
-	EventType          PermissionEventType    `protobuf:"varint,2,opt,name=event_type,json=eventType,proto3,enum=rbac.v1.PermissionEventType" json:"event_type,omitempty"`
-	OccurredAt         *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	EventId    string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	EventType  PermissionEventType    `protobuf:"varint,2,opt,name=event_type,json=eventType,proto3,enum=rbac.v1.PermissionEventType" json:"event_type,omitempty"`
+	OccurredAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
+	// The ID of the permission associated with this event
 	PermissionId       string                 `protobuf:"bytes,4,opt,name=permission_id,json=permissionId,proto3" json:"permission_id,omitempty"`
 	PermissionResource string                 `protobuf:"bytes,6,opt,name=permission_resource,json=permissionResource,proto3" json:"permission_resource,omitempty"`
 	PermissionAction   string                 `protobuf:"bytes,7,opt,name=permission_action,json=permissionAction,proto3" json:"permission_action,omitempty"`

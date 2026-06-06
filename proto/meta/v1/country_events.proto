@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package meta.v1;
+
+option go_package = "microservice-golang/gen/meta/v1;metav1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ─── Enum ─────────────────────────────────────────────────────────────────────
+enum CountryEventType {
+  COUNTRY_EVENT_TYPE_UNSPECIFIED = 0;
+  COUNTRY_EVENT_TYPE_CREATED     = 1;
+  COUNTRY_EVENT_TYPE_UPDATED     = 2;
+  COUNTRY_EVENT_TYPE_DELETED     = 3;
+}
+
+// ─── Event envelope ───────────────────────────────────────────────────────────
+message CountryEvent {
+  string event_id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+
+  CountryEventType event_type = 2 [
+    (buf.validate.field).enum.defined_only = true
+  ];
+
+  google.protobuf.Timestamp occurred_at = 3 [
+    (buf.validate.field).required = true
+  ];
+
+  // The ID of the country associated with this event
+  string country_id = 4 [
+    (buf.validate.field).string.uuid = true
+  ];
+
+  string country_name = 5 [
+    (buf.validate.field).string.min_len = 1
+  ];
+
+  string country_iso_alpha_2 = 6 [
+    (buf.validate.field).string.len = 2,
+    (buf.validate.field).string.pattern = "^[A-Z]+$"
+  ];
+
+  string country_iso_alpha_3 = 7 [
+    (buf.validate.field).string.len = 3,
+    (buf.validate.field).string.pattern = "^[A-Z]+$"
+  ];
+
+  string country_phone_code = 8 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 10
+  ];
+
+  string country_currency_code = 9 [
+    (buf.validate.field).string.len = 3,
+    (buf.validate.field).string.pattern = "^[A-Z]+$"
+  ];
+
+  optional google.protobuf.Timestamp deleted_at = 10;
+}

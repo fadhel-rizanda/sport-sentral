@@ -110,7 +110,7 @@ func (r *userRoleRepository) Delete(ctx context.Context, userID, roleID uuid.UUI
 func (r *userRoleRepository) loadStatus(ctx context.Context, userRole *entity.UserRole) error {
 	var statusCache entity.Status
 	err := r.db.WithContext(ctx).
-		Table("statuses").
+		Table("replicated_statuses").
 		Where("id = ?", userRole.StatusID).
 		First(&statusCache).Error
 

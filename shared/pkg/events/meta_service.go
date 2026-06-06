@@ -17,3 +17,15 @@ const (
 	SubjectTagUpdated = "meta.tag.updated"
 	SubjectTagDeleted = "meta.tag.deleted"
 )
+
+const (
+	SubjectCountryCreated = "meta.country.created"
+	SubjectCountryUpdated = "meta.country.updated"
+	SubjectCountryDeleted = "meta.country.deleted"
+)
+
+const (
+	SubjectAdministrativeDivisionCreated = "meta.administrative_division.created"
+	SubjectAdministrativeDivisionUpdated = "meta.administrative_division.updated"
+	SubjectAdministrativeDivisionDeleted = "meta.administrative_division.deleted"
+)

@@ -1,0 +1,151 @@
+syntax = "proto3";
+
+package meta.v1;
+
+option go_package = "microservice-golang/gen/meta/v1;metav1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
+
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+message Country {
+  string id = 1;
+  string name = 2;
+  string iso_alpha_2 = 3;
+  string iso_alpha_3 = 4;
+  string phone_code = 5;
+  string currency_code = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  optional google.protobuf.Timestamp deleted_at = 9;
+
+  common.v1.UserSimple created_by = 10;
+  common.v1.UserSimple updated_by = 11;
+  optional common.v1.UserSimple deleted_by = 12;
+}
+
+// ─── Requests ────────────────────────────────────────────────────────────────
+
+message CreateCountryRequest {
+  string name = 1 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 100
+  ];
+  string iso_alpha_2 = 2 [
+    (buf.validate.field).string.len = 2,
+    (buf.validate.field).string.pattern = "^[A-Z]+$"
+  ];
+  string iso_alpha_3 = 3 [
+    (buf.validate.field).string.len = 3,
+    (buf.validate.field).string.pattern = "^[A-Z]+$"
+  ];
+  string phone_code = 4 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 10
+  ];
+  string currency_code = 5 [
+    (buf.validate.field).string.len = 3,
+    (buf.validate.field).string.pattern = "^[A-Z]+$"
+  ];
+  string created_by_id = 6 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message GetCountryByIDRequest {
+  string id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message ListCountriesRequest {
+  optional string name = 1 [
+    (buf.validate.field).string.min_len = 1
+  ];
+  optional string iso_alpha_2 = 2 [
+    (buf.validate.field).string.len = 2
+  ];
+  optional string iso_alpha_3 = 3 [
+    (buf.validate.field).string.len = 3
+  ];
+}
+
+message UpdateCountryRequest {
+  string id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+  optional string name = 2 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 100
+  ];
+  optional string iso_alpha_2 = 3 [
+    (buf.validate.field).string.len = 2,
+    (buf.validate.field).string.pattern = "^[A-Z]+$"
+  ];
+  optional string iso_alpha_3 = 4 [
+    (buf.validate.field).string.len = 3,
+    (buf.validate.field).string.pattern = "^[A-Z]+$"
+  ];
+  optional string phone_code = 5 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 10
+  ];
+  optional string currency_code = 6 [
+    (buf.validate.field).string.len = 3,
+    (buf.validate.field).string.pattern = "^[A-Z]+$"
+  ];
+  string updated_by_id = 7 [
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeleteCountryRequest {
+  string id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+  string deleted_by_id = 2 [
+    (buf.validate.field).string.uuid = true
+  ];
+  bool is_permanent = 3;
+}
+
+// ─── Responses ───────────────────────────────────────────────────────────────
+
+message CreateCountryResponse {
+  Country country = 1;
+}
+
+message GetCountryResponse {
+  Country country = 1;
+}
+
+message GetCountryByIDResponse {
+  Country country = 1;
+}
+
+message ListCountriesResponse {
+  repeated Country countries = 1;
+  int64 total     = 2;
+  int32 page      = 3;
+  int32 page_size = 4;
+}
+
+message UpdateCountryResponse {
+  Country country = 1;
+}
+
+message DeleteCountryResponse {
+  bool success = 1;
+}
+
+// ─── Service ───────────────────────────────────────────────────────────────
+
+service CountryService {
+  rpc GetCountryByID(GetCountryByIDRequest) returns (GetCountryByIDResponse);
+  rpc ListCountries(ListCountriesRequest) returns (ListCountriesResponse);
+  rpc CreateCountry(CreateCountryRequest) returns (CreateCountryResponse);
+  rpc UpdateCountry(UpdateCountryRequest) returns (UpdateCountryResponse);
+  rpc DeleteCountry(DeleteCountryRequest) returns (DeleteCountryResponse);
+}

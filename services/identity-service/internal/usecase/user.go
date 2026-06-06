@@ -6,6 +6,7 @@ import (
 	userv1 "microservice-golang/gen/user/v1"
 	"microservice-golang/services/identity-service/internal/dto"
 	"microservice-golang/services/identity-service/internal/mapper"
+	"microservice-golang/services/identity-service/internal/repository/replicated"
 	"microservice-golang/shared/pkg/constants"
 	"time"
 
@@ -50,7 +51,7 @@ type userUseCase struct {
 	redis           redisclient.Client
 	AppURL          string
 	logger          *zap.Logger
-	statusCacheRepo repository.StatusRepository
+	statusCacheRepo replicated.StatusRepository
 	publisher       UserEventPublisher
 }
 
@@ -63,7 +64,7 @@ func NewUserUseCase(
 	redis redisclient.Client,
 	AppURL string,
 	logger *zap.Logger,
-	statusCacheRepo repository.StatusRepository,
+	statusCacheRepo replicated.StatusRepository,
 	publisher UserEventPublisher,
 ) UserUseCase {
 	return &userUseCase{

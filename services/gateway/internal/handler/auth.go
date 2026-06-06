@@ -5,6 +5,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	authv1 "microservice-golang/gen/auth/v1"
 	userv1 "microservice-golang/gen/user/v1"
+	"microservice-golang/services/gateway/internal/dto"
+	"microservice-golang/services/gateway/internal/mapper"
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/services/gateway/internal/request"
 	"microservice-golang/services/gateway/internal/response"
@@ -65,7 +67,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.Created(c, fiber.Map{"user": toUserResponse(resp.User)})
+	return response.Created(c, fiber.Map{"user": mapper.ToUserResponse(resp.User)})
 }
 
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
@@ -87,19 +89,19 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 
 	return response.OK(c, fiber.Map{
 		"tokens": resp.Tokens,
-		"user": UserSimpleResponse{
+		"user": dto.UserSimpleResponse{
 			ID:       resp.User.Id,
 			Email:    resp.User.Email,
 			Username: resp.User.Username,
 			FullName: resp.User.FullName,
 		},
-		"status": StatusSimpleResponse{
+		"status": dto.StatusSimpleResponse{
 			ID:   resp.Status.Id,
 			Name: resp.Status.Name,
 			Slug: resp.Status.Slug,
 			Type: resp.Status.Type,
 		},
-		"active_role": RoleSimpleResponse{
+		"active_role": dto.RoleSimpleResponse{
 			ID:            resp.ActiveRole.Id,
 			Name:          resp.ActiveRole.Name,
 			Slug:          resp.ActiveRole.Slug,
@@ -230,5 +232,5 @@ func (h *AuthHandler) Me(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.OK(c, fiber.Map{"user": toUserResponse(resp.User)})
+	return response.OK(c, fiber.Map{"user": mapper.ToUserResponse(resp.User)})
 }

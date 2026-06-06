@@ -78,9 +78,9 @@ func (r *statusRepository) GetByTypeAndName(ctx context.Context, statusType, nam
 			db.username AS deleted_by_username,
 			db.full_name AS deleted_by_full_name
 		`).
-		Joins("LEFT JOIN users cb ON cb.id = statuses.created_by_id").
-		Joins("LEFT JOIN users ub ON ub.id = statuses.updated_by_id").
-		Joins("LEFT JOIN users db ON db.id = statuses.deleted_by_id").
+		Joins("LEFT JOIN replicated_users cb ON cb.id = statuses.created_by_id").
+		Joins("LEFT JOIN replicated_users ub ON ub.id = statuses.updated_by_id").
+		Joins("LEFT JOIN replicated_users db ON db.id = statuses.deleted_by_id").
 		Where("type = ? AND name = ?", statusType, name).
 		First(&row).Error
 
@@ -129,9 +129,9 @@ func (r *statusRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.S
 			db.username AS deleted_by_username,
 			db.full_name AS deleted_by_full_name
 		`).
-		Joins("LEFT JOIN users cb ON cb.id = statuses.created_by_id").
-		Joins("LEFT JOIN users ub ON ub.id = statuses.updated_by_id").
-		Joins("LEFT JOIN users db ON db.id = statuses.deleted_by_id").
+		Joins("LEFT JOIN replicated_users cb ON cb.id = statuses.created_by_id").
+		Joins("LEFT JOIN replicated_users ub ON ub.id = statuses.updated_by_id").
+		Joins("LEFT JOIN replicated_users db ON db.id = statuses.deleted_by_id").
 		Where("statuses.id = ?", id).
 		First(&row).Error
 
@@ -203,9 +203,9 @@ func (r *statusRepository) List(ctx context.Context, statusType *string, page, p
           db.username AS deleted_by_username,
           db.full_name AS deleted_by_full_name
        `).
-		Joins("LEFT JOIN users cb ON cb.id = statuses.created_by_id").
-		Joins("LEFT JOIN users ub ON ub.id = statuses.updated_by_id").
-		Joins("LEFT JOIN users db ON db.id = statuses.deleted_by_id")
+		Joins("LEFT JOIN replicated_users cb ON cb.id = statuses.created_by_id").
+		Joins("LEFT JOIN replicated_users ub ON ub.id = statuses.updated_by_id").
+		Joins("LEFT JOIN replicated_users db ON db.id = statuses.deleted_by_id")
 
 	if statusType != nil && *statusType != "" {
 		listQuery = listQuery.Where("statuses.type = ?", *statusType)
@@ -312,16 +312,16 @@ func (r *statusRepository) loadUserCaches(ctx context.Context, statuses []*entit
 		return nil
 	}
 
-	var users []entity.User
+	var replicatedUsers []entity.User
 	if err := r.db.WithContext(ctx).
 		Where("id IN ?", userIDs).
-		Find(&users).Error; err != nil {
+		Find(&replicatedUsers).Error; err != nil {
 		return err
 	}
 
 	userMap := make(map[uuid.UUID]*entity.User)
-	for i := range users {
-		userMap[users[i].ID] = &users[i]
+	for i := range replicatedUsers {
+		userMap[replicatedUsers[i].ID] = &replicatedUsers[i]
 	}
 
 	for _, status := range statuses {

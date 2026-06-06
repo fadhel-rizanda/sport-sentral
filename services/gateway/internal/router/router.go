@@ -17,6 +17,7 @@ func Setup(
 	tagHandler *handler.TagHandler,
 	roleHandler *handler.RoleHandler,
 	permissionHandler *handler.PermissionHandler,
+	academyHandler *handler.AcademyHandler,
 ) {
 	api := app.Group("/api/v1")
 
@@ -32,4 +33,5 @@ func Setup(
 	tagHandler.Routes(api, auth, adminOnly)
 	roleHandler.Routes(api, auth, adminOnly)
 	permissionHandler.Routes(api, auth, adminOnly)
+	academyHandler.Routes(api, auth, adminOnly)
 }
