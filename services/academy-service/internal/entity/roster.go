@@ -9,7 +9,7 @@ import (
 
 type Roster struct {
 	ID              uuid.UUID  `gorm:"type:uuid;primaryKey"`
-	AcademyBranchID uuid.UUID  `gorm:"type:uuid;not null;index;constraint:OnDelete:CASCADE"`
+	AcademyBranchID uuid.UUID  `gorm:"type:uuid;not null;index"`
 	CompetitionID   *uuid.UUID `gorm:"type:uuid;index"`
 	Name            string     `gorm:"type:varchar(255);not null"`
 	TagID           uuid.UUID  `gorm:"type:uuid;index"`
@@ -22,16 +22,16 @@ type Roster struct {
 	MemberCount int64 `gorm:"->"`
 
 	// Relations
-	AcademyBranch *AcademyBranch `gorm:"foreignKey:AcademyBranchID"`
+	AcademyBranch *AcademyBranch `gorm:"foreignKey:AcademyBranchID;constraint:OnDelete:CASCADE;"`
 	Members       []RosterMember `gorm:"foreignKey:RosterID;constraint:OnDelete:CASCADE"`
-	Tag           *Tag           `gorm:"foreignKey:TagID;references:ID;constraint:OnDelete:CASCADE"`
-	Status        *Status        `gorm:"foreignKey:StatusID;references:ID;constraint:OnDelete:CASCADE"`
+	Tag           *Tag           `gorm:"foreignKey:TagID;references:ID;constraint:-;"`
+	Status        *Status        `gorm:"foreignKey:StatusID;references:ID;constraint:-;"`
 }
 
 type RosterMember struct {
 	ID           uuid.UUID `gorm:"type:uuid;primaryKey"`
-	RosterID     uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_roster_athlete"`
-	AthleteID    uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_roster_athlete"`
+	RosterID     uuid.UUID `gorm:"type:uuid;not null;index:idx_roster_athlete"`
+	AthleteID    uuid.UUID `gorm:"type:uuid;not null;index:idx_roster_athlete"`
 	JerseyNumber *int
 	PositionID   uuid.UUID `gorm:"type:uuid;not null"`
 	StatusID     uuid.UUID `gorm:"type:uuid;not null"`
@@ -45,9 +45,9 @@ type RosterMember struct {
 
 	// Relations
 	Roster    *Roster `gorm:"foreignKey:RosterID"`
-	Athlete   *User   `gorm:"foreignKey:AthleteID;references:ID;constraint:OnDelete:RESTRICT"`
-	Position  *Tag    `gorm:"foreignKey:PositionID;references:ID"`
-	Status    *Status `gorm:"foreignKey:StatusID;references:ID"`
-	AddedBy   *User   `gorm:"foreignKey:AddedByID;references:ID"`
-	RemovedBy *User   `gorm:"foreignKey:RemovedByID;references:ID"`
+	Athlete   *User   `gorm:"foreignKey:AthleteID;references:ID;constraint:-;"`
+	Position  *Tag    `gorm:"foreignKey:PositionID;references:ID;constraint:-;"`
+	Status    *Status `gorm:"foreignKey:StatusID;references:ID;constraint:-;"`
+	AddedBy   *User   `gorm:"foreignKey:AddedByID;references:ID;constraint:-;"`
+	RemovedBy *User   `gorm:"foreignKey:RemovedByID;references:ID;constraint:-;"`
 }

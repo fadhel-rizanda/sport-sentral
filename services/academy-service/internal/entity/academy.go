@@ -27,10 +27,10 @@ type AcademyHolding struct {
 	// Relations
 	Branches  []AcademyBranch        `gorm:"foreignKey:HoldingID;constraint:OnDelete:CASCADE"`
 	Address   *AcademyHoldingAddress `gorm:"foreignKey:AddressID;constraint:OnDelete:CASCADE"`
-	Status    *Status                `gorm:"foreignKey:StatusID;references:ID"`
-	CreatedBy *User                  `gorm:"foreignKey:CreatedByID;references:ID"`
-	UpdatedBy *User                  `gorm:"foreignKey:UpdatedByID;references:ID"`
-	DeletedBy *User                  `gorm:"foreignKey:DeletedByID;references:ID"`
+	Status    *Status                `gorm:"foreignKey:StatusID;references:ID;constraint:-;"`
+	CreatedBy *User                  `gorm:"foreignKey:CreatedByID;references:ID;constraint:-;"`
+	UpdatedBy *User                  `gorm:"foreignKey:UpdatedByID;references:ID;constraint:-;"`
+	DeletedBy *User                  `gorm:"foreignKey:DeletedByID;references:ID;constraint:-;"`
 }
 
 type AcademyBranch struct {
@@ -52,11 +52,11 @@ type AcademyBranch struct {
 
 	// Relations
 	Holding   *AcademyHolding `gorm:"foreignKey:HoldingID;constraint:OnDelete:CASCADE"`
-	Sport     *Sport          `gorm:"foreignKey:SportID;references:ID"`
-	Status    *Status         `gorm:"foreignKey:StatusID;references:ID"`
-	CreatedBy *User           `gorm:"foreignKey:CreatedByID;references:ID"`
-	UpdatedBy *User           `gorm:"foreignKey:UpdatedByID;references:ID"`
-	DeletedBy *User           `gorm:"foreignKey:DeletedByID;references:ID"`
+	Sport     *Sport          `gorm:"foreignKey:SportID;references:ID;constraint:-;"`
+	Status    *Status         `gorm:"foreignKey:StatusID;references:ID;constraint:-;"`
+	CreatedBy *User           `gorm:"foreignKey:CreatedByID;references:ID;constraint:-;"`
+	UpdatedBy *User           `gorm:"foreignKey:UpdatedByID;references:ID;constraint:-;"`
+	DeletedBy *User           `gorm:"foreignKey:DeletedByID;references:ID;constraint:-;"`
 
 	Enrollments []Enrollment           `gorm:"foreignKey:AcademyBranchID;constraint:OnDelete:CASCADE"`
 	Rosters     []Roster               `gorm:"foreignKey:AcademyBranchID;constraint:OnDelete:CASCADE"`
@@ -84,12 +84,12 @@ type AcademyAdmin struct {
 	// Relations
 	Academy    *AcademyHolding `gorm:"foreignKey:AcademyID;constraint:OnDelete:CASCADE"`
 	Branch     *AcademyBranch  `gorm:"foreignKey:BranchID;constraint:OnDelete:CASCADE"`
-	User       *User           `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE"`
-	Role       *Role           `gorm:"foreignKey:RoleID;references:ID"`
-	ApprovedBy *User           `gorm:"foreignKey:ApprovedByID;references:ID"`
-	CreatedBy  *User           `gorm:"foreignKey:CreatedByID;references:ID"`
-	UpdatedBy  *User           `gorm:"foreignKey:UpdatedByID;references:ID"`
-	DeletedBy  *User           `gorm:"foreignKey:DeletedByID;references:ID"`
+	User       *User           `gorm:"foreignKey:UserID;references:ID;constraint:-;"`
+	Role       *Role           `gorm:"foreignKey:RoleID;references:ID;constraint:-;"`
+	ApprovedBy *User           `gorm:"foreignKey:ApprovedByID;references:ID;constraint:-;"`
+	CreatedBy  *User           `gorm:"foreignKey:CreatedByID;references:ID;constraint:-;"`
+	UpdatedBy  *User           `gorm:"foreignKey:UpdatedByID;references:ID;constraint:-;"`
+	DeletedBy  *User           `gorm:"foreignKey:DeletedByID;references:ID;constraint:-;"`
 }
 
 type AcademyHoldingAddress struct {
@@ -101,7 +101,7 @@ type AcademyHoldingAddress struct {
 	AdministrativeDivisionID uuid.UUID `gorm:"type:uuid;not null"`
 
 	//	Relations
-	AdministrativeDivision *AdministrativeDivision `gorm:"foreignKey:ID;constraint:OnDelete:CASCADE"`
+	AdministrativeDivision *AdministrativeDivision `gorm:"foreignKey:AdministrativeDivisionID;references:ID;constraint:-;"`
 }
 
 type AcademyBranchAddress struct {
@@ -116,5 +116,5 @@ type AcademyBranchAddress struct {
 
 	// Relations
 	Branch                 *AcademyBranch          `gorm:"foreignKey:BranchID;constraint:OnDelete:CASCADE"`
-	AdministrativeDivision *AdministrativeDivision `gorm:"foreignKey:AdministrativeDivisionID;constraint:OnDelete:CASCADE"`
+	AdministrativeDivision *AdministrativeDivision `gorm:"foreignKey:AdministrativeDivisionID;constraint:-;"`
 }

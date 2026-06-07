@@ -7,11 +7,11 @@ import (
 
 type User struct {
 	ID           uuid.UUID      `gorm:"type:uuid;primaryKey"`
-	Email        string         `gorm:"index;not null"`
-	Username     string         `gorm:"index;not null"`
-	FullName     string         `gorm:"not null;default:''"`
-	ActiveRoleID uuid.UUID      `gorm:"type:uuid;not null"`
-	StatusID     uuid.UUID      `gorm:"type:uuid;not null"`
+	Email        string         `gorm:"index"`
+	Username     string         `gorm:"index"`
+	FullName     string         `gorm:"default:''"`
+	ActiveRoleID uuid.UUID      `gorm:"type:uuid"`
+	StatusID     uuid.UUID      `gorm:"type:uuid"`
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
 }
 
@@ -21,8 +21,8 @@ func (User) TableName() string {
 
 type Sport struct {
 	ID               uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Name             string    `gorm:"type:varchar(100);not null"`
-	Slug             string    `gorm:"type:varchar(100);not null"`
+	Name             string    `gorm:"type:varchar(100)"`
+	Slug             string    `gorm:"type:varchar(100)"`
 	IconAttachmentID *uuid.UUID
 
 	IsVerified  bool       `gorm:"default:false;index"`
@@ -35,10 +35,10 @@ func (Sport) TableName() string {
 }
 
 type Status struct {
-	ID        uuid.UUID      `gorm:"type:uuid;primaryKey"`
-	Type      string         `gorm:"not null"`
-	Name      string         `gorm:"not null"`
-	Slug      string         `gorm:"not null"`
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Type      string
+	Name      string
+	Slug      string
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
@@ -47,10 +47,10 @@ func (Status) TableName() string {
 }
 
 type Tag struct {
-	ID        uuid.UUID      `gorm:"type:uuid;primaryKey"`
-	Type      string         `gorm:"not null"`
-	Name      string         `gorm:"not null"`
-	Slug      string         `gorm:"not null"`
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Type      string
+	Name      string
+	Slug      string
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
@@ -60,12 +60,12 @@ func (Tag) TableName() string {
 
 type Role struct {
 	ID          uuid.UUID      `gorm:"type:uuid;primaryKey"`
-	Name        string         `gorm:"uniqueIndex;not null"`
-	Description string         `gorm:"not null;default:''"`
-	Slug        string         `gorm:"not null;unique"`
+	Name        string         `gorm:"index"`
+	Description string         `gorm:"default:''"`
+	Slug        string         `gorm:"index"`
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 
-	Permissions []Permission `gorm:"many2many:role_permissions;"`
+	Permissions []Permission `gorm:"many2many:role_permissions;constraint:-;"`
 }
 
 func (Role) TableName() string {
@@ -73,11 +73,11 @@ func (Role) TableName() string {
 }
 
 type Permission struct {
-	ID          uuid.UUID      `gorm:"type:uuid;primaryKey"`
-	Resource    string         `gorm:"not null"`
-	Action      string         `gorm:"not null"`
-	Description string         `gorm:"not null;default:''"`
-	Slug        string         `gorm:"not null;unique"`
+	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Resource    string
+	Action      string
+	Description string         `gorm:"default:''"`
+	Slug        string         `gorm:"index"`
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
 
@@ -87,11 +87,11 @@ func (Permission) TableName() string {
 
 type Country struct {
 	ID           uuid.UUID      `gorm:"type:uuid;primaryKey"`
-	Name         string         `gorm:"type:varchar(255);not null"`
-	ISOAlpha2    string         `gorm:"type:varchar(255);not null"`
-	ISOAlpha3    string         `gorm:"type:varchar(255);not null"`
-	PhoneCode    string         `gorm:"type:varchar(255);not null"`
-	CurrencyCode string         `gorm:"type:varchar(255);not null"`
+	Name         string         `gorm:"type:varchar(255)"`
+	ISOAlpha2    string         `gorm:"type:varchar(255)"`
+	ISOAlpha3    string         `gorm:"type:varchar(255)"`
+	PhoneCode    string         `gorm:"type:varchar(255)"`
+	CurrencyCode string         `gorm:"type:varchar(255)"`
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
 }
 
@@ -101,15 +101,15 @@ func (Country) TableName() string {
 
 type AdministrativeDivision struct {
 	ID         uuid.UUID      `gorm:"type:uuid;primaryKey"`
-	CountryID  uuid.UUID      `gorm:"type:uuid;not null"`
+	CountryID  uuid.UUID      `gorm:"type:uuid"`
 	ParentID   *uuid.UUID     `gorm:"type:uuid"`
-	Name       string         `gorm:"type:varchar(255);not null"`
-	Level      string         `gorm:"type:varchar(255);not null"`
-	PostalCode string         `gorm:"type:varchar(255);not null"`
+	Name       string         `gorm:"type:varchar(255)"`
+	Level      string         `gorm:"type:varchar(255)"`
+	PostalCode string         `gorm:"type:varchar(255)"`
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
 
-	Parent  *AdministrativeDivision `gorm:"foreignkey:ParentID"`
-	Country Country                 `gorm:"foreignkey:CountryID"`
+	Parent  *AdministrativeDivision `gorm:"foreignKey:ParentID;constraint:-;"`
+	Country Country                 `gorm:"foreignKey:CountryID;constraint:-;"`
 }
 
 func (AdministrativeDivision) TableName() string {

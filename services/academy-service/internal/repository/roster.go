@@ -20,8 +20,8 @@ type RosterRepository interface {
 	GetMembers(ctx context.Context, rosterID uuid.UUID) ([]*entity.RosterMember, error)
 	GetMemberByID(ctx context.Context, rosterID uuid.UUID, memberID uuid.UUID) (*entity.RosterMember, error)
 	AddMember(ctx context.Context, member *entity.RosterMember) error
-	RemoveMember(ctx context.Context, memberID uuid.UUID, kickedByID uuid.UUID, reason string) error
-	DeleteMember(ctx context.Context, memberID uuid.UUID) error
+	RemoveMember(ctx context.Context, rosterID uuid.UUID, memberID uuid.UUID, kickedByID uuid.UUID, reason string) error
+	DeleteMember(ctx context.Context, rosterID uuid.UUID, memberID uuid.UUID) error
 	CheckAthleteInRoster(ctx context.Context, rosterID, athleteID uuid.UUID) (bool, error)
 }
 
@@ -150,11 +150,11 @@ func (r *rosterRepository) AddMember(ctx context.Context, member *entity.RosterM
 	return r.db.WithContext(ctx).Create(member).Error
 }
 
-func (r *rosterRepository) RemoveMember(ctx context.Context, memberID uuid.UUID, kickedByID uuid.UUID, reason string) error {
+func (r *rosterRepository) RemoveMember(ctx context.Context, rosterID uuid.UUID, memberID uuid.UUID, kickedByID uuid.UUID, reason string) error {
 	now := time.Now()
 
 	return r.db.WithContext(ctx).Model(&entity.RosterMember{}).
-		Where("id = ? AND removed_at IS NULL", memberID).
+		Where("id = ? AND roster_id = ? AND removed_at IS NULL", memberID, rosterID).
 		Updates(map[string]interface{}{
 			"removed_at":     &now,
 			"removed_by_id":  kickedByID,
@@ -162,8 +162,8 @@ func (r *rosterRepository) RemoveMember(ctx context.Context, memberID uuid.UUID,
 		}).Error
 }
 
-func (r *rosterRepository) DeleteMember(ctx context.Context, memberID uuid.UUID) error {
-	return r.db.WithContext(ctx).Delete(&entity.RosterMember{}, memberID).Error
+func (r *rosterRepository) DeleteMember(ctx context.Context, rosterID uuid.UUID, memberID uuid.UUID) error {
+	return r.db.WithContext(ctx).Where("id = ? AND roster_id = ?", memberID, rosterID).Delete(&entity.RosterMember{}).Error
 }
 
 func (r *rosterRepository) CheckAthleteInRoster(ctx context.Context, rosterID, athleteID uuid.UUID) (bool, error) {
