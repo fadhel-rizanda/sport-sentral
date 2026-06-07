@@ -22,7 +22,7 @@ type Country struct {
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 
-	CreatedBy *User `gorm:"foreignkey:CreatedByID"`
-	UpdatedBy *User `gorm:"foreignkey:UpdatedByID"`
-	DeletedBy *User `gorm:"foreignkey:DeletedByID"`
+	CreatedBy *User `gorm:"foreignKey:CreatedByID;constraint:-;"`
+	UpdatedBy *User `gorm:"foreignKey:UpdatedByID;constraint:-;"`
+	DeletedBy *User `gorm:"foreignKey:DeletedByID;constraint:-;"`
 }

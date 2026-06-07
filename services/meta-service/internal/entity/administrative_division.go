@@ -22,9 +22,10 @@ type AdministrativeDivision struct {
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 
-	Parent    *AdministrativeDivision `gorm:"foreignkey:ParentID"`
-	Country   *Country                `gorm:"foreignkey:CountryID"`
-	CreatedBy *User                   `gorm:"foreignkey:CreatedByID"`
-	UpdatedBy *User                   `gorm:"foreignkey:UpdatedByID"`
-	DeletedBy *User                   `gorm:"foreignkey:DeletedByID"`
+	Parent *AdministrativeDivision `gorm:"foreignKey:ParentID;references:ID;constraint:-;"`
+
+	Country   *Country `gorm:"foreignKey:CountryID;references:ID;constraint:-;"`
+	CreatedBy *User    `gorm:"foreignKey:CreatedByID;references:ID;constraint:-;"`
+	UpdatedBy *User    `gorm:"foreignKey:UpdatedByID;references:ID;constraint:-;"`
+	DeletedBy *User    `gorm:"foreignKey:DeletedByID;references:ID;constraint:-;"`
 }

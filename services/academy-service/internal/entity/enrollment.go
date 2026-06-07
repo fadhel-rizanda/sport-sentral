@@ -28,10 +28,10 @@ type Enrollment struct {
 
 	// Relations
 	AcademyBranch *AcademyBranch `gorm:"foreignKey:AcademyBranchID;constraint:OnDelete:CASCADE"`
-	Athlete       *User          `gorm:"foreignKey:AthleteID;references:ID;constraint:OnDelete:CASCADE"`
-	ApprovedBy    *User          `gorm:"foreignKey:ApprovedByID;references:ID"`
-	Status        *Status        `gorm:"foreignKey:StatusID;references:ID"`
-	CreatedBy     *User          `gorm:"foreignKey:CreatedByID;references:ID"`
-	UpdatedBy     *User          `gorm:"foreignKey:UpdatedByID;references:ID"`
-	DeletedBy     *User          `gorm:"foreignKey:DeletedByID;references:ID"`
+	Athlete       *User          `gorm:"foreignKey:AthleteID;references:ID;constraint:-;"`
+	ApprovedBy    *User          `gorm:"foreignKey:ApprovedByID;references:ID;constraint:-;"`
+	Status        *Status        `gorm:"foreignKey:StatusID;references:ID;constraint:-;"`
+	CreatedBy     *User          `gorm:"foreignKey:CreatedByID;references:ID;constraint:-;"`
+	UpdatedBy     *User          `gorm:"foreignKey:UpdatedByID;references:ID;constraint:-;"`
+	DeletedBy     *User          `gorm:"foreignKey:DeletedByID;references:ID;constraint:-;"`
 }

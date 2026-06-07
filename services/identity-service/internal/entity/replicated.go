@@ -6,10 +6,10 @@ import (
 )
 
 type Status struct {
-	ID        uuid.UUID      `gorm:"type:uuid;primaryKey"`
-	Type      string         `gorm:"not null"`
-	Name      string         `gorm:"not null"`
-	Slug      string         `gorm:"not null"`
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Type      string
+	Name      string
+	Slug      string
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
@@ -19,11 +19,11 @@ func (Status) TableName() string {
 
 type Country struct {
 	ID           uuid.UUID      `gorm:"type:uuid;primaryKey"`
-	Name         string         `gorm:"type:varchar(255);not null"`
-	ISOAlpha2    string         `gorm:"type:varchar(255);not null"`
-	ISOAlpha3    string         `gorm:"type:varchar(255);not null"`
-	PhoneCode    string         `gorm:"type:varchar(255);not null"`
-	CurrencyCode string         `gorm:"type:varchar(255);not null"`
+	Name         string         `gorm:"type:varchar(255)"`
+	ISOAlpha2    string         `gorm:"type:varchar(255)"`
+	ISOAlpha3    string         `gorm:"type:varchar(255)"`
+	PhoneCode    string         `gorm:"type:varchar(255)"`
+	CurrencyCode string         `gorm:"type:varchar(255)"`
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
 }
 
@@ -33,15 +33,15 @@ func (Country) TableName() string {
 
 type AdministrativeDivision struct {
 	ID         uuid.UUID      `gorm:"type:uuid;primaryKey"`
-	CountryID  uuid.UUID      `gorm:"type:uuid;not null"`
+	CountryID  uuid.UUID      `gorm:"type:uuid"`
 	ParentID   *uuid.UUID     `gorm:"type:uuid"`
-	Name       string         `gorm:"type:varchar(255);not null"`
-	Level      string         `gorm:"type:varchar(255);not null"`
-	PostalCode string         `gorm:"type:varchar(255);not null"`
+	Name       string         `gorm:"type:varchar(255)"`
+	Level      string         `gorm:"type:varchar(255)"`
+	PostalCode string         `gorm:"type:varchar(255)"`
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
 
-	Parent  *AdministrativeDivision `gorm:"foreignkey:ParentID"`
-	Country Country                 `gorm:"foreignkey:CountryID"`
+	Parent  *AdministrativeDivision `gorm:"foreignKey:ParentID;constraint:-;"`
+	Country Country                 `gorm:"foreignKey:CountryID;constraint:-;"`
 }
 
 func (AdministrativeDivision) TableName() string {

@@ -266,7 +266,7 @@ func (uc *rosterUseCase) RemoveMember(ctx context.Context, rosterID, memberID uu
 		return apperr.Internal(err)
 	}
 
-	if err := uc.repo.RemoveMember(ctx, memberID, req.RemovedByID, req.RemovalReason); err != nil {
+	if err := uc.repo.RemoveMember(ctx, rosterID, memberID, req.RemovedByID, req.RemovalReason); err != nil {
 		return apperr.Internal(err)
 	}
 	return nil
@@ -281,7 +281,7 @@ func (uc *rosterUseCase) DeleteMember(ctx context.Context, rosterID, memberID uu
 		return apperr.Internal(err)
 	}
 
-	if err := uc.repo.DeleteMember(ctx, memberID); err != nil {
+	if err := uc.repo.DeleteMember(ctx, rosterID, memberID); err != nil {
 		return apperr.Internal(err)
 	}
 	return nil

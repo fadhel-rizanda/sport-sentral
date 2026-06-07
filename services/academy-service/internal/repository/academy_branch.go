@@ -71,7 +71,7 @@ func (r *academyBranchRepository) List(ctx context.Context, filters AcademyBranc
 	}
 
 	// Count total
-	if err := query.Model(&entity.AcademyBranch{}).Count(&total).Error; err != nil {
+	if err := query.Session(&gorm.Session{}).Model(&entity.AcademyBranch{}).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
