@@ -43,10 +43,12 @@ func (h *AcademyHandler) Routes(router fiber.Router, auth fiber.Handler, admin .
 
 	// Academy Admins
 	academy.Post("/admins", h.CreateAcademyAdmin)
+	academy.Post("/admins/assign", h.AssignAcademyAdmin)
 	academy.Get("/admins/:id", h.GetAcademyAdmin)
 	academy.Get("/admins", h.ListAcademyAdmins)
 	academy.Put("/admins/:id", h.UpdateAcademyAdmin)
 	academy.Delete("/admins/:id", h.DeleteAcademyAdmin)
+	academy.Post("/admins/:id/revoke", h.RevokeAcademyAdmin)
 	academy.Get("/admins/user/:userID", h.GetAcademyAdminByUser)
 	academy.Get("/admins/check/:userID", h.CheckUserIsAcademyAdmin)
 
@@ -493,6 +495,50 @@ func (h *AcademyHandler) DeleteAcademyAdmin(c *fiber.Ctx) error {
 	}
 
 	return response.OKWithMessage(c, "academy admin deleted")
+}
+
+func (h *AcademyHandler) AssignAcademyAdmin(c *fiber.Ctx) error {
+	userID := c.Locals(middleware.ContextUserID).(string)
+
+	var body struct {
+		AcademyID string  `json:"academy_id" validate:"required,uuid"`
+		BranchID  *string `json:"branch_id"`
+		UserID    string  `json:"user_id" validate:"required,uuid"`
+		RoleID    string  `json:"role_id" validate:"required,uuid"`
+	}
+	if err := request.Parse(c, &body); err != nil {
+		return err
+	}
+
+	resp, err := h.client.AcademyAdmin.AssignAcademyAdmin(c.Context(), &academyv1.AssignAcademyAdminRequest{
+		AcademyId:    body.AcademyID,
+		BranchId:     body.BranchID,
+		UserId:       body.UserID,
+		RoleId:       body.RoleID,
+		AssignedById: userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return response.Created(c, mapper.ToAcademyAdminResponse(resp.Admin))
+}
+
+func (h *AcademyHandler) RevokeAcademyAdmin(c *fiber.Ctx) error {
+	id := c.Params("id")
+	userID := c.Locals(middleware.ContextUserID).(string)
+
+	resp, err := h.client.AcademyAdmin.RevokeAcademyAdmin(c.Context(), &academyv1.RevokeAcademyAdminRequest{
+		Id:          id,
+		RevokedById: userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return response.OK(c, fiber.Map{
+		"id": resp.Id,
+	})
 }
 
 func (h *AcademyHandler) GetAcademyAdminByUser(c *fiber.Ctx) error {

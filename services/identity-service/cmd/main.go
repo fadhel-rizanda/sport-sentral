@@ -104,6 +104,9 @@ func main() {
 	if err := database.Migrate(db); err != nil {
 		log.Fatal("migrate failed", zap.Error(err))
 	}
+	if err := database.CreateIndexes(db); err != nil {
+		log.Fatal("failed to create indexes", zap.Error(err))
+	}
 	if err := database.Seed(db); err != nil {
 		log.Fatal("failed to seed database", zap.Error(err))
 	}

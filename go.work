@@ -3,9 +3,10 @@ go 1.25.0
 use (
 	./gen
 	./proto
+	./services/academy-service
 	./services/gateway
 	./services/identity-service
 	./services/meta-service
+	./services/sport-service
 	./shared
-	services/academy-service
 )

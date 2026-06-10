@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// TODO implementasinya belom ada
 type SportRepository interface {
 	Upsert(ctx context.Context, s entity.Sport) error
 	Delete(ctx context.Context, id uuid.UUID) error

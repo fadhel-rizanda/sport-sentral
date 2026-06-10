@@ -63,7 +63,6 @@ type AcademyBranch struct {
 	Addresses   []AcademyBranchAddress `gorm:"foreignKey:BranchID;constraint:OnDelete:CASCADE"`
 }
 
-// TODO assign or revoke not yet configured
 type AcademyAdmin struct {
 	ID        uuid.UUID  `gorm:"type:uuid;primaryKey"`
 	AcademyID uuid.UUID  `gorm:"type:uuid;not null;index:idx_academy_user_role"`

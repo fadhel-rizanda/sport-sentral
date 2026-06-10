@@ -26,6 +26,8 @@ const (
 	AcademyAdminService_DeleteAcademyAdmin_FullMethodName      = "/academy.v1.AcademyAdminService/DeleteAcademyAdmin"
 	AcademyAdminService_GetAcademyAdminByUser_FullMethodName   = "/academy.v1.AcademyAdminService/GetAcademyAdminByUser"
 	AcademyAdminService_CheckUserIsAcademyAdmin_FullMethodName = "/academy.v1.AcademyAdminService/CheckUserIsAcademyAdmin"
+	AcademyAdminService_AssignAcademyAdmin_FullMethodName      = "/academy.v1.AcademyAdminService/AssignAcademyAdmin"
+	AcademyAdminService_RevokeAcademyAdmin_FullMethodName      = "/academy.v1.AcademyAdminService/RevokeAcademyAdmin"
 )
 
 // AcademyAdminServiceClient is the client API for AcademyAdminService service.
@@ -39,6 +41,8 @@ type AcademyAdminServiceClient interface {
 	DeleteAcademyAdmin(ctx context.Context, in *DeleteAcademyAdminRequest, opts ...grpc.CallOption) (*DeleteAcademyAdminResponse, error)
 	GetAcademyAdminByUser(ctx context.Context, in *GetAcademyAdminByUserRequest, opts ...grpc.CallOption) (*GetAcademyAdminByUserResponse, error)
 	CheckUserIsAcademyAdmin(ctx context.Context, in *CheckUserIsAcademyAdminRequest, opts ...grpc.CallOption) (*CheckUserIsAcademyAdminResponse, error)
+	AssignAcademyAdmin(ctx context.Context, in *AssignAcademyAdminRequest, opts ...grpc.CallOption) (*AssignAcademyAdminResponse, error)
+	RevokeAcademyAdmin(ctx context.Context, in *RevokeAcademyAdminRequest, opts ...grpc.CallOption) (*RevokeAcademyAdminResponse, error)
 }
 
 type academyAdminServiceClient struct {
@@ -119,6 +123,26 @@ func (c *academyAdminServiceClient) CheckUserIsAcademyAdmin(ctx context.Context,
 	return out, nil
 }
 
+func (c *academyAdminServiceClient) AssignAcademyAdmin(ctx context.Context, in *AssignAcademyAdminRequest, opts ...grpc.CallOption) (*AssignAcademyAdminResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AssignAcademyAdminResponse)
+	err := c.cc.Invoke(ctx, AcademyAdminService_AssignAcademyAdmin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *academyAdminServiceClient) RevokeAcademyAdmin(ctx context.Context, in *RevokeAcademyAdminRequest, opts ...grpc.CallOption) (*RevokeAcademyAdminResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RevokeAcademyAdminResponse)
+	err := c.cc.Invoke(ctx, AcademyAdminService_RevokeAcademyAdmin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AcademyAdminServiceServer is the server API for AcademyAdminService service.
 // All implementations must embed UnimplementedAcademyAdminServiceServer
 // for forward compatibility.
@@ -130,6 +154,8 @@ type AcademyAdminServiceServer interface {
 	DeleteAcademyAdmin(context.Context, *DeleteAcademyAdminRequest) (*DeleteAcademyAdminResponse, error)
 	GetAcademyAdminByUser(context.Context, *GetAcademyAdminByUserRequest) (*GetAcademyAdminByUserResponse, error)
 	CheckUserIsAcademyAdmin(context.Context, *CheckUserIsAcademyAdminRequest) (*CheckUserIsAcademyAdminResponse, error)
+	AssignAcademyAdmin(context.Context, *AssignAcademyAdminRequest) (*AssignAcademyAdminResponse, error)
+	RevokeAcademyAdmin(context.Context, *RevokeAcademyAdminRequest) (*RevokeAcademyAdminResponse, error)
 	mustEmbedUnimplementedAcademyAdminServiceServer()
 }
 
@@ -160,6 +186,12 @@ func (UnimplementedAcademyAdminServiceServer) GetAcademyAdminByUser(context.Cont
 }
 func (UnimplementedAcademyAdminServiceServer) CheckUserIsAcademyAdmin(context.Context, *CheckUserIsAcademyAdminRequest) (*CheckUserIsAcademyAdminResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CheckUserIsAcademyAdmin not implemented")
+}
+func (UnimplementedAcademyAdminServiceServer) AssignAcademyAdmin(context.Context, *AssignAcademyAdminRequest) (*AssignAcademyAdminResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AssignAcademyAdmin not implemented")
+}
+func (UnimplementedAcademyAdminServiceServer) RevokeAcademyAdmin(context.Context, *RevokeAcademyAdminRequest) (*RevokeAcademyAdminResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RevokeAcademyAdmin not implemented")
 }
 func (UnimplementedAcademyAdminServiceServer) mustEmbedUnimplementedAcademyAdminServiceServer() {}
 func (UnimplementedAcademyAdminServiceServer) testEmbeddedByValue()                             {}
@@ -308,6 +340,42 @@ func _AcademyAdminService_CheckUserIsAcademyAdmin_Handler(srv interface{}, ctx c
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AcademyAdminService_AssignAcademyAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AssignAcademyAdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AcademyAdminServiceServer).AssignAcademyAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AcademyAdminService_AssignAcademyAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AcademyAdminServiceServer).AssignAcademyAdmin(ctx, req.(*AssignAcademyAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AcademyAdminService_RevokeAcademyAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeAcademyAdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AcademyAdminServiceServer).RevokeAcademyAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AcademyAdminService_RevokeAcademyAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AcademyAdminServiceServer).RevokeAcademyAdmin(ctx, req.(*RevokeAcademyAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AcademyAdminService_ServiceDesc is the grpc.ServiceDesc for AcademyAdminService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +410,14 @@ var AcademyAdminService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckUserIsAcademyAdmin",
 			Handler:    _AcademyAdminService_CheckUserIsAcademyAdmin_Handler,
+		},
+		{
+			MethodName: "AssignAcademyAdmin",
+			Handler:    _AcademyAdminService_AssignAcademyAdmin_Handler,
+		},
+		{
+			MethodName: "RevokeAcademyAdmin",
+			Handler:    _AcademyAdminService_RevokeAcademyAdmin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

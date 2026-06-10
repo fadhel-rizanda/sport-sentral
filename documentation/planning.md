@@ -35,47 +35,47 @@ Baik, saya sudah baca planning document-nya. Mari saya breakdown dalam format ma
 │  │ • Users      │  │ • Enrollment │  │ • Booking    │      │
 │  │ • RBAC       │  │ • Roster     │  │ • Schedule   │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────┐
-│                    PHASE 2: COMPETITION                      │
-│                                                               │
+┌────────────────────────────────────────────────────────────┐
+│                    PHASE 2: COMPETITION                    │
+│                                                            │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ Competition  │  │  Regulator   │  │    Scout     │      │
+│  │ Competition  │  │    Sport     │  │    Scout     │      │
 │  │   Service    │  │   Service    │  │   Service    │      │
 │  │              │  │              │  │              │      │
-│  │ • Bracket    │  │ • Sport cfg  │  │ • Leaderboard      │
+│  │ • Bracket    │  │ • Sport cfg  │  │ • Leaderboard       │
 │  │ • Match      │  │ • Approval   │  │ • Watchlist  │      │
 │  │ • Stats      │  │ • Tier       │  │ • Profiles   │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────┐
-│                   PHASE 3: COMMUNITY                         │
-│                                                               │
+┌────────────────────────────────────────────────────────────┐
+│                   PHASE 3: COMMUNITY                       │
+│                                                            │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
 │  │    Event     │  │  Community   │  │    Feed      │      │
 │  │   Service    │  │   Service    │  │   Service    │      │
 │  │              │  │              │  │              │      │
 │  │ • Pickup     │  │ • Groups     │  │ • Global     │      │
 │  │ • Gathering  │  │ • Posts      │  │ • Timeline   │      │
-│  │ • Entry fees │  │ • Membership │  │ • Aggregation      │
+│  │ • Entry fees │  │ • Membership │  │ • Aggregation       │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────┐
-│                   PHASE 4-5: GROWTH                          │
-│                                                               │
+┌────────────────────────────────────────────────────────────┐
+│                   PHASE 4-5: GROWTH                        │
+│                                                            │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
 │  │   Payment    │  │  Attachment  │  │ Notification │      │
 │  │   Service    │  │   Service    │  │   Service    │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
-│                   SHARED INFRASTRUCTURE                      │
-│                                                               │
-│  API Gateway  │  Meta Service  │  Sport Service  │  Logger  │
+│                   SHARED INFRASTRUCTURE                     │
+│                                                             │
+│       API Gateway  │  Meta Service  │  Logger  │            │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -125,24 +125,24 @@ Academy-Service manages the **training organization layer** of the platform:
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                    Academy                           │
-│                                                      │
+│                    Academy                          │
+│                                                     │
 │  Sport: Basketball (tenant-bound)                   │
 │  Admin: academy_admin user                          │
 │  Location: Jakarta, GOR Senayan                     │
-│                                                      │
+│                                                     │
 │  └─ Enrollments (Athletes in this academy)          │
-│     ├─ Athlete 1 (enrolled, status: ACTIVE)        │
-│     ├─ Athlete 2 (enrolled, status: ACTIVE)        │
-│     └─ Athlete 3 (soft-deleted, stats intact)      │
-│                                                      │
+│     ├─ Athlete 1 (enrolled, status: ACTIVE)         │
+│     ├─ Athlete 2 (enrolled, status: ACTIVE)         │
+│     └─ Athlete 3 (soft-deleted, stats intact)       │
+│                                                     │
 │  └─ Roster (for specific competition)               │
-│     ├─ Roster A (competition X, 5 players)         │
-│     └─ Roster B (competition Y, 3 players)         │
-│                                                      │
+│     ├─ Roster A (competition X, 5 players)          │
+│     └─ Roster B (competition Y, 3 players)          │
+│                                                     │
 │  └─ Participants (submitted to competitions)        │
-│     ├─ Participant A (team, 5 athletes)            │
-│     └─ Participant B (individual, 1 athlete)       │
+│     ├─ Participant A (team, 5 athletes)             │
+│     └─ Participant B (individual, 1 athlete)        │
 └─────────────────────────────────────────────────────┘
 ```
 

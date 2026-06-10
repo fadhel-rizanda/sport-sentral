@@ -242,7 +242,7 @@ func (uc *rosterUseCase) AddMember(ctx context.Context, req dto.AddRosterMemberR
 	}
 
 	if err := uc.repo.AddMember(ctx, member); err != nil {
-		if postgres.IsUniqueConstraint(err, "idx_roster_athlete") || postgres.IsUniqueConstraint(err, "uq_roster_athlete") {
+		if postgres.IsUniqueConstraint(err, "idx_roster_athlete") {
 			return nil, apperr.Conflict("athlete is already in this roster")
 		}
 		return nil, apperr.Internal(err)

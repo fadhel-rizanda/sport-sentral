@@ -289,3 +289,77 @@ func (h *AcademyAdminHandler) CheckUserIsAcademyAdmin(ctx context.Context, req *
 		IsAdmin: isAdmin,
 	}, nil
 }
+
+func (h *AcademyAdminHandler) AssignAcademyAdmin(ctx context.Context, req *academyv1.AssignAcademyAdminRequest) (*academyv1.AssignAcademyAdminResponse, error) {
+	academyID, err := uuid.Parse(req.GetAcademyId())
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid academy id"))
+	}
+
+	var branchID *uuid.UUID
+	if req.BranchId != nil && *req.BranchId != "" {
+		bID, err := uuid.Parse(*req.BranchId)
+		if err != nil {
+			return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid branch id"))
+		}
+		branchID = &bID
+	}
+
+	userID, err := uuid.Parse(req.GetUserId())
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid user id"))
+	}
+
+	roleID, err := uuid.Parse(req.GetRoleId())
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid role id"))
+	}
+
+	assignedByID, err := uuid.Parse(req.GetAssignedById())
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid assigned by id"))
+	}
+
+	dtoReq := dto.AssignAcademyAdminRequest{
+		AcademyID:    academyID,
+		BranchID:     branchID,
+		UserID:       userID,
+		RoleID:       roleID,
+		AssignedByID: assignedByID,
+	}
+
+	res, err := h.uc.Assign(ctx, dtoReq)
+	if err != nil {
+		return nil, apperr.ToGRPC(err)
+	}
+
+	return &academyv1.AssignAcademyAdminResponse{
+		Admin: mapper.ToProtoAcademyAdmin(res),
+	}, nil
+}
+
+func (h *AcademyAdminHandler) RevokeAcademyAdmin(ctx context.Context, req *academyv1.RevokeAcademyAdminRequest) (*academyv1.RevokeAcademyAdminResponse, error) {
+	id, err := uuid.Parse(req.GetId())
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid admin id"))
+	}
+
+	revokedByID, err := uuid.Parse(req.GetRevokedById())
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid revoked by id"))
+	}
+
+	dtoReq := dto.RevokeAcademyAdminRequest{
+		ID:          id,
+		RevokedByID: revokedByID,
+	}
+
+	err = h.uc.Revoke(ctx, dtoReq)
+	if err != nil {
+		return nil, apperr.ToGRPC(err)
+	}
+
+	return &academyv1.RevokeAcademyAdminResponse{
+		Id: req.GetId(),
+	}, nil
+}

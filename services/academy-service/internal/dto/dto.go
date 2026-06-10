@@ -320,6 +320,19 @@ type DeleteAcademyAdminRequest struct {
 	DeletedByID uuid.UUID
 }
 
+type AssignAcademyAdminRequest struct {
+	AcademyID    uuid.UUID
+	BranchID     *uuid.UUID
+	UserID       uuid.UUID
+	RoleID       uuid.UUID
+	AssignedByID uuid.UUID
+}
+
+type RevokeAcademyAdminRequest struct {
+	ID          uuid.UUID
+	RevokedByID uuid.UUID
+}
+
 // ─── Enrollment ───────────────────────────────────────────────────────────────
 
 type CreateEnrollmentRequest struct {

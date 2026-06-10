@@ -46,3 +46,54 @@ func Migrate(db *gorm.DB) error {
 		&entity.Status{},
 	)
 }
+
+func CreateIndexes(db *gorm.DB) error {
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS uni_permissions_slug 
+		ON permissions(slug) 
+		WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS idx_roles_name 
+		ON roles(name) 
+		WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS uni_roles_slug 
+		ON roles(slug) 
+		WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS idx_roles_permission_ids 
+		ON role_permissions(role_id, permission_id)
+	`).Error; err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email 
+		ON users(email) 
+		WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username 
+		ON users(username) 
+		WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
