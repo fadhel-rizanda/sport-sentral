@@ -16,6 +16,9 @@ type AcademyAdminRepository interface {
 	Update(ctx context.Context, admin *entity.AcademyAdmin) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	CheckUserIsAdmin(ctx context.Context, scope AdminScope, userID uuid.UUID) (bool, error)
+
+	Assign(ctx context.Context, admin *entity.AcademyAdmin) error
+	Revoke(ctx context.Context, id uuid.UUID, revokedByID uuid.UUID) error
 }
 
 type AdminScope struct {
@@ -153,4 +156,21 @@ func (r *academyAdminRepository) CheckUserIsAdmin(ctx context.Context, scope Adm
 
 	err := query.Model(&entity.AcademyAdmin{}).Count(&count).Error
 	return count > 0, err
+}
+
+func (r *academyAdminRepository) Assign(ctx context.Context, admin *entity.AcademyAdmin) error {
+	return r.db.WithContext(ctx).Create(admin).Error
+}
+
+func (r *academyAdminRepository) Revoke(ctx context.Context, id uuid.UUID, revokedByID uuid.UUID) error {
+	var admin entity.AcademyAdmin
+	if err := r.db.WithContext(ctx).First(&admin, "id = ?", id).Error; err != nil {
+		return err
+	}
+	admin.DeletedByID = &revokedByID
+	admin.UpdatedByID = revokedByID
+	if err := r.db.WithContext(ctx).Save(&admin).Error; err != nil {
+		return err
+	}
+	return r.db.WithContext(ctx).Delete(&entity.AcademyAdmin{}, "id = ?", id).Error
 }

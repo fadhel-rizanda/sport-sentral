@@ -972,6 +972,222 @@ func (x *CheckUserIsAcademyAdminResponse) GetIsAdmin() bool {
 	return false
 }
 
+type AssignAcademyAdminRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AcademyId     string                 `protobuf:"bytes,1,opt,name=academy_id,json=academyId,proto3" json:"academy_id,omitempty"`
+	BranchId      *string                `protobuf:"bytes,2,opt,name=branch_id,json=branchId,proto3,oneof" json:"branch_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	RoleId        string                 `protobuf:"bytes,4,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	AssignedById  string                 `protobuf:"bytes,5,opt,name=assigned_by_id,json=assignedById,proto3" json:"assigned_by_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AssignAcademyAdminRequest) Reset() {
+	*x = AssignAcademyAdminRequest{}
+	mi := &file_academy_v1_academy_admin_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AssignAcademyAdminRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AssignAcademyAdminRequest) ProtoMessage() {}
+
+func (x *AssignAcademyAdminRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_academy_v1_academy_admin_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AssignAcademyAdminRequest.ProtoReflect.Descriptor instead.
+func (*AssignAcademyAdminRequest) Descriptor() ([]byte, []int) {
+	return file_academy_v1_academy_admin_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *AssignAcademyAdminRequest) GetAcademyId() string {
+	if x != nil {
+		return x.AcademyId
+	}
+	return ""
+}
+
+func (x *AssignAcademyAdminRequest) GetBranchId() string {
+	if x != nil && x.BranchId != nil {
+		return *x.BranchId
+	}
+	return ""
+}
+
+func (x *AssignAcademyAdminRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *AssignAcademyAdminRequest) GetRoleId() string {
+	if x != nil {
+		return x.RoleId
+	}
+	return ""
+}
+
+func (x *AssignAcademyAdminRequest) GetAssignedById() string {
+	if x != nil {
+		return x.AssignedById
+	}
+	return ""
+}
+
+type AssignAcademyAdminResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Admin         *AcademyAdmin          `protobuf:"bytes,1,opt,name=admin,proto3" json:"admin,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AssignAcademyAdminResponse) Reset() {
+	*x = AssignAcademyAdminResponse{}
+	mi := &file_academy_v1_academy_admin_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AssignAcademyAdminResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AssignAcademyAdminResponse) ProtoMessage() {}
+
+func (x *AssignAcademyAdminResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_academy_v1_academy_admin_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AssignAcademyAdminResponse.ProtoReflect.Descriptor instead.
+func (*AssignAcademyAdminResponse) Descriptor() ([]byte, []int) {
+	return file_academy_v1_academy_admin_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *AssignAcademyAdminResponse) GetAdmin() *AcademyAdmin {
+	if x != nil {
+		return x.Admin
+	}
+	return nil
+}
+
+type RevokeAcademyAdminRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	RevokedById   string                 `protobuf:"bytes,2,opt,name=revoked_by_id,json=revokedById,proto3" json:"revoked_by_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RevokeAcademyAdminRequest) Reset() {
+	*x = RevokeAcademyAdminRequest{}
+	mi := &file_academy_v1_academy_admin_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokeAcademyAdminRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeAcademyAdminRequest) ProtoMessage() {}
+
+func (x *RevokeAcademyAdminRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_academy_v1_academy_admin_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeAcademyAdminRequest.ProtoReflect.Descriptor instead.
+func (*RevokeAcademyAdminRequest) Descriptor() ([]byte, []int) {
+	return file_academy_v1_academy_admin_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *RevokeAcademyAdminRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *RevokeAcademyAdminRequest) GetRevokedById() string {
+	if x != nil {
+		return x.RevokedById
+	}
+	return ""
+}
+
+type RevokeAcademyAdminResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RevokeAcademyAdminResponse) Reset() {
+	*x = RevokeAcademyAdminResponse{}
+	mi := &file_academy_v1_academy_admin_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokeAcademyAdminResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeAcademyAdminResponse) ProtoMessage() {}
+
+func (x *RevokeAcademyAdminResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_academy_v1_academy_admin_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeAcademyAdminResponse.ProtoReflect.Descriptor instead.
+func (*RevokeAcademyAdminResponse) Descriptor() ([]byte, []int) {
+	return file_academy_v1_academy_admin_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *RevokeAcademyAdminResponse) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
 var File_academy_v1_academy_admin_proto protoreflect.FileDescriptor
 
 const file_academy_v1_academy_admin_proto_rawDesc = "" +
@@ -1081,7 +1297,23 @@ const file_academy_v1_academy_admin_proto_rawDesc = "" +
 	"\n" +
 	"_branch_id\"<\n" +
 	"\x1fCheckUserIsAcademyAdminResponse\x12\x19\n" +
-	"\bis_admin\x18\x01 \x01(\bR\aisAdmin2\xe4\x05\n" +
+	"\bis_admin\x18\x01 \x01(\bR\aisAdmin\"\xf4\x01\n" +
+	"\x19AssignAcademyAdminRequest\x12'\n" +
+	"\n" +
+	"academy_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\tacademyId\x12*\n" +
+	"\tbranch_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01H\x00R\bbranchId\x88\x01\x01\x12!\n" +
+	"\auser_id\x18\x03 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12!\n" +
+	"\arole_id\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06roleId\x12.\n" +
+	"\x0eassigned_by_id\x18\x05 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\fassignedByIdB\f\n" +
+	"\n" +
+	"_branch_id\"L\n" +
+	"\x1aAssignAcademyAdminResponse\x12.\n" +
+	"\x05admin\x18\x01 \x01(\v2\x18.academy.v1.AcademyAdminR\x05admin\"c\n" +
+	"\x19RevokeAcademyAdminRequest\x12\x18\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12,\n" +
+	"\rrevoked_by_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vrevokedById\",\n" +
+	"\x1aRevokeAcademyAdminResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id2\xae\a\n" +
 	"\x13AcademyAdminService\x12c\n" +
 	"\x12CreateAcademyAdmin\x12%.academy.v1.CreateAcademyAdminRequest\x1a&.academy.v1.CreateAcademyAdminResponse\x12Z\n" +
 	"\x0fGetAcademyAdmin\x12\".academy.v1.GetAcademyAdminRequest\x1a#.academy.v1.GetAcademyAdminResponse\x12`\n" +
@@ -1089,7 +1321,9 @@ const file_academy_v1_academy_admin_proto_rawDesc = "" +
 	"\x12UpdateAcademyAdmin\x12%.academy.v1.UpdateAcademyAdminRequest\x1a&.academy.v1.UpdateAcademyAdminResponse\x12c\n" +
 	"\x12DeleteAcademyAdmin\x12%.academy.v1.DeleteAcademyAdminRequest\x1a&.academy.v1.DeleteAcademyAdminResponse\x12l\n" +
 	"\x15GetAcademyAdminByUser\x12(.academy.v1.GetAcademyAdminByUserRequest\x1a).academy.v1.GetAcademyAdminByUserResponse\x12r\n" +
-	"\x17CheckUserIsAcademyAdmin\x12*.academy.v1.CheckUserIsAcademyAdminRequest\x1a+.academy.v1.CheckUserIsAcademyAdminResponseB.Z,microservice-golang/gen/academy/v1;academyv1b\x06proto3"
+	"\x17CheckUserIsAcademyAdmin\x12*.academy.v1.CheckUserIsAcademyAdminRequest\x1a+.academy.v1.CheckUserIsAcademyAdminResponse\x12c\n" +
+	"\x12AssignAcademyAdmin\x12%.academy.v1.AssignAcademyAdminRequest\x1a&.academy.v1.AssignAcademyAdminResponse\x12c\n" +
+	"\x12RevokeAcademyAdmin\x12%.academy.v1.RevokeAcademyAdminRequest\x1a&.academy.v1.RevokeAcademyAdminResponseB.Z,microservice-golang/gen/academy/v1;academyv1b\x06proto3"
 
 var (
 	file_academy_v1_academy_admin_proto_rawDescOnce sync.Once
@@ -1103,7 +1337,7 @@ func file_academy_v1_academy_admin_proto_rawDescGZIP() []byte {
 	return file_academy_v1_academy_admin_proto_rawDescData
 }
 
-var file_academy_v1_academy_admin_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_academy_v1_academy_admin_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_academy_v1_academy_admin_proto_goTypes = []any{
 	(*AcademyAdmin)(nil),                    // 0: academy.v1.AcademyAdmin
 	(*CreateAcademyAdminRequest)(nil),       // 1: academy.v1.CreateAcademyAdminRequest
@@ -1120,49 +1354,58 @@ var file_academy_v1_academy_admin_proto_goTypes = []any{
 	(*GetAcademyAdminByUserResponse)(nil),   // 12: academy.v1.GetAcademyAdminByUserResponse
 	(*CheckUserIsAcademyAdminRequest)(nil),  // 13: academy.v1.CheckUserIsAcademyAdminRequest
 	(*CheckUserIsAcademyAdminResponse)(nil), // 14: academy.v1.CheckUserIsAcademyAdminResponse
-	(*timestamppb.Timestamp)(nil),           // 15: google.protobuf.Timestamp
-	(*v1.AcademyHoldingSimple)(nil),         // 16: common.v1.AcademyHoldingSimple
-	(*v1.AcademyBranchSimple)(nil),          // 17: common.v1.AcademyBranchSimple
-	(*v1.UserSimple)(nil),                   // 18: common.v1.UserSimple
-	(*v1.RoleSimple)(nil),                   // 19: common.v1.RoleSimple
+	(*AssignAcademyAdminRequest)(nil),       // 15: academy.v1.AssignAcademyAdminRequest
+	(*AssignAcademyAdminResponse)(nil),      // 16: academy.v1.AssignAcademyAdminResponse
+	(*RevokeAcademyAdminRequest)(nil),       // 17: academy.v1.RevokeAcademyAdminRequest
+	(*RevokeAcademyAdminResponse)(nil),      // 18: academy.v1.RevokeAcademyAdminResponse
+	(*timestamppb.Timestamp)(nil),           // 19: google.protobuf.Timestamp
+	(*v1.AcademyHoldingSimple)(nil),         // 20: common.v1.AcademyHoldingSimple
+	(*v1.AcademyBranchSimple)(nil),          // 21: common.v1.AcademyBranchSimple
+	(*v1.UserSimple)(nil),                   // 22: common.v1.UserSimple
+	(*v1.RoleSimple)(nil),                   // 23: common.v1.RoleSimple
 }
 var file_academy_v1_academy_admin_proto_depIdxs = []int32{
-	15, // 0: academy.v1.AcademyAdmin.approved_at:type_name -> google.protobuf.Timestamp
-	15, // 1: academy.v1.AcademyAdmin.created_at:type_name -> google.protobuf.Timestamp
-	15, // 2: academy.v1.AcademyAdmin.updated_at:type_name -> google.protobuf.Timestamp
-	15, // 3: academy.v1.AcademyAdmin.deleted_at:type_name -> google.protobuf.Timestamp
-	16, // 4: academy.v1.AcademyAdmin.academy:type_name -> common.v1.AcademyHoldingSimple
-	17, // 5: academy.v1.AcademyAdmin.branch:type_name -> common.v1.AcademyBranchSimple
-	18, // 6: academy.v1.AcademyAdmin.user:type_name -> common.v1.UserSimple
-	19, // 7: academy.v1.AcademyAdmin.role:type_name -> common.v1.RoleSimple
-	18, // 8: academy.v1.AcademyAdmin.approved_by:type_name -> common.v1.UserSimple
-	18, // 9: academy.v1.AcademyAdmin.created_by:type_name -> common.v1.UserSimple
-	18, // 10: academy.v1.AcademyAdmin.updated_by:type_name -> common.v1.UserSimple
-	18, // 11: academy.v1.AcademyAdmin.deleted_by:type_name -> common.v1.UserSimple
+	19, // 0: academy.v1.AcademyAdmin.approved_at:type_name -> google.protobuf.Timestamp
+	19, // 1: academy.v1.AcademyAdmin.created_at:type_name -> google.protobuf.Timestamp
+	19, // 2: academy.v1.AcademyAdmin.updated_at:type_name -> google.protobuf.Timestamp
+	19, // 3: academy.v1.AcademyAdmin.deleted_at:type_name -> google.protobuf.Timestamp
+	20, // 4: academy.v1.AcademyAdmin.academy:type_name -> common.v1.AcademyHoldingSimple
+	21, // 5: academy.v1.AcademyAdmin.branch:type_name -> common.v1.AcademyBranchSimple
+	22, // 6: academy.v1.AcademyAdmin.user:type_name -> common.v1.UserSimple
+	23, // 7: academy.v1.AcademyAdmin.role:type_name -> common.v1.RoleSimple
+	22, // 8: academy.v1.AcademyAdmin.approved_by:type_name -> common.v1.UserSimple
+	22, // 9: academy.v1.AcademyAdmin.created_by:type_name -> common.v1.UserSimple
+	22, // 10: academy.v1.AcademyAdmin.updated_by:type_name -> common.v1.UserSimple
+	22, // 11: academy.v1.AcademyAdmin.deleted_by:type_name -> common.v1.UserSimple
 	0,  // 12: academy.v1.CreateAcademyAdminResponse.admin:type_name -> academy.v1.AcademyAdmin
 	0,  // 13: academy.v1.GetAcademyAdminResponse.admin:type_name -> academy.v1.AcademyAdmin
 	0,  // 14: academy.v1.ListAcademyAdminsResponse.admins:type_name -> academy.v1.AcademyAdmin
 	0,  // 15: academy.v1.UpdateAcademyAdminResponse.admin:type_name -> academy.v1.AcademyAdmin
 	0,  // 16: academy.v1.GetAcademyAdminByUserResponse.admin:type_name -> academy.v1.AcademyAdmin
-	1,  // 17: academy.v1.AcademyAdminService.CreateAcademyAdmin:input_type -> academy.v1.CreateAcademyAdminRequest
-	3,  // 18: academy.v1.AcademyAdminService.GetAcademyAdmin:input_type -> academy.v1.GetAcademyAdminRequest
-	5,  // 19: academy.v1.AcademyAdminService.ListAcademyAdmins:input_type -> academy.v1.ListAcademyAdminsRequest
-	7,  // 20: academy.v1.AcademyAdminService.UpdateAcademyAdmin:input_type -> academy.v1.UpdateAcademyAdminRequest
-	9,  // 21: academy.v1.AcademyAdminService.DeleteAcademyAdmin:input_type -> academy.v1.DeleteAcademyAdminRequest
-	11, // 22: academy.v1.AcademyAdminService.GetAcademyAdminByUser:input_type -> academy.v1.GetAcademyAdminByUserRequest
-	13, // 23: academy.v1.AcademyAdminService.CheckUserIsAcademyAdmin:input_type -> academy.v1.CheckUserIsAcademyAdminRequest
-	2,  // 24: academy.v1.AcademyAdminService.CreateAcademyAdmin:output_type -> academy.v1.CreateAcademyAdminResponse
-	4,  // 25: academy.v1.AcademyAdminService.GetAcademyAdmin:output_type -> academy.v1.GetAcademyAdminResponse
-	6,  // 26: academy.v1.AcademyAdminService.ListAcademyAdmins:output_type -> academy.v1.ListAcademyAdminsResponse
-	8,  // 27: academy.v1.AcademyAdminService.UpdateAcademyAdmin:output_type -> academy.v1.UpdateAcademyAdminResponse
-	10, // 28: academy.v1.AcademyAdminService.DeleteAcademyAdmin:output_type -> academy.v1.DeleteAcademyAdminResponse
-	12, // 29: academy.v1.AcademyAdminService.GetAcademyAdminByUser:output_type -> academy.v1.GetAcademyAdminByUserResponse
-	14, // 30: academy.v1.AcademyAdminService.CheckUserIsAcademyAdmin:output_type -> academy.v1.CheckUserIsAcademyAdminResponse
-	24, // [24:31] is the sub-list for method output_type
-	17, // [17:24] is the sub-list for method input_type
-	17, // [17:17] is the sub-list for extension type_name
-	17, // [17:17] is the sub-list for extension extendee
-	0,  // [0:17] is the sub-list for field type_name
+	0,  // 17: academy.v1.AssignAcademyAdminResponse.admin:type_name -> academy.v1.AcademyAdmin
+	1,  // 18: academy.v1.AcademyAdminService.CreateAcademyAdmin:input_type -> academy.v1.CreateAcademyAdminRequest
+	3,  // 19: academy.v1.AcademyAdminService.GetAcademyAdmin:input_type -> academy.v1.GetAcademyAdminRequest
+	5,  // 20: academy.v1.AcademyAdminService.ListAcademyAdmins:input_type -> academy.v1.ListAcademyAdminsRequest
+	7,  // 21: academy.v1.AcademyAdminService.UpdateAcademyAdmin:input_type -> academy.v1.UpdateAcademyAdminRequest
+	9,  // 22: academy.v1.AcademyAdminService.DeleteAcademyAdmin:input_type -> academy.v1.DeleteAcademyAdminRequest
+	11, // 23: academy.v1.AcademyAdminService.GetAcademyAdminByUser:input_type -> academy.v1.GetAcademyAdminByUserRequest
+	13, // 24: academy.v1.AcademyAdminService.CheckUserIsAcademyAdmin:input_type -> academy.v1.CheckUserIsAcademyAdminRequest
+	15, // 25: academy.v1.AcademyAdminService.AssignAcademyAdmin:input_type -> academy.v1.AssignAcademyAdminRequest
+	17, // 26: academy.v1.AcademyAdminService.RevokeAcademyAdmin:input_type -> academy.v1.RevokeAcademyAdminRequest
+	2,  // 27: academy.v1.AcademyAdminService.CreateAcademyAdmin:output_type -> academy.v1.CreateAcademyAdminResponse
+	4,  // 28: academy.v1.AcademyAdminService.GetAcademyAdmin:output_type -> academy.v1.GetAcademyAdminResponse
+	6,  // 29: academy.v1.AcademyAdminService.ListAcademyAdmins:output_type -> academy.v1.ListAcademyAdminsResponse
+	8,  // 30: academy.v1.AcademyAdminService.UpdateAcademyAdmin:output_type -> academy.v1.UpdateAcademyAdminResponse
+	10, // 31: academy.v1.AcademyAdminService.DeleteAcademyAdmin:output_type -> academy.v1.DeleteAcademyAdminResponse
+	12, // 32: academy.v1.AcademyAdminService.GetAcademyAdminByUser:output_type -> academy.v1.GetAcademyAdminByUserResponse
+	14, // 33: academy.v1.AcademyAdminService.CheckUserIsAcademyAdmin:output_type -> academy.v1.CheckUserIsAcademyAdminResponse
+	16, // 34: academy.v1.AcademyAdminService.AssignAcademyAdmin:output_type -> academy.v1.AssignAcademyAdminResponse
+	18, // 35: academy.v1.AcademyAdminService.RevokeAcademyAdmin:output_type -> academy.v1.RevokeAcademyAdminResponse
+	27, // [27:36] is the sub-list for method output_type
+	18, // [18:27] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_academy_v1_academy_admin_proto_init() }
@@ -1175,13 +1418,14 @@ func file_academy_v1_academy_admin_proto_init() {
 	file_academy_v1_academy_admin_proto_msgTypes[5].OneofWrappers = []any{}
 	file_academy_v1_academy_admin_proto_msgTypes[11].OneofWrappers = []any{}
 	file_academy_v1_academy_admin_proto_msgTypes[13].OneofWrappers = []any{}
+	file_academy_v1_academy_admin_proto_msgTypes[15].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_academy_v1_academy_admin_proto_rawDesc), len(file_academy_v1_academy_admin_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

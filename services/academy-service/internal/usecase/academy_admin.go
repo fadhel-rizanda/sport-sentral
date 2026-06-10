@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -21,6 +22,9 @@ type AcademyAdminUseCase interface {
 	Delete(ctx context.Context, req dto.DeleteAcademyAdminRequest) error
 	GetByUser(ctx context.Context, scope repository.AdminScope, userID uuid.UUID) (*dto.AcademyAdminResponse, error)
 	CheckUserIsAdmin(ctx context.Context, scope repository.AdminScope, userID uuid.UUID) (bool, error)
+
+	Assign(ctx context.Context, req dto.AssignAcademyAdminRequest) (*dto.AcademyAdminResponse, error)
+	Revoke(ctx context.Context, req dto.RevokeAcademyAdminRequest) error
 }
 
 type academyAdminUseCase struct {
@@ -156,4 +160,50 @@ func (uc *academyAdminUseCase) CheckUserIsAdmin(ctx context.Context, scope repos
 		return false, apperr.Internal(err)
 	}
 	return isAdmin, nil
+}
+
+func (uc *academyAdminUseCase) Assign(ctx context.Context, req dto.AssignAcademyAdminRequest) (*dto.AcademyAdminResponse, error) {
+	id, err := uuid.NewV7()
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	now := time.Now()
+	admin := &entity.AcademyAdmin{
+		ID:           id,
+		AcademyID:    req.AcademyID,
+		BranchID:     req.BranchID,
+		UserID:       req.UserID,
+		RoleID:       req.RoleID,
+		CreatedByID:  req.AssignedByID,
+		UpdatedByID:  req.AssignedByID,
+		ApprovedAt:   &now,
+		ApprovedByID: &req.AssignedByID,
+	}
+
+	if err := uc.repo.Assign(ctx, admin); err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	resAdmin, err := uc.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	return mapper.ToAcademyAdminResponse(resAdmin), nil
+}
+
+func (uc *academyAdminUseCase) Revoke(ctx context.Context, req dto.RevokeAcademyAdminRequest) error {
+	_, err := uc.repo.GetByID(ctx, req.ID)
+	if err != nil {
+		if postgres.IsNotFound(err) {
+			return apperr.NotFound("academy admin")
+		}
+		return apperr.Internal(err)
+	}
+
+	if err := uc.repo.Revoke(ctx, req.ID, req.RevokedByID); err != nil {
+		return apperr.Internal(err)
+	}
+	return nil
 }

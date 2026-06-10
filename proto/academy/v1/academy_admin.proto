@@ -112,6 +112,27 @@ message CheckUserIsAcademyAdminResponse {
   bool is_admin = 1;
 }
 
+message AssignAcademyAdminRequest {
+  string academy_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string branch_id = 2 [(buf.validate.field).string.uuid = true];
+  string user_id = 3 [(buf.validate.field).string.uuid = true];
+  string role_id = 4 [(buf.validate.field).string.uuid = true];
+  string assigned_by_id = 5 [(buf.validate.field).string.uuid = true];
+}
+
+message AssignAcademyAdminResponse {
+  AcademyAdmin admin = 1;
+}
+
+message RevokeAcademyAdminRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string revoked_by_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message RevokeAcademyAdminResponse {
+  string id = 1;
+}
+
 // ─── Service ─────────────────────────────────────────────────────────────────
 
 service AcademyAdminService {
@@ -122,4 +143,7 @@ service AcademyAdminService {
   rpc DeleteAcademyAdmin(DeleteAcademyAdminRequest) returns (DeleteAcademyAdminResponse);
   rpc GetAcademyAdminByUser(GetAcademyAdminByUserRequest) returns (GetAcademyAdminByUserResponse);
   rpc CheckUserIsAcademyAdmin(CheckUserIsAcademyAdminRequest) returns (CheckUserIsAcademyAdminResponse);
+
+  rpc AssignAcademyAdmin(AssignAcademyAdminRequest) returns (AssignAcademyAdminResponse);
+  rpc RevokeAcademyAdmin(RevokeAcademyAdminRequest) returns (RevokeAcademyAdminResponse);
 }

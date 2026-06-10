@@ -50,7 +50,7 @@ func (uc *enrollmentUseCase) Create(ctx context.Context, req dto.CreateEnrollmen
 	}
 
 	if err := uc.repo.Create(ctx, enrollment); err != nil {
-		if postgres.IsUniqueConstraint(err, "idx_academy_athlete") || postgres.IsUniqueConstraint(err, "uq_academy_athlete") {
+		if postgres.IsUniqueConstraint(err, "idx_academy_athlete") {
 			return nil, apperr.Conflict("athlete is already enrolled in this branch")
 		}
 		return nil, apperr.Internal(err)

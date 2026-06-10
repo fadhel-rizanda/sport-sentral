@@ -46,3 +46,47 @@ func Migrate(db *gorm.DB) error {
 		&entity.User{},
 	)
 }
+
+func CreateIndexes(db *gorm.DB) error {
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS uni_countries_iso_alpha2 
+		ON countries(iso_alpha2) 
+		WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS uni_countries_iso_alpha3 
+		ON countries(iso_alpha3) 
+		WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS uni_statuses_slug 
+		ON statuses(slug) 
+		WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS uni_tags_name 
+		ON tags(name) 
+		WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS uni_tags_slug 
+		ON tags(slug) 
+		WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -66,7 +66,7 @@ func (uc *academyHoldingUseCase) Create(ctx context.Context, req dto.CreateAcade
 	}
 
 	if err := uc.repo.Create(ctx, holding); err != nil {
-		if postgres.IsUniqueConstraint(err, "uni_academy_holdings_name") || postgres.IsUniqueConstraint(err, "name") {
+		if postgres.IsUniqueConstraint(err, "uni_academy_holdings_name") {
 			return nil, apperr.Conflict("name")
 		}
 		return nil, apperr.Internal(err)
@@ -150,7 +150,7 @@ func (uc *academyHoldingUseCase) Update(ctx context.Context, id uuid.UUID, req d
 	if updated {
 		holding.UpdatedByID = req.UpdatedByID
 		if err := uc.repo.Update(ctx, holding); err != nil {
-			if postgres.IsUniqueConstraint(err, "uni_academy_holdings_name") || postgres.IsUniqueConstraint(err, "name") {
+			if postgres.IsUniqueConstraint(err, "uni_academy_holdings_name") {
 				return nil, apperr.Conflict("name")
 			}
 			return nil, apperr.Internal(err)

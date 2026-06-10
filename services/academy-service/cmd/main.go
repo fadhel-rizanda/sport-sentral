@@ -100,6 +100,9 @@ func main() {
 	if err := database.Migrate(db); err != nil {
 		log.Fatal("migrate failed", zap.Error(err))
 	}
+	if err := database.CreateIndexes(db); err != nil {
+		log.Fatal("failed to create indexes", zap.Error(err))
+	}
 
 	// ── NATS ──────────────────────────────────────────────────────────────────
 	natsClient, err := messaging.Connect(messaging.Config(cfg.Nats), log)
@@ -123,6 +126,7 @@ func main() {
 	userRepo := repoReplicated.NewUserRepository(db)
 	roleRepo := repoReplicated.NewRoleRepository(db)
 	permissionRepo := repoReplicated.NewPermissionRepository(db)
+	sportRepo := repoReplicated.NewSportRepository(db)
 
 	// ── Use Cases ─────────────────────────────────────────────────────────────
 	academyHoldingUC := usecase.NewAcademyHoldingUseCase(academyHoldingRepo)
@@ -139,6 +143,7 @@ func main() {
 	userSyncUC := ucReplicated.NewSyncUserUseCase(userRepo, log)
 	roleSyncUC := ucReplicated.NewSyncRoleUseCase(roleRepo, log)
 	permissionSyncUC := ucReplicated.NewSyncPermissionUseCase(permissionRepo, log)
+	sportSyncUC := ucReplicated.NewSyncSportUseCase(sportRepo, log)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	academyHoldingHandler := handler.NewAcademyHoldingHandler(academyHoldingUC)
@@ -211,6 +216,14 @@ func main() {
 		identityDurableName,
 	)
 
+	sportDurableName := envConfig.GetEnv("SPORT_DURABLE_NAME", "academy-service-sport-sync")
+	sportSub := nats.NewSportSubscriber(
+		sportSyncUC,
+		natsClient,
+		log,
+		sportDurableName,
+	)
+
 	// Start subscribers in goroutines
 	go func() {
 		log.Info("starting meta event consumer")
@@ -223,6 +236,13 @@ func main() {
 		log.Info("starting identity event consumer")
 		if err := identitySub.Listen(ctx); err != nil {
 			log.Error("identity consumer stopped", zap.Error(err))
+		}
+	}()
+
+	go func() {
+		log.Info("starting sport event consumer")
+		if err := sportSub.Listen(ctx); err != nil {
+			log.Error("sport consumer stopped", zap.Error(err))
 		}
 	}()
 

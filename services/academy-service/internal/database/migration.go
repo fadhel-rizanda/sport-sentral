@@ -63,3 +63,31 @@ func Migrate(db *gorm.DB) error {
 		&entity.RosterMember{},
 	)
 }
+
+func CreateIndexes(db *gorm.DB) error {
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS uni_academy_holdings_name 
+		ON academy_holdings(name) 
+		WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS idx_academy_athlete 
+		ON enrollments(academy_branch_id, athlete_id) 
+		WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS idx_roster_athlete 
+		ON roster_members(roster_id, athlete_id) 
+		WHERE removed_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
