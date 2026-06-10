@@ -9,4 +9,5 @@ use (
 	./services/meta-service
 	./services/sport-service
 	./shared
+	services/academy-service
 )
