@@ -9,6 +9,7 @@ import (
 	"microservice-golang/services/sport-service/internal/mapper"
 	"microservice-golang/services/sport-service/internal/repository"
 	"microservice-golang/services/sport-service/internal/repository/replicated"
+	"microservice-golang/shared/infrastructure/postgres"
 	apperr "microservice-golang/shared/pkg/errors"
 	"time"
 
@@ -96,6 +97,9 @@ func (uc *regulatorUseCase) Create(ctx context.Context, req dto.CreateRegulatorR
 	}
 
 	if err := uc.repo.Create(ctx, regulator); err != nil {
+		if postgres.IsUniqueConstraint(err, "uni_regulators_code") {
+			return nil, apperr.Conflict("regulator code already exists")
+		}
 		return nil, apperr.Internal(fmt.Errorf("failed to create regulator: %w", err))
 	}
 

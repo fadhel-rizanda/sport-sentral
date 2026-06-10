@@ -10,6 +10,7 @@ import (
 	"microservice-golang/services/sport-service/internal/mapper"
 	"microservice-golang/services/sport-service/internal/repository"
 	"microservice-golang/services/sport-service/internal/repository/replicated"
+	"microservice-golang/shared/infrastructure/postgres"
 	apperr "microservice-golang/shared/pkg/errors"
 	"time"
 
@@ -86,6 +87,12 @@ func (uc *sportUseCase) Create(ctx context.Context, req dto.CreateSportRequest) 
 	}
 
 	if err := uc.repo.Create(ctx, sport); err != nil {
+		if postgres.IsUniqueConstraint(err, "uni_sports_name") {
+			return nil, apperr.Conflict("sport name already exists")
+		}
+		if postgres.IsUniqueConstraint(err, "uni_sports_slug") {
+			return nil, apperr.Conflict("sport slug already exists")
+		}
 		return nil, apperr.Internal(fmt.Errorf("failed to create sport: %w", err))
 	}
 
@@ -186,6 +193,12 @@ func (uc *sportUseCase) Update(ctx context.Context, req dto.UpdateSportRequest) 
 	if updated {
 		sport.UpdatedByID = req.UpdatedByID
 		if err := uc.repo.Update(ctx, sport); err != nil {
+			if postgres.IsUniqueConstraint(err, "uni_sports_name") {
+				return nil, apperr.Conflict("sport name already exists")
+			}
+			if postgres.IsUniqueConstraint(err, "uni_sports_slug") {
+				return nil, apperr.Conflict("sport slug already exists")
+			}
 			return nil, apperr.Internal(err)
 		}
 	}

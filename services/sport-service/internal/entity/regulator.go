@@ -10,7 +10,7 @@ import (
 type Regulator struct {
 	ID               uuid.UUID  `gorm:"type:uuid;primaryKey"`
 	OrganizationName string     `gorm:"type:varchar(100);not null"`
-	Code             string     `gorm:"type:varchar(50);not null;uniqueIndex"`
+	Code             string     `gorm:"type:varchar(50);not null"`
 	LogoAttachmentID *uuid.UUID `gorm:"type:uuid"`
 	ContactEmail     string     `gorm:"type:varchar(255);not null"`
 	PhoneNumber      *string    `gorm:"type:varchar(50)"`

@@ -36,30 +36,36 @@ func Migrate(db *gorm.DB) error {
 
 func CreateIndexes(db *gorm.DB) error {
 	if err := db.Exec(`
-		CREATE INDEX IF NOT EXISTS idx_sport_status_tier 
-		ON replicated_sports(status_id, tier_tag_id) WHERE deleted_at IS NULL
+		CREATE INDEX IF NOT EXISTS idx_sports_status_tier 
+		ON sports(status_id, tier_tag_id) WHERE deleted_at IS NULL
 	`).Error; err != nil {
 		return err
 	}
 
 	if err := db.Exec(`
-		CREATE INDEX IF NOT EXISTS idx_sport_config_sport 
-		ON sport_configs(sport_id)
+		CREATE UNIQUE INDEX IF NOT EXISTS uni_sports_name 
+		ON sports(name) WHERE deleted_at IS NULL
 	`).Error; err != nil {
 		return err
 	}
 
 	if err := db.Exec(`
-		CREATE INDEX IF NOT EXISTS idx_regulator_status 
-		ON regulators(status_id)
+		CREATE UNIQUE INDEX IF NOT EXISTS uni_sports_slug 
+		ON sports(slug) WHERE deleted_at IS NULL
 	`).Error; err != nil {
 		return err
 	}
 
 	if err := db.Exec(`
-		CREATE INDEX IF NOT EXISTS idx_sport_reg_active 
-		ON sport_regulator_assignments(sport_id, is_active) 
-		WHERE is_active = true
+		CREATE UNIQUE INDEX IF NOT EXISTS uni_sport_configs_sport_id 
+		ON sport_configs(sport_id) WHERE deleted_at IS NULL
+	`).Error; err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS uni_regulators_code 
+		ON regulators(code) WHERE deleted_at IS NULL
 	`).Error; err != nil {
 		return err
 	}

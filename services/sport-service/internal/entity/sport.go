@@ -9,8 +9,8 @@ import (
 
 type Sport struct {
 	ID               uuid.UUID  `gorm:"type:uuid;primaryKey"`
-	Name             string     `gorm:"type:varchar(100);not null;uniqueIndex"`
-	Slug             string     `gorm:"type:varchar(100);not null;uniqueIndex"`
+	Name             string     `gorm:"type:varchar(100);not null"`
+	Slug             string     `gorm:"type:varchar(100);not null"`
 	Description      string     `gorm:"type:text"`
 	IconAttachmentID *uuid.UUID `gorm:"type:uuid"`
 	StatusID         uuid.UUID  `gorm:"type:uuid;not null;index"`
@@ -34,7 +34,7 @@ type Sport struct {
 	// Relations
 	Status          *Status      `gorm:"foreignKey:StatusID;references:ID;constraint:-;"`
 	TierTag         *Tag         `gorm:"foreignKey:TierTagID;references:ID;constraint:-;"`
-	Config          *SportConfig `gorm:"foreignKey:SportID;references:SportID;constraint:OnDelete:CASCADE"`
+	Config          *SportConfig `gorm:"foreignKey:SportID;references:ID;constraint:OnDelete:CASCADE"`
 	ActiveRegulator *Regulator   `gorm:"foreignKey:RegulatorID;references:ID;constraint:OnDelete:SET NULL"`
 	CreatedBy       *User        `gorm:"foreignKey:CreatedByID;references:ID;constraint:-;"`
 	UpdatedBy       *User        `gorm:"foreignKey:UpdatedByID;references:ID;constraint:-;"`
@@ -43,7 +43,7 @@ type Sport struct {
 
 type SportConfig struct {
 	ID                   uuid.UUID `gorm:"type:uuid;primaryKey"`
-	SportID              uuid.UUID `gorm:"type:uuid;not null;uniqueIndex"`
+	SportID              uuid.UUID `gorm:"type:uuid;not null"`
 	ParticipantTypeTagID uuid.UUID `gorm:"type:uuid;not null;index"`
 	MinRosterSize        int32     `gorm:"not null"`
 	MaxRosterSize        int32     `gorm:"not null"`

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	envConfig "microservice-golang/shared/pkg/config"
+	"microservice-golang/shared/pkg/events"
 	"microservice-golang/shared/pkg/messaging"
 )
 
@@ -73,6 +74,11 @@ func Load() (*Config, error) {
 			URL:                  fmt.Sprintf("%s:%d", natsHost, natsPort),
 			MaxReconnects:        -1,
 			ReconnectWait:        2 * time.Second,
+			StreamName:           events.SportStreamName,
+			StreamSubjects:       []string{"sport.sport.*"},
+			RetentionMaxAge:      7 * 24 * time.Hour,
+			PublishMaxAttempts:   3,
+			PublishBaseDelay:     100 * time.Millisecond,
 			DefaultAckWait:       30 * time.Second,
 			DefaultMaxDeliver:    5,
 			DefaultMaxAckPending: 100,
