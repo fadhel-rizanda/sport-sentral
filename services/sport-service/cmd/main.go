@@ -125,7 +125,7 @@ func main() {
 
 	// ── Use Cases ─────────────────────────────────────────────────────────────
 	sportUC := usecase.NewSportUseCase(sportRepo, statusRepo, tagRepo, sportPublisher)
-	regulatorUC := usecase.NewRegulatorUseCase(regulatorRepo, sportRepo, statusRepo, tagRepo, userRepo)
+	regulatorUC := usecase.NewRegulatorUseCase(regulatorRepo, sportRepo, statusRepo, tagRepo, userRepo, sportPublisher)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	sportHandler := handler.NewSportHandler(sportUC)

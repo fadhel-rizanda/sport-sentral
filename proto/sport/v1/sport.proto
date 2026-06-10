@@ -121,7 +121,7 @@ message DeleteSportRequest {
 
 message UpdateSportConfigRequest {
   string sport_id                    = 1 [(buf.validate.field).string.uuid = true];
-  repeated string stat_tag_ids       = 2;
+  repeated string stat_tag_ids       = 2 [(buf.validate.field).repeated.items.string.uuid = true];
   string participant_type_tag_id     = 3 [(buf.validate.field).string.uuid = true];
   int32 min_roster_size              = 4 [(buf.validate.field).int32.gt = 0];
   int32 max_roster_size              = 5 [(buf.validate.field).int32.gt = 0];

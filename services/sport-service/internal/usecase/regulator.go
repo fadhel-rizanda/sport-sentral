@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	sportv1 "microservice-golang/gen/sport/v1"
 	"microservice-golang/services/sport-service/internal/dto"
 	"microservice-golang/services/sport-service/internal/entity"
 	"microservice-golang/services/sport-service/internal/mapper"
@@ -35,6 +36,7 @@ type regulatorUseCase struct {
 	statusRepo replicated.StatusRepository
 	tagRepo    replicated.TagRepository
 	userRepo   replicated.UserRepository
+	publisher  SportEventPublisher
 }
 
 func NewRegulatorUseCase(
@@ -43,6 +45,7 @@ func NewRegulatorUseCase(
 	statusRepo replicated.StatusRepository,
 	tagRepo replicated.TagRepository,
 	userRepo replicated.UserRepository,
+	publisher SportEventPublisher,
 ) RegulatorUseCase {
 	return &regulatorUseCase{
 		repo:       repo,
@@ -50,6 +53,7 @@ func NewRegulatorUseCase(
 		statusRepo: statusRepo,
 		tagRepo:    tagRepo,
 		userRepo:   userRepo,
+		publisher:  publisher,
 	}
 }
 
@@ -216,6 +220,12 @@ func (uc *regulatorUseCase) AssignSport(ctx context.Context, req dto.AssignSport
 
 	if err := uc.sportRepo.Update(ctx, sport); err != nil {
 		return apperr.Internal(fmt.Errorf("failed to assign sport to regulator: %w", err))
+	}
+
+	resSport, err := uc.sportRepo.GetByID(ctx, req.SportID)
+	if err == nil {
+		evt := buildSportEvent(sportv1.SportEventType_SPORT_EVENT_TYPE_UPDATED, resSport)
+		_ = uc.publisher.PublishSportUpdated(ctx, evt)
 	}
 
 	return nil

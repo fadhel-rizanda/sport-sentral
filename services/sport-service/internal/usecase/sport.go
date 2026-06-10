@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 )
 
@@ -101,7 +100,7 @@ func (uc *sportUseCase) Create(ctx context.Context, req dto.CreateSportRequest) 
 		return nil, apperr.Internal(err)
 	}
 
-	evt := uc.buildEvent(sportv1.SportEventType_SPORT_EVENT_TYPE_CREATED, resSport)
+	evt := buildSportEvent(sportv1.SportEventType_SPORT_EVENT_TYPE_CREATED, resSport)
 	if err := uc.publisher.PublishSportCreated(ctx, evt); err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -208,7 +207,7 @@ func (uc *sportUseCase) Update(ctx context.Context, req dto.UpdateSportRequest) 
 		return nil, apperr.Internal(err)
 	}
 
-	evt := uc.buildEvent(sportv1.SportEventType_SPORT_EVENT_TYPE_UPDATED, resSport)
+	evt := buildSportEvent(sportv1.SportEventType_SPORT_EVENT_TYPE_UPDATED, resSport)
 	if err := uc.publisher.PublishSportUpdated(ctx, evt); err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -230,7 +229,7 @@ func (uc *sportUseCase) Delete(ctx context.Context, id uuid.UUID) error {
 	}
 
 	sport.DeletedAt = gorm.DeletedAt{Time: time.Now(), Valid: true}
-	evt := uc.buildEvent(sportv1.SportEventType_SPORT_EVENT_TYPE_DELETED, sport)
+	evt := buildSportEvent(sportv1.SportEventType_SPORT_EVENT_TYPE_DELETED, sport)
 	if err := uc.publisher.PublishSportDeleted(ctx, evt); err != nil {
 		return apperr.Internal(err)
 	}
@@ -328,49 +327,4 @@ func (uc *sportUseCase) UpdateConfig(ctx context.Context, req dto.UpdateSportCon
 	}
 
 	return mapper.ToSportConfigResponse(resConfig), nil
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-func (uc *sportUseCase) buildEvent(
-	eventType sportv1.SportEventType,
-	s *entity.Sport,
-) *sportv1.SportEvent {
-	evtID, _ := uuid.NewV7()
-
-	var iconID *string
-	if s.IconAttachmentID != nil {
-		str := s.IconAttachmentID.String()
-		iconID = &str
-	}
-
-	var regulatorID *string
-	if s.RegulatorID != nil {
-		str := s.RegulatorID.String()
-		regulatorID = &str
-	}
-
-	var tier string
-	if s.TierTag != nil {
-		tier = s.TierTag.Slug
-	}
-
-	evt := &sportv1.SportEvent{
-		EventId:          evtID.String(),
-		EventType:        eventType,
-		OccurredAt:       timestamppb.Now(),
-		SportId:          s.ID.String(),
-		Name:             s.Name,
-		Slug:             s.Slug,
-		IconAttachmentId: iconID,
-		IsVerified:       s.RegulatorID != nil,
-		RegulatorId:      regulatorID,
-		Tier:             tier,
-	}
-
-	if s.DeletedAt.Valid {
-		evt.DeletedAt = timestamppb.New(s.DeletedAt.Time)
-	}
-
-	return evt
 }

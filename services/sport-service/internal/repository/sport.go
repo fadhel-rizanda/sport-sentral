@@ -114,13 +114,8 @@ func (r *sportRepository) GetConfigBySportID(ctx context.Context, sportID uuid.U
 }
 
 func (r *sportRepository) UpsertConfig(ctx context.Context, config *entity.SportConfig) error {
-	// First delete existing many2many associations for stat tags to avoid duplicates/stale tags
-	if config.ID != uuid.Nil {
-		err := r.db.WithContext(ctx).Model(config).Association("StatTags").Replace(config.StatTags)
-		if err != nil {
-			return err
-		}
+	if err := r.db.WithContext(ctx).Omit("StatTags", "ParticipantTypeTag", "Sport").Save(config).Error; err != nil {
+		return err
 	}
-	// GORM Save handles upsert for the struct itself
-	return r.db.WithContext(ctx).Session(&gorm.Session{FullSaveAssociations: true}).Save(config).Error
+	return r.db.WithContext(ctx).Model(config).Association("StatTags").Replace(config.StatTags)
 }
