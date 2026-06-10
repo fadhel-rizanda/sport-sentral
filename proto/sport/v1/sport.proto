@@ -1,0 +1,151 @@
+syntax = "proto3";
+
+package sport.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+import "common/v1/common.proto";
+import "sport/v1/regulator.proto";
+
+option go_package = "microservice-golang/gen/sport/v1;sportv1";
+
+// ─── messages ─────────────────────────────────────────────────────────────────
+
+message Sport {
+  string id                     = 1;
+  string name                   = 2;
+  string slug                   = 3;
+  string description            = 4;
+  string icon_attachment_id     = 5;
+
+  common.v1.StatusSimple status = 6;
+  common.v1.TagSimple tier_tag  = 7;
+
+  Regulator active_regulator    = 8;
+  SportConfig config            = 9;
+
+  int32 total_competitions      = 10;
+  int32 total_athletes          = 11;
+  int32 total_academies         = 12;
+
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+}
+
+message SportConfig {
+  string id                     = 1;
+  string sport_id               = 2;
+
+  repeated common.v1.TagSimple stat_tags = 3;
+
+  common.v1.TagSimple participant_type_tag = 4;
+  int32 min_roster_size                 = 5;
+  int32 max_roster_size                 = 6;
+  int32 typical_roster_size             = 7;
+
+  string rules_url              = 8;
+  string description            = 9;
+
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+//message CompetitionLevel { // Will be implemented on its own service
+//  string id                     = 1;
+//  string sport_id               = 2;
+//  common.v1.TagSimple level_tag = 3;  // Tag representing the level
+//  string description            = 4;
+//
+//  // Leaderboard weight for stats aggregation
+//  double leaderboard_weight     = 5;  // 0.0 = no weight, 1.0 = base weight
+//
+//  // Approval requirement
+//  bool requires_regulator_approval = 6;
+//
+//  // Participant constraints
+//  int32 min_participants        = 7;
+//  int32 max_participants        = 8;
+//
+//  // Match/Duration constraints
+//  int32 recommended_duration_minutes = 9;
+//
+//  google.protobuf.Timestamp created_at = 10;
+//  google.protobuf.Timestamp updated_at = 11;
+//}
+
+// ─── requests ─────────────────────────────────────────────────────────────────
+
+message CreateSportRequest {
+  string name               = 1 [(buf.validate.field).string = {min_len: 2, max_len: 100}];
+  string slug               = 2 [(buf.validate.field).string = {min_len: 2, max_len: 100}];
+  string description        = 3 [(buf.validate.field).string.min_len = 10];
+  string icon_attachment_id = 4;
+  string tier_tag_id        = 5 [(buf.validate.field).string.uuid = true];
+  string status_id          = 6 [(buf.validate.field).string.uuid = true];
+  string created_by_id      = 7 [(buf.validate.field).string.uuid = true];
+}
+
+message GetSportRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message ListSportsRequest {
+  optional string tier_tag_id    = 1 [(buf.validate.field).string.uuid = true];
+  optional string status_id      = 2 [(buf.validate.field).string.uuid = true];
+  optional string search         = 3;
+  int32 page                     = 4;
+  int32 page_size                = 5;
+}
+
+message ListSportsResponse {
+  repeated Sport sports = 1;
+  int64 total           = 2;
+  int32 page            = 3;
+  int32 page_size       = 4;
+}
+
+message UpdateSportRequest {
+  string id                     = 1 [(buf.validate.field).string.uuid = true];
+  optional string name          = 2;
+  optional string description   = 3;
+  optional string icon_attachment_id = 4;
+  optional string tier_tag_id   = 5;
+  optional string status_id     = 6;
+  string updated_by_id          = 7 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteSportRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message UpdateSportConfigRequest {
+  string sport_id                    = 1 [(buf.validate.field).string.uuid = true];
+  repeated string stat_tag_ids       = 2;
+  string participant_type_tag_id     = 3 [(buf.validate.field).string.uuid = true];
+  int32 min_roster_size              = 4 [(buf.validate.field).int32.gt = 0];
+  int32 max_roster_size              = 5 [(buf.validate.field).int32.gt = 0];
+  int32 typical_roster_size          = 6 [(buf.validate.field).int32.gt = 0];
+  optional string rules_url          = 7;
+  optional string description        = 8;
+  string updated_by_id               = 9 [(buf.validate.field).string.uuid = true];
+}
+
+message GetSportConfigRequest {
+  string sport_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+// ─── Service ─────────────────────────────────────────────────────────────────
+
+service SportService {
+  // Sport Management
+  rpc GetSport(GetSportRequest) returns (Sport);
+  rpc ListSports(ListSportsRequest) returns (ListSportsResponse);
+  rpc CreateSport(CreateSportRequest) returns (Sport);
+  rpc UpdateSport(UpdateSportRequest) returns (Sport);
+  rpc DeleteSport(DeleteSportRequest) returns (google.protobuf.Empty);
+
+  // Sport Configuration
+  rpc UpdateSportConfig(UpdateSportConfigRequest) returns (SportConfig);
+  rpc GetSportConfig(GetSportConfigRequest) returns (SportConfig);
+}

@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package sport.v1;
+
+option go_package = "microservice-golang/gen/sport/v1;sportv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ─── Enum ─────────────────────────────────────────────────────────────────────
+enum SportEventType {
+  SPORT_EVENT_TYPE_UNSPECIFIED = 0;
+  SPORT_EVENT_TYPE_CREATED     = 1;
+  SPORT_EVENT_TYPE_UPDATED     = 2;
+  SPORT_EVENT_TYPE_DELETED     = 3;
+}
+
+// ─── Event envelope ───────────────────────────────────────────────────────────
+message SportEvent {
+  string event_id = 1 [
+    (buf.validate.field).string.uuid = true
+  ];
+
+  SportEventType event_type = 2 [
+    (buf.validate.field).enum.defined_only = true
+  ];
+
+  google.protobuf.Timestamp occurred_at = 3 [
+    (buf.validate.field).required = true
+  ];
+
+  string sport_id = 4 [
+    (buf.validate.field).string.uuid = true
+  ];
+
+  string name = 5 [
+    (buf.validate.field).string.min_len = 1
+  ];
+
+  string slug = 6 [
+    (buf.validate.field).string.min_len = 1
+  ];
+
+  optional string icon_attachment_id = 7 [
+    (buf.validate.field).string.uuid = true
+  ];
+
+  bool is_verified = 8;
+
+  optional string regulator_id = 9 [
+    (buf.validate.field).string.uuid = true
+  ];
+
+  string tier = 10 [
+    (buf.validate.field).string.min_len = 1
+  ];
+
+  optional google.protobuf.Timestamp deleted_at = 11;
+}
