@@ -59,7 +59,6 @@ type AcademyBranch struct {
 	DeletedBy *User           `gorm:"foreignKey:DeletedByID;references:ID;constraint:-;"`
 
 	Enrollments []Enrollment           `gorm:"foreignKey:AcademyBranchID;constraint:OnDelete:CASCADE"`
-	Rosters     []Roster               `gorm:"foreignKey:AcademyBranchID;constraint:OnDelete:CASCADE"`
 	Addresses   []AcademyBranchAddress `gorm:"foreignKey:BranchID;constraint:OnDelete:CASCADE"`
 }
 

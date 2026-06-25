@@ -25,6 +25,7 @@ func Migrate(db *gorm.DB) error {
 		&entity.RegulatorStaff{},
 		&entity.Sport{},
 		&entity.SportConfig{},
+		&entity.SportStat{},
 	)
 	if err != nil {
 		return err

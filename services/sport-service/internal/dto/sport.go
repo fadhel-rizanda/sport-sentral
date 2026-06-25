@@ -31,7 +31,7 @@ type SportResponse struct {
 type SportConfigResponse struct {
 	ID                 uuid.UUID
 	SportID            uuid.UUID
-	StatTags           []TagSimpleResponse
+	Stats              []SportStatResponse
 	ParticipantTypeTag *TagSimpleResponse
 	MinRosterSize      int32
 	MaxRosterSize      int32
@@ -40,6 +40,14 @@ type SportConfigResponse struct {
 	Description        string
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
+}
+
+type SportStatResponse struct {
+	ID                uuid.UUID
+	SportID           uuid.UUID
+	StatTypeTagID     uuid.UUID
+	StatTypeTag       *TagSimpleResponse
+	AggregationMethod string
 }
 
 type CreateSportRequest struct {
@@ -77,9 +85,14 @@ type UpdateSportRequest struct {
 	UpdatedByID      uuid.UUID
 }
 
+type SportStatConfigInput struct {
+	StatTypeTagID     uuid.UUID
+	AggregationMethod string
+}
+
 type UpdateSportConfigRequest struct {
 	SportID              uuid.UUID
-	StatTagIDs           []uuid.UUID
+	Stats                []SportStatConfigInput
 	ParticipantTypeTagID uuid.UUID
 	MinRosterSize        int32
 	MaxRosterSize        int32

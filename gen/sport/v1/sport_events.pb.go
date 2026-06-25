@@ -90,6 +90,7 @@ type SportEvent struct {
 	RegulatorId      *string                `protobuf:"bytes,9,opt,name=regulator_id,json=regulatorId,proto3,oneof" json:"regulator_id,omitempty"`
 	Tier             string                 `protobuf:"bytes,10,opt,name=tier,proto3" json:"tier,omitempty"`
 	DeletedAt        *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
+	Stats            []*SportStatEvent      `protobuf:"bytes,12,rep,name=stats,proto3" json:"stats,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -201,11 +202,78 @@ func (x *SportEvent) GetDeletedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *SportEvent) GetStats() []*SportStatEvent {
+	if x != nil {
+		return x.Stats
+	}
+	return nil
+}
+
+type SportStatEvent struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	StatTypeTagId     string                 `protobuf:"bytes,2,opt,name=stat_type_tag_id,json=statTypeTagId,proto3" json:"stat_type_tag_id,omitempty"`
+	AggregationMethod string                 `protobuf:"bytes,3,opt,name=aggregation_method,json=aggregationMethod,proto3" json:"aggregation_method,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *SportStatEvent) Reset() {
+	*x = SportStatEvent{}
+	mi := &file_sport_v1_sport_events_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SportStatEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SportStatEvent) ProtoMessage() {}
+
+func (x *SportStatEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_sport_v1_sport_events_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SportStatEvent.ProtoReflect.Descriptor instead.
+func (*SportStatEvent) Descriptor() ([]byte, []int) {
+	return file_sport_v1_sport_events_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *SportStatEvent) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *SportStatEvent) GetStatTypeTagId() string {
+	if x != nil {
+		return x.StatTypeTagId
+	}
+	return ""
+}
+
+func (x *SportStatEvent) GetAggregationMethod() string {
+	if x != nil {
+		return x.AggregationMethod
+	}
+	return ""
+}
+
 var File_sport_v1_sport_events_proto protoreflect.FileDescriptor
 
 const file_sport_v1_sport_events_proto_rawDesc = "" +
 	"\n" +
-	"\x1bsport/v1/sport_events.proto\x12\bsport.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xbc\x04\n" +
+	"\x1bsport/v1/sport_events.proto\x12\bsport.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xec\x04\n" +
 	"\n" +
 	"SportEvent\x12#\n" +
 	"\bevent_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\aeventId\x12A\n" +
@@ -223,10 +291,15 @@ const file_sport_v1_sport_events_proto_rawDesc = "" +
 	"\x04tier\x18\n" +
 	" \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04tier\x12>\n" +
 	"\n" +
-	"deleted_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampH\x02R\tdeletedAt\x88\x01\x01B\x15\n" +
+	"deleted_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampH\x02R\tdeletedAt\x88\x01\x01\x12.\n" +
+	"\x05stats\x18\f \x03(\v2\x18.sport.v1.SportStatEventR\x05statsB\x15\n" +
 	"\x13_icon_attachment_idB\x0f\n" +
 	"\r_regulator_idB\r\n" +
-	"\v_deleted_at*\x8c\x01\n" +
+	"\v_deleted_at\"x\n" +
+	"\x0eSportStatEvent\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
+	"\x10stat_type_tag_id\x18\x02 \x01(\tR\rstatTypeTagId\x12-\n" +
+	"\x12aggregation_method\x18\x03 \x01(\tR\x11aggregationMethod*\x8c\x01\n" +
 	"\x0eSportEventType\x12 \n" +
 	"\x1cSPORT_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18SPORT_EVENT_TYPE_CREATED\x10\x01\x12\x1c\n" +
@@ -246,21 +319,23 @@ func file_sport_v1_sport_events_proto_rawDescGZIP() []byte {
 }
 
 var file_sport_v1_sport_events_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_sport_v1_sport_events_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_sport_v1_sport_events_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_sport_v1_sport_events_proto_goTypes = []any{
 	(SportEventType)(0),           // 0: sport.v1.SportEventType
 	(*SportEvent)(nil),            // 1: sport.v1.SportEvent
-	(*timestamppb.Timestamp)(nil), // 2: google.protobuf.Timestamp
+	(*SportStatEvent)(nil),        // 2: sport.v1.SportStatEvent
+	(*timestamppb.Timestamp)(nil), // 3: google.protobuf.Timestamp
 }
 var file_sport_v1_sport_events_proto_depIdxs = []int32{
 	0, // 0: sport.v1.SportEvent.event_type:type_name -> sport.v1.SportEventType
-	2, // 1: sport.v1.SportEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	2, // 2: sport.v1.SportEvent.deleted_at:type_name -> google.protobuf.Timestamp
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	3, // 1: sport.v1.SportEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	3, // 2: sport.v1.SportEvent.deleted_at:type_name -> google.protobuf.Timestamp
+	2, // 3: sport.v1.SportEvent.stats:type_name -> sport.v1.SportStatEvent
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_sport_v1_sport_events_proto_init() }
@@ -275,7 +350,7 @@ func file_sport_v1_sport_events_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sport_v1_sport_events_proto_rawDesc), len(file_sport_v1_sport_events_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

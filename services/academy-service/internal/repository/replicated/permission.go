@@ -3,6 +3,8 @@ package replicated
 import (
 	"context"
 	"microservice-golang/services/academy-service/internal/entity"
+	"microservice-golang/shared/infrastructure/postgres"
+	sharedgrpc "microservice-golang/shared/pkg/grpc"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -13,6 +15,7 @@ type PermissionRepository interface {
 	Upsert(ctx context.Context, p entity.Permission) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetByID(ctx context.Context, id uuid.UUID) (*entity.Permission, error)
+	Validate(ctx context.Context, permissionSlug string) error
 }
 
 type permissionRepository struct {
@@ -42,4 +45,8 @@ func (r *permissionRepository) GetByID(ctx context.Context, id uuid.UUID) (*enti
 	var p entity.Permission
 	err := r.db.WithContext(ctx).First(&p, "id = ?", id).Error
 	return &p, err
+}
+
+func (r *permissionRepository) Validate(ctx context.Context, permissionSlug string) error {
+	return sharedgrpc.ValidatePermission(ctx, postgres.GetTx(ctx, r.db), permissionSlug)
 }

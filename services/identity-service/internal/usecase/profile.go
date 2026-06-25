@@ -10,6 +10,7 @@ import (
 	"microservice-golang/services/identity-service/internal/repository"
 	"microservice-golang/shared/infrastructure/postgres"
 	apperr "microservice-golang/shared/pkg/errors"
+	sharedgrpc "microservice-golang/shared/pkg/grpc"
 )
 
 type ProfileUseCase interface {
@@ -23,6 +24,7 @@ type profileUseCase struct {
 	userRepo        repository.UserRepository
 	userRoleRepo    repository.UserRoleRepository
 	roleRepo        repository.RoleRepository
+	permissionRepo  repository.PermissionRepository
 	statusCacheRepo replicated.StatusRepository
 }
 
@@ -30,17 +32,33 @@ func NewProfileUseCase(
 	userRepo repository.UserRepository,
 	userRoleRepo repository.UserRoleRepository,
 	roleRepo repository.RoleRepository,
+	permissionRepo repository.PermissionRepository,
 	statusCacheRepo replicated.StatusRepository,
 ) ProfileUseCase {
 	return &profileUseCase{
 		userRepo:        userRepo,
 		userRoleRepo:    userRoleRepo,
 		roleRepo:        roleRepo,
+		permissionRepo:  permissionRepo,
 		statusCacheRepo: statusCacheRepo,
 	}
 }
 
 func (uc *profileUseCase) ApplyProfile(ctx context.Context, req dto.ApplyProfileRequest) error {
+	callerID, errExtract := sharedgrpc.ExtractUserID(ctx)
+	if errExtract != nil {
+		return errExtract
+	}
+	if callerID != req.UserID {
+		activeRole, _ := sharedgrpc.ExtractActiveRole(ctx)
+		if activeRole != "platform_admin" {
+			has, _ := uc.permissionRepo.CheckPermission(ctx, callerID, "role", "assign")
+			if !has {
+				return apperr.Forbidden("insufficient permissions")
+			}
+		}
+	}
+
 	user, err := uc.userRepo.GetByID(ctx, req.UserID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -113,6 +131,20 @@ func (uc *profileUseCase) ApplyProfile(ctx context.Context, req dto.ApplyProfile
 }
 
 func (uc *profileUseCase) ToggleProfile(ctx context.Context, req dto.ToggleProfileRequest) error {
+	callerID, errExtract := sharedgrpc.ExtractUserID(ctx)
+	if errExtract != nil {
+		return errExtract
+	}
+	if callerID != req.UserID {
+		activeRole, _ := sharedgrpc.ExtractActiveRole(ctx)
+		if activeRole != "platform_admin" {
+			has, _ := uc.permissionRepo.CheckPermission(ctx, callerID, "role", "assign")
+			if !has {
+				return apperr.Forbidden("insufficient permissions")
+			}
+		}
+	}
+
 	user, err := uc.userRepo.GetByID(ctx, req.UserID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -140,6 +172,18 @@ func (uc *profileUseCase) ToggleProfile(ctx context.Context, req dto.ToggleProfi
 }
 
 func (uc *profileUseCase) ApproveProfile(ctx context.Context, req dto.ApproveProfileRequest) error {
+	callerID, errExtract := sharedgrpc.ExtractUserID(ctx)
+	if errExtract != nil {
+		return errExtract
+	}
+	activeRole, _ := sharedgrpc.ExtractActiveRole(ctx)
+	if activeRole != "platform_admin" {
+		has, _ := uc.permissionRepo.CheckPermission(ctx, callerID, "verification", "approve")
+		if !has {
+			return apperr.Forbidden("insufficient permissions")
+		}
+	}
+
 	targetRole, err := uc.roleRepo.GetByID(ctx, req.RoleID)
 	if err != nil {
 		return apperr.NotFound("role")
@@ -164,6 +208,18 @@ func (uc *profileUseCase) ApproveProfile(ctx context.Context, req dto.ApprovePro
 }
 
 func (uc *profileUseCase) RejectProfile(ctx context.Context, req dto.ApproveProfileRequest) error {
+	callerID, errExtract := sharedgrpc.ExtractUserID(ctx)
+	if errExtract != nil {
+		return errExtract
+	}
+	activeRole, _ := sharedgrpc.ExtractActiveRole(ctx)
+	if activeRole != "platform_admin" {
+		has, _ := uc.permissionRepo.CheckPermission(ctx, callerID, "verification", "reject")
+		if !has {
+			return apperr.Forbidden("insufficient permissions")
+		}
+	}
+
 	targetRole, err := uc.roleRepo.GetByID(ctx, req.RoleID)
 	if err != nil {
 		return apperr.NotFound("role")

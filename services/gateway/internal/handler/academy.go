@@ -4,6 +4,7 @@ import (
 	"time"
 
 	academyv1 "microservice-golang/gen/academy/v1"
+	competitionv1 "microservice-golang/gen/competition/v1"
 	"microservice-golang/services/gateway/internal/client"
 	"microservice-golang/services/gateway/internal/dto"
 	"microservice-golang/services/gateway/internal/mapper"
@@ -16,11 +17,12 @@ import (
 )
 
 type AcademyHandler struct {
-	client *client.AcademyClient
+	client     *client.AcademyClient
+	compClient *client.CompetitionClient
 }
 
-func NewAcademyHandler(client *client.AcademyClient) *AcademyHandler {
-	return &AcademyHandler{client: client}
+func NewAcademyHandler(client *client.AcademyClient, compClient *client.CompetitionClient) *AcademyHandler {
+	return &AcademyHandler{client: client, compClient: compClient}
 }
 
 func (h *AcademyHandler) Routes(router fiber.Router, auth fiber.Handler, admin ...fiber.Handler) {
@@ -795,7 +797,7 @@ func (h *AcademyHandler) CreateRoster(c *fiber.Ctx) error {
 		return err
 	}
 
-	resp, err := h.client.Roster.CreateRoster(c.Context(), &academyv1.CreateRosterRequest{
+	resp, err := h.compClient.Roster.CreateRoster(c.Context(), &competitionv1.CreateRosterRequest{
 		AcademyBranchId: body.AcademyBranchID,
 		CompetitionId:   body.CompetitionID,
 		Name:            body.Name,
@@ -813,7 +815,7 @@ func (h *AcademyHandler) CreateRoster(c *fiber.Ctx) error {
 func (h *AcademyHandler) GetRoster(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	resp, err := h.client.Roster.GetRoster(c.Context(), &academyv1.GetRosterRequest{
+	resp, err := h.compClient.Roster.GetRoster(c.Context(), &competitionv1.GetRosterRequest{
 		Id: id,
 	})
 	if err != nil {
@@ -857,7 +859,7 @@ func (h *AcademyHandler) ListRosters(c *fiber.Ctx) error {
 		tagIDPtr = &tagID
 	}
 
-	resp, err := h.client.Roster.ListRosters(c.Context(), &academyv1.ListRostersRequest{
+	resp, err := h.compClient.Roster.ListRosters(c.Context(), &competitionv1.ListRostersRequest{
 		Page:          int32(page),
 		PageSize:      int32(pageSize),
 		Search:        searchPtr,
@@ -896,7 +898,7 @@ func (h *AcademyHandler) UpdateRoster(c *fiber.Ctx) error {
 		return err
 	}
 
-	resp, err := h.client.Roster.UpdateRoster(c.Context(), &academyv1.UpdateRosterRequest{
+	resp, err := h.compClient.Roster.UpdateRoster(c.Context(), &competitionv1.UpdateRosterRequest{
 		Id:            id,
 		CompetitionId: body.CompetitionID,
 		Name:          body.Name,
@@ -915,7 +917,7 @@ func (h *AcademyHandler) DeleteRoster(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
 
-	_, err := h.client.Roster.DeleteRoster(c.Context(), &academyv1.DeleteRosterRequest{
+	_, err := h.compClient.Roster.DeleteRoster(c.Context(), &competitionv1.DeleteRosterRequest{
 		Id:          id,
 		DeletedById: userID,
 	})
@@ -929,7 +931,7 @@ func (h *AcademyHandler) DeleteRoster(c *fiber.Ctx) error {
 func (h *AcademyHandler) GetRosterMembers(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	resp, err := h.client.Roster.GetRosterMembers(c.Context(), &academyv1.GetRosterMembersRequest{
+	resp, err := h.compClient.Roster.GetRosterMembers(c.Context(), &competitionv1.GetRosterMembersRequest{
 		RosterId: id,
 	})
 	if err != nil {
@@ -948,7 +950,7 @@ func (h *AcademyHandler) GetRosterMember(c *fiber.Ctx) error {
 	id := c.Params("id")
 	memberID := c.Params("memberID")
 
-	resp, err := h.client.Roster.GetRosterMember(c.Context(), &academyv1.GetRosterMemberRequest{
+	resp, err := h.compClient.Roster.GetRosterMember(c.Context(), &competitionv1.GetRosterMemberRequest{
 		RosterId: id,
 		MemberId: memberID,
 	})
@@ -973,7 +975,7 @@ func (h *AcademyHandler) AddRosterMember(c *fiber.Ctx) error {
 		return err
 	}
 
-	resp, err := h.client.Roster.AddRosterMember(c.Context(), &academyv1.AddRosterMemberRequest{
+	resp, err := h.compClient.Roster.AddRosterMember(c.Context(), &competitionv1.AddRosterMemberRequest{
 		RosterId:     id,
 		AthleteId:    body.AthleteID,
 		JerseyNumber: body.JerseyNumber,
@@ -1000,7 +1002,7 @@ func (h *AcademyHandler) RemoveRosterMember(c *fiber.Ctx) error {
 		return err
 	}
 
-	resp, err := h.client.Roster.RemoveRosterMember(c.Context(), &academyv1.RemoveRosterMemberRequest{
+	resp, err := h.compClient.Roster.RemoveRosterMember(c.Context(), &competitionv1.RemoveRosterMemberRequest{
 		RosterId:      id,
 		MemberId:      memberID,
 		RemovedById:   userID,
@@ -1017,7 +1019,7 @@ func (h *AcademyHandler) DeleteRosterMember(c *fiber.Ctx) error {
 	id := c.Params("id")
 	memberID := c.Params("memberID")
 
-	resp, err := h.client.Roster.DeleteRosterMember(c.Context(), &academyv1.DeleteRosterMemberRequest{
+	resp, err := h.compClient.Roster.DeleteRosterMember(c.Context(), &competitionv1.DeleteRosterMemberRequest{
 		RosterId: id,
 		MemberId: memberID,
 	})

@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package competition.v1;
+
+option go_package = "microservice-golang/gen/competition/v1;competitionv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
+import "competition/v1/match.proto";
+
+message Branch {
+  string id = 1;
+  string competition_id = 2;
+  optional string parent_branch_id = 3;
+  string name = 4;
+  string description = 5;
+  string status_id = 6;
+  string created_by_id = 7;
+  string updated_by_id = 8;
+  optional string deleted_by_id = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  optional google.protobuf.Timestamp deleted_at = 12;
+
+  optional Branch parent_branch = 13;
+  optional common.v1.StatusSimple status = 14;
+  repeated Branch child_branches = 15;
+  repeated Match matches = 16;
+  optional common.v1.UserSimple created_by = 17;
+  optional common.v1.UserSimple updated_by = 18;
+}
+
+message CreateBranchRequest {
+  string competition_id = 1 [(buf.validate.field).string.uuid = true];
+  string name = 2 [(buf.validate.field).string.min_len = 1];
+  string description = 3;
+  string status_id = 4 [(buf.validate.field).string.uuid = true];
+  optional string parent_branch_id = 5 [(buf.validate.field).string.uuid = true];
+}
+
+message CreateBranchResponse {
+  Branch branch = 1;
+}
+
+message GetBranchRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetBranchResponse {
+  Branch branch = 1;
+}
+
+message ListBranchesByCompetitionRequest {
+  string competition_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message ListBranchesByCompetitionResponse {
+  repeated Branch branches = 1;
+}
+
+message UpdateBranchRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  optional string name = 2 [(buf.validate.field).string.min_len = 1];
+  optional string description = 3;
+  optional string status_id = 4 [(buf.validate.field).string.uuid = true];
+  optional string parent_branch_id = 5 [(buf.validate.field).string.uuid = true];
+}
+
+message UpdateBranchResponse {
+  Branch branch = 1;
+}
+
+message DeleteBranchRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteBranchResponse {
+  string id = 1;
+}
+
+service CompetitionBranchService {
+  rpc CreateBranch(CreateBranchRequest) returns (CreateBranchResponse);
+  rpc GetBranch(GetBranchRequest) returns (GetBranchResponse);
+  rpc ListBranchesByCompetition(ListBranchesByCompetitionRequest) returns (ListBranchesByCompetitionResponse);
+  rpc UpdateBranch(UpdateBranchRequest) returns (UpdateBranchResponse);
+  rpc DeleteBranch(DeleteBranchRequest) returns (DeleteBranchResponse);
+}

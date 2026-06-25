@@ -5,10 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"microservice-golang/services/academy-service/internal/dto"
-	"microservice-golang/services/academy-service/internal/entity"
-	"microservice-golang/services/academy-service/internal/mapper"
-	"microservice-golang/services/academy-service/internal/repository"
+	"microservice-golang/services/competition-service/internal/dto"
+	"microservice-golang/services/competition-service/internal/entity"
+	"microservice-golang/services/competition-service/internal/mapper"
+	"microservice-golang/services/competition-service/internal/repository"
+	replicatedRepo "microservice-golang/services/competition-service/internal/repository/replicated"
 	"microservice-golang/shared/infrastructure/postgres"
 	apperr "microservice-golang/shared/pkg/errors"
 )
@@ -28,16 +29,21 @@ type RosterUseCase interface {
 }
 
 type rosterUseCase struct {
-	repo repository.RosterRepository
+	permissionRepo replicatedRepo.PermissionRepository
+	repo           repository.RosterRepository
 }
 
-func NewRosterUseCase(repo repository.RosterRepository) RosterUseCase {
+func NewRosterUseCase(permissionRepo replicatedRepo.PermissionRepository, repo repository.RosterRepository) RosterUseCase {
 	return &rosterUseCase{
-		repo: repo,
+		permissionRepo: permissionRepo,
+		repo:           repo,
 	}
 }
 
 func (uc *rosterUseCase) Create(ctx context.Context, req dto.CreateRosterRequest) (*dto.RosterResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "competition.join"); err != nil {
+		return nil, err
+	}
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -66,6 +72,9 @@ func (uc *rosterUseCase) Create(ctx context.Context, req dto.CreateRosterRequest
 }
 
 func (uc *rosterUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.RosterResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "competition.read"); err != nil {
+		return nil, err
+	}
 	roster, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -77,6 +86,9 @@ func (uc *rosterUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.Roster
 }
 
 func (uc *rosterUseCase) List(ctx context.Context, req dto.ListRostersRequest) (*dto.ListRostersResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "competition.read"); err != nil {
+		return nil, err
+	}
 	filters := repository.RosterFilters{
 		CompetitionID: req.CompetitionID,
 		BranchID:      req.BranchID,
@@ -104,6 +116,9 @@ func (uc *rosterUseCase) List(ctx context.Context, req dto.ListRostersRequest) (
 }
 
 func (uc *rosterUseCase) Update(ctx context.Context, id uuid.UUID, req dto.UpdateRosterRequest) (*dto.RosterResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "competition.join"); err != nil {
+		return nil, err
+	}
 	roster, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -114,7 +129,7 @@ func (uc *rosterUseCase) Update(ctx context.Context, id uuid.UUID, req dto.Updat
 
 	updated := false
 	if req.CompetitionID != nil {
-		roster.CompetitionID = req.CompetitionID
+		roster.CompetitionID = *req.CompetitionID
 		updated = true
 	}
 	if req.Name != nil {
@@ -149,6 +164,9 @@ func (uc *rosterUseCase) Update(ctx context.Context, id uuid.UUID, req dto.Updat
 }
 
 func (uc *rosterUseCase) Delete(ctx context.Context, req dto.DeleteRosterRequest) error {
+	if err := uc.permissionRepo.Validate(ctx, "competition.join"); err != nil {
+		return err
+	}
 	_, err := uc.repo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -164,6 +182,9 @@ func (uc *rosterUseCase) Delete(ctx context.Context, req dto.DeleteRosterRequest
 }
 
 func (uc *rosterUseCase) GetMembers(ctx context.Context, rosterID uuid.UUID) ([]dto.RosterMemberResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "competition.read"); err != nil {
+		return nil, err
+	}
 	_, err := uc.repo.GetByID(ctx, rosterID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -186,6 +207,9 @@ func (uc *rosterUseCase) GetMembers(ctx context.Context, rosterID uuid.UUID) ([]
 }
 
 func (uc *rosterUseCase) GetMemberByID(ctx context.Context, rosterID uuid.UUID, memberID uuid.UUID) (*dto.RosterMemberResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "competition.read"); err != nil {
+		return nil, err
+	}
 	member, err := uc.repo.GetMemberByID(ctx, rosterID, memberID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -198,6 +222,9 @@ func (uc *rosterUseCase) GetMemberByID(ctx context.Context, rosterID uuid.UUID, 
 }
 
 func (uc *rosterUseCase) AddMember(ctx context.Context, req dto.AddRosterMemberRequest) (*dto.RosterMemberResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "competition.join"); err != nil {
+		return nil, err
+	}
 	roster, err := uc.repo.GetByID(ctx, req.RosterID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -258,6 +285,9 @@ func (uc *rosterUseCase) AddMember(ctx context.Context, req dto.AddRosterMemberR
 }
 
 func (uc *rosterUseCase) RemoveMember(ctx context.Context, rosterID, memberID uuid.UUID, req dto.RemoveRosterMemberRequest) error {
+	if err := uc.permissionRepo.Validate(ctx, "competition.join"); err != nil {
+		return err
+	}
 	_, err := uc.repo.GetMemberByID(ctx, rosterID, memberID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -273,6 +303,9 @@ func (uc *rosterUseCase) RemoveMember(ctx context.Context, rosterID, memberID uu
 }
 
 func (uc *rosterUseCase) DeleteMember(ctx context.Context, rosterID, memberID uuid.UUID) error {
+	if err := uc.permissionRepo.Validate(ctx, "competition.join"); err != nil {
+		return err
+	}
 	_, err := uc.repo.GetMemberByID(ctx, rosterID, memberID)
 	if err != nil {
 		if postgres.IsNotFound(err) {

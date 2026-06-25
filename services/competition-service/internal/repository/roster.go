@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"microservice-golang/services/academy-service/internal/entity"
+	"microservice-golang/services/competition-service/internal/entity"
 	"time"
 
 	"github.com/google/uuid"
@@ -48,7 +48,6 @@ func (r *rosterRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.R
 	err := r.db.WithContext(ctx).
 		Preload("AcademyBranch.Holding").
 		Preload("AcademyBranch.Sport").
-		// Menyelaraskan urutan kemunculan member di dalam detail Roster
 		Preload("Members", func(db *gorm.DB) *gorm.DB {
 			return db.Order("removed_at ASC NULLS FIRST").Order("added_at ASC")
 		}).

@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"microservice-golang/shared/pkg/utils"
 )
 
 // ─── Shared Helper Converters ──────────────────────────────────────────────────
@@ -329,7 +330,7 @@ func ToProtoAcademyAdmin(a *dto.AcademyAdminResponse) *academyv1.AcademyAdmin {
 	res := &academyv1.AcademyAdmin{
 		Id:           a.ID.String(),
 		AcademyId:    a.AcademyID.String(),
-		BranchId:     convertUUIDPtrToStringPtr(a.BranchID),
+		BranchId:     utils.UUIDPtrToStringPtr(a.BranchID),
 		UserId:       a.UserID.String(),
 		RoleId:       a.RoleID.String(),
 		ApprovedAt:   approvedAt,
@@ -427,104 +428,4 @@ func ToProtoEnrollment(e *dto.EnrollmentResponse) *academyv1.Enrollment {
 	return res
 }
 
-// ─── Roster Member ────────────────────────────────────────────────────────────
-
-func ToProtoRosterMember(m dto.RosterMemberResponse) *academyv1.RosterMember {
-	var removedAt *timestamppb.Timestamp
-	if m.RemovedAt != nil {
-		removedAt = timestamppb.New(*m.RemovedAt)
-	}
-
-	var removedByID *string
-	if m.RemovedByID != nil {
-		str := m.RemovedByID.String()
-		removedByID = &str
-	}
-
-	var removalReason *string
-	if m.RemovalReason != nil {
-		removalReason = m.RemovalReason
-	}
-
-	var jNum *int32
-	if m.JerseyNumber != nil {
-		val := int32(*m.JerseyNumber)
-		jNum = &val
-	}
-
-	res := &academyv1.RosterMember{
-		Id:            m.ID.String(),
-		RosterId:      m.RosterID.String(),
-		AthleteId:     m.AthleteID.String(),
-		JerseyNumber:  jNum,
-		PositionId:    m.PositionID.String(),
-		StatusId:      m.StatusID.String(),
-		AddedAt:       timestamppb.New(m.AddedAt),
-		AddedById:     m.AddedByID.String(),
-		RemovedAt:     removedAt,
-		RemovedById:   removedByID,
-		RemovalReason: removalReason,
-		Athlete:       ToProtoUserSimple(m.Athlete),
-		Position:      ToProtoTagSimple(m.Position),
-		Status:        ToProtoStatusSimple(m.Status),
-		AddedBy:       ToProtoUserSimple(m.AddedBy),
-	}
-
-	if m.RemovedBy != nil {
-		remBy := ToProtoUserSimple(*m.RemovedBy)
-		res.RemovedBy = remBy
-	}
-
-	return res
-}
-
-// ─── Roster ───────────────────────────────────────────────────────────────────
-
-func ToProtoRoster(r *dto.RosterResponse) *academyv1.Roster {
-	if r == nil {
-		return nil
-	}
-
-	var branchSimple *commonv1.AcademyBranchSimple
-	if r.AcademyBranch != nil {
-		branchSimple = ToProtoAcademyBranchSimple(r.AcademyBranch)
-	}
-
-	members := make([]*academyv1.RosterMember, len(r.Members))
-	for i, m := range r.Members {
-		members[i] = ToProtoRosterMember(m)
-	}
-
-	var deletedAt *timestamppb.Timestamp
-	if r.DeletedAt != nil {
-		deletedAt = timestamppb.New(*r.DeletedAt)
-	}
-
-	return &academyv1.Roster{
-		Id:              r.ID.String(),
-		AcademyBranchId: r.AcademyBranchID.String(),
-		CompetitionId:   convertUUIDPtrToStringPtr(r.CompetitionID),
-		Name:            r.Name,
-		TagId:           r.TagID.String(),
-		StatusId:        r.StatusID.String(),
-		MaxSize:         int32(r.MaxSize),
-		CreatedAt:       timestamppb.New(r.CreatedAt),
-		UpdatedAt:       timestamppb.New(r.UpdatedAt),
-		DeletedAt:       deletedAt,
-		MemberCount:     r.MemberCount,
-		AcademyBranch:   branchSimple,
-		Members:         members,
-		Tag:             ToProtoTagSimple(r.Tag),
-		Status:          ToProtoStatusSimple(r.Status),
-	}
-}
-
 // ─── Utils ────────────────────────────────────────────────────────────────────
-
-func convertUUIDPtrToStringPtr(u *uuid.UUID) *string {
-	if u == nil {
-		return nil
-	}
-	str := u.String()
-	return &str
-}

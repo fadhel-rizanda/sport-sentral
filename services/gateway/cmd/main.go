@@ -94,6 +94,12 @@ func main() {
 	}
 	defer academyClient.Close()
 
+	competitionClient, err := client.NewCompetitionClient(cfg.GRPC.CompetitionAddress)
+	if err != nil {
+		log.Fatal("failed to connect to competition-service", zap.Error(err))
+	}
+	defer competitionClient.Close()
+
 	// ── Redis ─────────────────────────────────────────────────────────────────
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.Redis.Address,
@@ -109,7 +115,7 @@ func main() {
 	tagHandler := handler.NewTagHandler(metaClient.Tag)
 	roleHandler := handler.NewRoleHandler(identityClient.Role)
 	permissionHandler := handler.NewPermissionHandler(identityClient.Permission)
-	academyHandler := handler.NewAcademyHandler(academyClient)
+	academyHandler := handler.NewAcademyHandler(academyClient, competitionClient)
 
 	// ── Fiber ─────────────────────────────────────────────────────────────────
 	app := fiber.New(fiber.Config{

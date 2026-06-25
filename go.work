@@ -4,9 +4,11 @@ use (
 	./gen
 	./proto
 	./services/academy-service
+	./services/competition-service
 	./services/gateway
 	./services/identity-service
 	./services/meta-service
+	./services/scout-service
 	./services/sport-service
 	./shared
 )

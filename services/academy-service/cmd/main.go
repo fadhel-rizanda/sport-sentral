@@ -116,7 +116,6 @@ func main() {
 	academyBranchRepo := repository.NewAcademyBranchRepository(db)
 	academyAdminRepo := repository.NewAcademyAdminRepository(db)
 	enrollmentRepo := repository.NewEnrollmentRepository(db)
-	rosterRepo := repository.NewRosterRepository(db)
 
 	// ── Replicated Repositories ───────────────────────────────────────────────
 	statusRepo := repoReplicated.NewStatusRepository(db)
@@ -128,12 +127,14 @@ func main() {
 	permissionRepo := repoReplicated.NewPermissionRepository(db)
 	sportRepo := repoReplicated.NewSportRepository(db)
 
+	// ── Event Publishers ──────────────────────────────────────────────────────
+	academyEventPublisher := nats.NewAcademyEventPublisher(natsClient, log)
+
 	// ── Use Cases ─────────────────────────────────────────────────────────────
-	academyHoldingUC := usecase.NewAcademyHoldingUseCase(academyHoldingRepo)
-	academyBranchUC := usecase.NewAcademyBranchUseCase(academyBranchRepo)
-	academyAdminUC := usecase.NewAcademyAdminUseCase(academyAdminRepo)
-	enrollmentUC := usecase.NewEnrollmentUseCase(enrollmentRepo)
-	rosterUC := usecase.NewRosterUseCase(rosterRepo)
+	academyHoldingUC := usecase.NewAcademyHoldingUseCase(permissionRepo, academyHoldingRepo, academyEventPublisher)
+	academyBranchUC := usecase.NewAcademyBranchUseCase(permissionRepo, academyBranchRepo, academyEventPublisher)
+	academyAdminUC := usecase.NewAcademyAdminUseCase(permissionRepo, academyAdminRepo, academyEventPublisher)
+	enrollmentUC := usecase.NewEnrollmentUseCase(permissionRepo, enrollmentRepo)
 
 	// ── Replicated Use Cases ──────────────────────────────────────────────────
 	statusSyncUC := ucReplicated.NewSyncStatusUseCase(statusRepo, log)
@@ -150,7 +151,6 @@ func main() {
 	academyBranchHandler := handler.NewAcademyBranchHandler(academyBranchUC)
 	academyAdminHandler := handler.NewAcademyAdminHandler(academyAdminUC)
 	enrollmentHandler := handler.NewEnrollmentHandler(enrollmentUC)
-	rosterHandler := handler.NewRosterHandler(rosterUC)
 
 	// ── gRPC Server ───────────────────────────────────────────────────────────
 	v, err := protovalidate.New()
@@ -171,7 +171,6 @@ func main() {
 	academyBranchHandler.RegisterGRPC(grpcServer)
 	academyAdminHandler.RegisterGRPC(grpcServer)
 	enrollmentHandler.RegisterGRPC(grpcServer)
-	rosterHandler.RegisterGRPC(grpcServer)
 
 	reflection.Register(grpcServer)
 

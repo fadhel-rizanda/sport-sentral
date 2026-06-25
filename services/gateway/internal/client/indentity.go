@@ -7,6 +7,7 @@ import (
 	authv1 "microservice-golang/gen/auth/v1"
 	rbacv1 "microservice-golang/gen/rbac/v1"
 	userv1 "microservice-golang/gen/user/v1"
+	"microservice-golang/shared/pkg/grpc/interceptor"
 )
 
 type IdentityClient struct {
@@ -23,6 +24,7 @@ func NewIdentityClient(address string) (*IdentityClient, error) {
 		address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+		grpc.WithUnaryInterceptor(interceptor.UnaryClientMetadataPropagator()),
 	)
 	if err != nil {
 		return nil, err

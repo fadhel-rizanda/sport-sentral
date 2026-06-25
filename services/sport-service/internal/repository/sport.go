@@ -42,7 +42,7 @@ func (r *sportRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Sp
 		Preload("Status").
 		Preload("TierTag").
 		Preload("Config.ParticipantTypeTag").
-		Preload("Config.StatTags").
+		Preload("Config.Stats.StatTypeTag").
 		Preload("ActiveRegulator").
 		Preload("CreatedBy").
 		Preload("UpdatedBy").
@@ -79,7 +79,7 @@ func (r *sportRepository) List(ctx context.Context, filters SportFilters, page, 
 		Preload("Status").
 		Preload("TierTag").
 		Preload("Config.ParticipantTypeTag").
-		Preload("Config.StatTags").
+		Preload("Config.Stats.StatTypeTag").
 		Preload("ActiveRegulator").
 		Offset(offset).
 		Limit(pageSize).
@@ -105,7 +105,7 @@ func (r *sportRepository) GetConfigBySportID(ctx context.Context, sportID uuid.U
 	var config entity.SportConfig
 	err := r.db.WithContext(ctx).
 		Preload("ParticipantTypeTag").
-		Preload("StatTags").
+		Preload("Stats.StatTypeTag").
 		First(&config, "sport_id = ?", sportID).Error
 	if err != nil {
 		return nil, err
@@ -114,8 +114,8 @@ func (r *sportRepository) GetConfigBySportID(ctx context.Context, sportID uuid.U
 }
 
 func (r *sportRepository) UpsertConfig(ctx context.Context, config *entity.SportConfig) error {
-	if err := r.db.WithContext(ctx).Omit("StatTags", "ParticipantTypeTag", "Sport").Save(config).Error; err != nil {
+	if err := r.db.WithContext(ctx).Omit("Stats", "ParticipantTypeTag", "Sport").Save(config).Error; err != nil {
 		return err
 	}
-	return r.db.WithContext(ctx).Model(config).Association("StatTags").Replace(config.StatTags)
+	return r.db.WithContext(ctx).Model(config).Association("Stats").Replace(config.Stats)
 }

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"github.com/gofiber/fiber/v2"
 	authv1 "microservice-golang/gen/auth/v1"
 	userv1 "microservice-golang/gen/user/v1"
@@ -56,7 +55,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		return err
 	}
 
-	resp, err := h.userClient.CreateUser(context.Background(), &userv1.CreateUserRequest{
+	resp, err := h.userClient.CreateUser(c.Context(), &userv1.CreateUserRequest{
 		Email:    body.Email,
 		Username: body.Username,
 		FullName: body.FullName,
@@ -79,7 +78,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		return err
 	}
 
-	resp, err := h.authClient.Login(context.Background(), &authv1.LoginRequest{
+	resp, err := h.authClient.Login(c.Context(), &authv1.LoginRequest{
 		Email:    body.Email,
 		Password: body.Password,
 	})
@@ -118,7 +117,7 @@ func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := h.authClient.Logout(context.Background(), &authv1.LogoutRequest{
+	_, err := h.authClient.Logout(c.Context(), &authv1.LogoutRequest{
 		RefreshToken: body.RefreshToken,
 	})
 	if err != nil {
@@ -136,7 +135,7 @@ func (h *AuthHandler) RefreshToken(c *fiber.Ctx) error {
 		return err
 	}
 
-	resp, err := h.authClient.RefreshToken(context.Background(), &authv1.RefreshTokenRequest{
+	resp, err := h.authClient.RefreshToken(c.Context(), &authv1.RefreshTokenRequest{
 		RefreshToken: body.RefreshToken,
 	})
 	if err != nil {
@@ -156,7 +155,7 @@ func (h *AuthHandler) SendVerifyEmail(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := h.userClient.SendVerifyEmail(context.Background(), &userv1.SendVerifyEmailRequest{
+	_, err := h.userClient.SendVerifyEmail(c.Context(), &userv1.SendVerifyEmailRequest{
 		Email: body.Email,
 	})
 	if err != nil {
@@ -172,7 +171,7 @@ func (h *AuthHandler) VerifyAccount(c *fiber.Ctx) error {
 		return response.Error(c, fiber.StatusBadRequest, "verification token is required")
 	}
 
-	_, err := h.userClient.VerifyAccount(context.Background(), &userv1.VerifyAccountRequest{
+	_, err := h.userClient.VerifyAccount(c.Context(), &userv1.VerifyAccountRequest{
 		Token: token,
 	})
 	if err != nil {
@@ -190,7 +189,7 @@ func (h *AuthHandler) ForgotPassword(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := h.userClient.ForgotPassword(context.Background(), &userv1.ForgotPasswordRequest{
+	_, err := h.userClient.ForgotPassword(c.Context(), &userv1.ForgotPasswordRequest{
 		Email: body.Email,
 	})
 	if err != nil {
@@ -209,7 +208,7 @@ func (h *AuthHandler) ResetPassword(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := h.userClient.ResetPassword(context.Background(), &userv1.ResetPasswordRequest{
+	_, err := h.userClient.ResetPassword(c.Context(), &userv1.ResetPasswordRequest{
 		Token:    body.Token,
 		Password: body.Password,
 	})
@@ -225,7 +224,7 @@ func (h *AuthHandler) ResetPassword(c *fiber.Ctx) error {
 func (h *AuthHandler) Me(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
-	resp, err := h.userClient.GetUser(context.Background(), &userv1.GetUserRequest{
+	resp, err := h.userClient.GetUser(c.Context(), &userv1.GetUserRequest{
 		Id: userID,
 	})
 	if err != nil {

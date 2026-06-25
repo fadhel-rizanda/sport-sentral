@@ -173,11 +173,87 @@ func (x *Sport) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type SportStat struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	SportId           string                 `protobuf:"bytes,2,opt,name=sport_id,json=sportId,proto3" json:"sport_id,omitempty"`
+	StatTypeTagId     string                 `protobuf:"bytes,3,opt,name=stat_type_tag_id,json=statTypeTagId,proto3" json:"stat_type_tag_id,omitempty"`
+	StatTypeTag       *v1.TagSimple          `protobuf:"bytes,4,opt,name=stat_type_tag,json=statTypeTag,proto3" json:"stat_type_tag,omitempty"`
+	AggregationMethod string                 `protobuf:"bytes,5,opt,name=aggregation_method,json=aggregationMethod,proto3" json:"aggregation_method,omitempty"` // e.g. "SUM", "AVG", "MAX", "MIN"
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *SportStat) Reset() {
+	*x = SportStat{}
+	mi := &file_sport_v1_sport_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SportStat) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SportStat) ProtoMessage() {}
+
+func (x *SportStat) ProtoReflect() protoreflect.Message {
+	mi := &file_sport_v1_sport_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SportStat.ProtoReflect.Descriptor instead.
+func (*SportStat) Descriptor() ([]byte, []int) {
+	return file_sport_v1_sport_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *SportStat) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *SportStat) GetSportId() string {
+	if x != nil {
+		return x.SportId
+	}
+	return ""
+}
+
+func (x *SportStat) GetStatTypeTagId() string {
+	if x != nil {
+		return x.StatTypeTagId
+	}
+	return ""
+}
+
+func (x *SportStat) GetStatTypeTag() *v1.TagSimple {
+	if x != nil {
+		return x.StatTypeTag
+	}
+	return nil
+}
+
+func (x *SportStat) GetAggregationMethod() string {
+	if x != nil {
+		return x.AggregationMethod
+	}
+	return ""
+}
+
 type SportConfig struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
 	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	SportId            string                 `protobuf:"bytes,2,opt,name=sport_id,json=sportId,proto3" json:"sport_id,omitempty"`
-	StatTags           []*v1.TagSimple        `protobuf:"bytes,3,rep,name=stat_tags,json=statTags,proto3" json:"stat_tags,omitempty"`
+	Stats              []*SportStat           `protobuf:"bytes,3,rep,name=stats,proto3" json:"stats,omitempty"`
 	ParticipantTypeTag *v1.TagSimple          `protobuf:"bytes,4,opt,name=participant_type_tag,json=participantTypeTag,proto3" json:"participant_type_tag,omitempty"`
 	MinRosterSize      int32                  `protobuf:"varint,5,opt,name=min_roster_size,json=minRosterSize,proto3" json:"min_roster_size,omitempty"`
 	MaxRosterSize      int32                  `protobuf:"varint,6,opt,name=max_roster_size,json=maxRosterSize,proto3" json:"max_roster_size,omitempty"`
@@ -192,7 +268,7 @@ type SportConfig struct {
 
 func (x *SportConfig) Reset() {
 	*x = SportConfig{}
-	mi := &file_sport_v1_sport_proto_msgTypes[1]
+	mi := &file_sport_v1_sport_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -204,7 +280,7 @@ func (x *SportConfig) String() string {
 func (*SportConfig) ProtoMessage() {}
 
 func (x *SportConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_sport_v1_sport_proto_msgTypes[1]
+	mi := &file_sport_v1_sport_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -217,7 +293,7 @@ func (x *SportConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SportConfig.ProtoReflect.Descriptor instead.
 func (*SportConfig) Descriptor() ([]byte, []int) {
-	return file_sport_v1_sport_proto_rawDescGZIP(), []int{1}
+	return file_sport_v1_sport_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *SportConfig) GetId() string {
@@ -234,9 +310,9 @@ func (x *SportConfig) GetSportId() string {
 	return ""
 }
 
-func (x *SportConfig) GetStatTags() []*v1.TagSimple {
+func (x *SportConfig) GetStats() []*SportStat {
 	if x != nil {
-		return x.StatTags
+		return x.Stats
 	}
 	return nil
 }
@@ -312,7 +388,7 @@ type CreateSportRequest struct {
 
 func (x *CreateSportRequest) Reset() {
 	*x = CreateSportRequest{}
-	mi := &file_sport_v1_sport_proto_msgTypes[2]
+	mi := &file_sport_v1_sport_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -324,7 +400,7 @@ func (x *CreateSportRequest) String() string {
 func (*CreateSportRequest) ProtoMessage() {}
 
 func (x *CreateSportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sport_v1_sport_proto_msgTypes[2]
+	mi := &file_sport_v1_sport_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -337,7 +413,7 @@ func (x *CreateSportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateSportRequest.ProtoReflect.Descriptor instead.
 func (*CreateSportRequest) Descriptor() ([]byte, []int) {
-	return file_sport_v1_sport_proto_rawDescGZIP(), []int{2}
+	return file_sport_v1_sport_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateSportRequest) GetName() string {
@@ -398,7 +474,7 @@ type GetSportRequest struct {
 
 func (x *GetSportRequest) Reset() {
 	*x = GetSportRequest{}
-	mi := &file_sport_v1_sport_proto_msgTypes[3]
+	mi := &file_sport_v1_sport_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -410,7 +486,7 @@ func (x *GetSportRequest) String() string {
 func (*GetSportRequest) ProtoMessage() {}
 
 func (x *GetSportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sport_v1_sport_proto_msgTypes[3]
+	mi := &file_sport_v1_sport_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -423,7 +499,7 @@ func (x *GetSportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSportRequest.ProtoReflect.Descriptor instead.
 func (*GetSportRequest) Descriptor() ([]byte, []int) {
-	return file_sport_v1_sport_proto_rawDescGZIP(), []int{3}
+	return file_sport_v1_sport_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetSportRequest) GetId() string {
@@ -446,7 +522,7 @@ type ListSportsRequest struct {
 
 func (x *ListSportsRequest) Reset() {
 	*x = ListSportsRequest{}
-	mi := &file_sport_v1_sport_proto_msgTypes[4]
+	mi := &file_sport_v1_sport_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -458,7 +534,7 @@ func (x *ListSportsRequest) String() string {
 func (*ListSportsRequest) ProtoMessage() {}
 
 func (x *ListSportsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sport_v1_sport_proto_msgTypes[4]
+	mi := &file_sport_v1_sport_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -471,7 +547,7 @@ func (x *ListSportsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSportsRequest.ProtoReflect.Descriptor instead.
 func (*ListSportsRequest) Descriptor() ([]byte, []int) {
-	return file_sport_v1_sport_proto_rawDescGZIP(), []int{4}
+	return file_sport_v1_sport_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListSportsRequest) GetTierTagId() string {
@@ -521,7 +597,7 @@ type ListSportsResponse struct {
 
 func (x *ListSportsResponse) Reset() {
 	*x = ListSportsResponse{}
-	mi := &file_sport_v1_sport_proto_msgTypes[5]
+	mi := &file_sport_v1_sport_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -533,7 +609,7 @@ func (x *ListSportsResponse) String() string {
 func (*ListSportsResponse) ProtoMessage() {}
 
 func (x *ListSportsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sport_v1_sport_proto_msgTypes[5]
+	mi := &file_sport_v1_sport_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -546,7 +622,7 @@ func (x *ListSportsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSportsResponse.ProtoReflect.Descriptor instead.
 func (*ListSportsResponse) Descriptor() ([]byte, []int) {
-	return file_sport_v1_sport_proto_rawDescGZIP(), []int{5}
+	return file_sport_v1_sport_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListSportsResponse) GetSports() []*Sport {
@@ -592,7 +668,7 @@ type UpdateSportRequest struct {
 
 func (x *UpdateSportRequest) Reset() {
 	*x = UpdateSportRequest{}
-	mi := &file_sport_v1_sport_proto_msgTypes[6]
+	mi := &file_sport_v1_sport_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -604,7 +680,7 @@ func (x *UpdateSportRequest) String() string {
 func (*UpdateSportRequest) ProtoMessage() {}
 
 func (x *UpdateSportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sport_v1_sport_proto_msgTypes[6]
+	mi := &file_sport_v1_sport_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -617,7 +693,7 @@ func (x *UpdateSportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSportRequest.ProtoReflect.Descriptor instead.
 func (*UpdateSportRequest) Descriptor() ([]byte, []int) {
-	return file_sport_v1_sport_proto_rawDescGZIP(), []int{6}
+	return file_sport_v1_sport_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UpdateSportRequest) GetId() string {
@@ -678,7 +754,7 @@ type DeleteSportRequest struct {
 
 func (x *DeleteSportRequest) Reset() {
 	*x = DeleteSportRequest{}
-	mi := &file_sport_v1_sport_proto_msgTypes[7]
+	mi := &file_sport_v1_sport_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -690,7 +766,7 @@ func (x *DeleteSportRequest) String() string {
 func (*DeleteSportRequest) ProtoMessage() {}
 
 func (x *DeleteSportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sport_v1_sport_proto_msgTypes[7]
+	mi := &file_sport_v1_sport_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -703,7 +779,7 @@ func (x *DeleteSportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSportRequest.ProtoReflect.Descriptor instead.
 func (*DeleteSportRequest) Descriptor() ([]byte, []int) {
-	return file_sport_v1_sport_proto_rawDescGZIP(), []int{7}
+	return file_sport_v1_sport_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteSportRequest) GetId() string {
@@ -713,24 +789,76 @@ func (x *DeleteSportRequest) GetId() string {
 	return ""
 }
 
+type SportStatConfigInput struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	StatTypeTagId     string                 `protobuf:"bytes,1,opt,name=stat_type_tag_id,json=statTypeTagId,proto3" json:"stat_type_tag_id,omitempty"`
+	AggregationMethod string                 `protobuf:"bytes,2,opt,name=aggregation_method,json=aggregationMethod,proto3" json:"aggregation_method,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *SportStatConfigInput) Reset() {
+	*x = SportStatConfigInput{}
+	mi := &file_sport_v1_sport_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SportStatConfigInput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SportStatConfigInput) ProtoMessage() {}
+
+func (x *SportStatConfigInput) ProtoReflect() protoreflect.Message {
+	mi := &file_sport_v1_sport_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SportStatConfigInput.ProtoReflect.Descriptor instead.
+func (*SportStatConfigInput) Descriptor() ([]byte, []int) {
+	return file_sport_v1_sport_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *SportStatConfigInput) GetStatTypeTagId() string {
+	if x != nil {
+		return x.StatTypeTagId
+	}
+	return ""
+}
+
+func (x *SportStatConfigInput) GetAggregationMethod() string {
+	if x != nil {
+		return x.AggregationMethod
+	}
+	return ""
+}
+
 type UpdateSportConfigRequest struct {
-	state                protoimpl.MessageState `protogen:"open.v1"`
-	SportId              string                 `protobuf:"bytes,1,opt,name=sport_id,json=sportId,proto3" json:"sport_id,omitempty"`
-	StatTagIds           []string               `protobuf:"bytes,2,rep,name=stat_tag_ids,json=statTagIds,proto3" json:"stat_tag_ids,omitempty"`
-	ParticipantTypeTagId string                 `protobuf:"bytes,3,opt,name=participant_type_tag_id,json=participantTypeTagId,proto3" json:"participant_type_tag_id,omitempty"`
-	MinRosterSize        int32                  `protobuf:"varint,4,opt,name=min_roster_size,json=minRosterSize,proto3" json:"min_roster_size,omitempty"`
-	MaxRosterSize        int32                  `protobuf:"varint,5,opt,name=max_roster_size,json=maxRosterSize,proto3" json:"max_roster_size,omitempty"`
-	TypicalRosterSize    int32                  `protobuf:"varint,6,opt,name=typical_roster_size,json=typicalRosterSize,proto3" json:"typical_roster_size,omitempty"`
-	RulesUrl             *string                `protobuf:"bytes,7,opt,name=rules_url,json=rulesUrl,proto3,oneof" json:"rules_url,omitempty"`
-	Description          *string                `protobuf:"bytes,8,opt,name=description,proto3,oneof" json:"description,omitempty"`
-	UpdatedById          string                 `protobuf:"bytes,9,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
+	state                protoimpl.MessageState  `protogen:"open.v1"`
+	SportId              string                  `protobuf:"bytes,1,opt,name=sport_id,json=sportId,proto3" json:"sport_id,omitempty"`
+	Stats                []*SportStatConfigInput `protobuf:"bytes,2,rep,name=stats,proto3" json:"stats,omitempty"`
+	ParticipantTypeTagId string                  `protobuf:"bytes,3,opt,name=participant_type_tag_id,json=participantTypeTagId,proto3" json:"participant_type_tag_id,omitempty"`
+	MinRosterSize        int32                   `protobuf:"varint,4,opt,name=min_roster_size,json=minRosterSize,proto3" json:"min_roster_size,omitempty"`
+	MaxRosterSize        int32                   `protobuf:"varint,5,opt,name=max_roster_size,json=maxRosterSize,proto3" json:"max_roster_size,omitempty"`
+	TypicalRosterSize    int32                   `protobuf:"varint,6,opt,name=typical_roster_size,json=typicalRosterSize,proto3" json:"typical_roster_size,omitempty"`
+	RulesUrl             *string                 `protobuf:"bytes,7,opt,name=rules_url,json=rulesUrl,proto3,oneof" json:"rules_url,omitempty"`
+	Description          *string                 `protobuf:"bytes,8,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	UpdatedById          string                  `protobuf:"bytes,9,opt,name=updated_by_id,json=updatedById,proto3" json:"updated_by_id,omitempty"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
 
 func (x *UpdateSportConfigRequest) Reset() {
 	*x = UpdateSportConfigRequest{}
-	mi := &file_sport_v1_sport_proto_msgTypes[8]
+	mi := &file_sport_v1_sport_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -742,7 +870,7 @@ func (x *UpdateSportConfigRequest) String() string {
 func (*UpdateSportConfigRequest) ProtoMessage() {}
 
 func (x *UpdateSportConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sport_v1_sport_proto_msgTypes[8]
+	mi := &file_sport_v1_sport_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -755,7 +883,7 @@ func (x *UpdateSportConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSportConfigRequest.ProtoReflect.Descriptor instead.
 func (*UpdateSportConfigRequest) Descriptor() ([]byte, []int) {
-	return file_sport_v1_sport_proto_rawDescGZIP(), []int{8}
+	return file_sport_v1_sport_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *UpdateSportConfigRequest) GetSportId() string {
@@ -765,9 +893,9 @@ func (x *UpdateSportConfigRequest) GetSportId() string {
 	return ""
 }
 
-func (x *UpdateSportConfigRequest) GetStatTagIds() []string {
+func (x *UpdateSportConfigRequest) GetStats() []*SportStatConfigInput {
 	if x != nil {
-		return x.StatTagIds
+		return x.Stats
 	}
 	return nil
 }
@@ -830,7 +958,7 @@ type GetSportConfigRequest struct {
 
 func (x *GetSportConfigRequest) Reset() {
 	*x = GetSportConfigRequest{}
-	mi := &file_sport_v1_sport_proto_msgTypes[9]
+	mi := &file_sport_v1_sport_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -842,7 +970,7 @@ func (x *GetSportConfigRequest) String() string {
 func (*GetSportConfigRequest) ProtoMessage() {}
 
 func (x *GetSportConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sport_v1_sport_proto_msgTypes[9]
+	mi := &file_sport_v1_sport_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -855,7 +983,7 @@ func (x *GetSportConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSportConfigRequest.ProtoReflect.Descriptor instead.
 func (*GetSportConfigRequest) Descriptor() ([]byte, []int) {
-	return file_sport_v1_sport_proto_rawDescGZIP(), []int{9}
+	return file_sport_v1_sport_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GetSportConfigRequest) GetSportId() string {
@@ -887,11 +1015,17 @@ const file_sport_v1_sport_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xe8\x03\n" +
+	"updated_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xc8\x01\n" +
+	"\tSportStat\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
+	"\bsport_id\x18\x02 \x01(\tR\asportId\x12'\n" +
+	"\x10stat_type_tag_id\x18\x03 \x01(\tR\rstatTypeTagId\x128\n" +
+	"\rstat_type_tag\x18\x04 \x01(\v2\x14.common.v1.TagSimpleR\vstatTypeTag\x12-\n" +
+	"\x12aggregation_method\x18\x05 \x01(\tR\x11aggregationMethod\"\xe0\x03\n" +
 	"\vSportConfig\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
-	"\bsport_id\x18\x02 \x01(\tR\asportId\x121\n" +
-	"\tstat_tags\x18\x03 \x03(\v2\x14.common.v1.TagSimpleR\bstatTags\x12F\n" +
+	"\bsport_id\x18\x02 \x01(\tR\asportId\x12)\n" +
+	"\x05stats\x18\x03 \x03(\v2\x13.sport.v1.SportStatR\x05stats\x12F\n" +
 	"\x14participant_type_tag\x18\x04 \x01(\v2\x14.common.v1.TagSimpleR\x12participantTypeTag\x12&\n" +
 	"\x0fmin_roster_size\x18\x05 \x01(\x05R\rminRosterSize\x12&\n" +
 	"\x0fmax_roster_size\x18\x06 \x01(\x05R\rmaxRosterSize\x12.\n" +
@@ -944,11 +1078,13 @@ const file_sport_v1_sport_proto_rawDesc = "" +
 	"\n" +
 	"_status_id\".\n" +
 	"\x12DeleteSportRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\xd2\x03\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\x81\x01\n" +
+	"\x14SportStatConfigInput\x121\n" +
+	"\x10stat_type_tag_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\rstatTypeTagId\x126\n" +
+	"\x12aggregation_method\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x02R\x11aggregationMethod\"\xe6\x03\n" +
 	"\x18UpdateSportConfigRequest\x12#\n" +
-	"\bsport_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\asportId\x12 \n" +
-	"\fstat_tag_ids\x18\x02 \x03(\tR\n" +
-	"statTagIds\x12?\n" +
+	"\bsport_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\asportId\x124\n" +
+	"\x05stats\x18\x02 \x03(\v2\x1e.sport.v1.SportStatConfigInputR\x05stats\x12?\n" +
 	"\x17participant_type_tag_id\x18\x03 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x14participantTypeTagId\x12/\n" +
 	"\x0fmin_roster_size\x18\x04 \x01(\x05B\a\xbaH\x04\x1a\x02 \x00R\rminRosterSize\x12/\n" +
 	"\x0fmax_roster_size\x18\x05 \x01(\x05B\a\xbaH\x04\x1a\x02 \x00R\rmaxRosterSize\x127\n" +
@@ -983,55 +1119,59 @@ func file_sport_v1_sport_proto_rawDescGZIP() []byte {
 	return file_sport_v1_sport_proto_rawDescData
 }
 
-var file_sport_v1_sport_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_sport_v1_sport_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_sport_v1_sport_proto_goTypes = []any{
 	(*Sport)(nil),                    // 0: sport.v1.Sport
-	(*SportConfig)(nil),              // 1: sport.v1.SportConfig
-	(*CreateSportRequest)(nil),       // 2: sport.v1.CreateSportRequest
-	(*GetSportRequest)(nil),          // 3: sport.v1.GetSportRequest
-	(*ListSportsRequest)(nil),        // 4: sport.v1.ListSportsRequest
-	(*ListSportsResponse)(nil),       // 5: sport.v1.ListSportsResponse
-	(*UpdateSportRequest)(nil),       // 6: sport.v1.UpdateSportRequest
-	(*DeleteSportRequest)(nil),       // 7: sport.v1.DeleteSportRequest
-	(*UpdateSportConfigRequest)(nil), // 8: sport.v1.UpdateSportConfigRequest
-	(*GetSportConfigRequest)(nil),    // 9: sport.v1.GetSportConfigRequest
-	(*v1.StatusSimple)(nil),          // 10: common.v1.StatusSimple
-	(*v1.TagSimple)(nil),             // 11: common.v1.TagSimple
-	(*Regulator)(nil),                // 12: sport.v1.Regulator
-	(*timestamppb.Timestamp)(nil),    // 13: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),            // 14: google.protobuf.Empty
+	(*SportStat)(nil),                // 1: sport.v1.SportStat
+	(*SportConfig)(nil),              // 2: sport.v1.SportConfig
+	(*CreateSportRequest)(nil),       // 3: sport.v1.CreateSportRequest
+	(*GetSportRequest)(nil),          // 4: sport.v1.GetSportRequest
+	(*ListSportsRequest)(nil),        // 5: sport.v1.ListSportsRequest
+	(*ListSportsResponse)(nil),       // 6: sport.v1.ListSportsResponse
+	(*UpdateSportRequest)(nil),       // 7: sport.v1.UpdateSportRequest
+	(*DeleteSportRequest)(nil),       // 8: sport.v1.DeleteSportRequest
+	(*SportStatConfigInput)(nil),     // 9: sport.v1.SportStatConfigInput
+	(*UpdateSportConfigRequest)(nil), // 10: sport.v1.UpdateSportConfigRequest
+	(*GetSportConfigRequest)(nil),    // 11: sport.v1.GetSportConfigRequest
+	(*v1.StatusSimple)(nil),          // 12: common.v1.StatusSimple
+	(*v1.TagSimple)(nil),             // 13: common.v1.TagSimple
+	(*Regulator)(nil),                // 14: sport.v1.Regulator
+	(*timestamppb.Timestamp)(nil),    // 15: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),            // 16: google.protobuf.Empty
 }
 var file_sport_v1_sport_proto_depIdxs = []int32{
-	10, // 0: sport.v1.Sport.status:type_name -> common.v1.StatusSimple
-	11, // 1: sport.v1.Sport.tier_tag:type_name -> common.v1.TagSimple
-	12, // 2: sport.v1.Sport.active_regulator:type_name -> sport.v1.Regulator
-	1,  // 3: sport.v1.Sport.config:type_name -> sport.v1.SportConfig
-	13, // 4: sport.v1.Sport.created_at:type_name -> google.protobuf.Timestamp
-	13, // 5: sport.v1.Sport.updated_at:type_name -> google.protobuf.Timestamp
-	11, // 6: sport.v1.SportConfig.stat_tags:type_name -> common.v1.TagSimple
-	11, // 7: sport.v1.SportConfig.participant_type_tag:type_name -> common.v1.TagSimple
-	13, // 8: sport.v1.SportConfig.created_at:type_name -> google.protobuf.Timestamp
-	13, // 9: sport.v1.SportConfig.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 10: sport.v1.ListSportsResponse.sports:type_name -> sport.v1.Sport
-	3,  // 11: sport.v1.SportService.GetSport:input_type -> sport.v1.GetSportRequest
-	4,  // 12: sport.v1.SportService.ListSports:input_type -> sport.v1.ListSportsRequest
-	2,  // 13: sport.v1.SportService.CreateSport:input_type -> sport.v1.CreateSportRequest
-	6,  // 14: sport.v1.SportService.UpdateSport:input_type -> sport.v1.UpdateSportRequest
-	7,  // 15: sport.v1.SportService.DeleteSport:input_type -> sport.v1.DeleteSportRequest
-	8,  // 16: sport.v1.SportService.UpdateSportConfig:input_type -> sport.v1.UpdateSportConfigRequest
-	9,  // 17: sport.v1.SportService.GetSportConfig:input_type -> sport.v1.GetSportConfigRequest
-	0,  // 18: sport.v1.SportService.GetSport:output_type -> sport.v1.Sport
-	5,  // 19: sport.v1.SportService.ListSports:output_type -> sport.v1.ListSportsResponse
-	0,  // 20: sport.v1.SportService.CreateSport:output_type -> sport.v1.Sport
-	0,  // 21: sport.v1.SportService.UpdateSport:output_type -> sport.v1.Sport
-	14, // 22: sport.v1.SportService.DeleteSport:output_type -> google.protobuf.Empty
-	1,  // 23: sport.v1.SportService.UpdateSportConfig:output_type -> sport.v1.SportConfig
-	1,  // 24: sport.v1.SportService.GetSportConfig:output_type -> sport.v1.SportConfig
-	18, // [18:25] is the sub-list for method output_type
-	11, // [11:18] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	12, // 0: sport.v1.Sport.status:type_name -> common.v1.StatusSimple
+	13, // 1: sport.v1.Sport.tier_tag:type_name -> common.v1.TagSimple
+	14, // 2: sport.v1.Sport.active_regulator:type_name -> sport.v1.Regulator
+	2,  // 3: sport.v1.Sport.config:type_name -> sport.v1.SportConfig
+	15, // 4: sport.v1.Sport.created_at:type_name -> google.protobuf.Timestamp
+	15, // 5: sport.v1.Sport.updated_at:type_name -> google.protobuf.Timestamp
+	13, // 6: sport.v1.SportStat.stat_type_tag:type_name -> common.v1.TagSimple
+	1,  // 7: sport.v1.SportConfig.stats:type_name -> sport.v1.SportStat
+	13, // 8: sport.v1.SportConfig.participant_type_tag:type_name -> common.v1.TagSimple
+	15, // 9: sport.v1.SportConfig.created_at:type_name -> google.protobuf.Timestamp
+	15, // 10: sport.v1.SportConfig.updated_at:type_name -> google.protobuf.Timestamp
+	0,  // 11: sport.v1.ListSportsResponse.sports:type_name -> sport.v1.Sport
+	9,  // 12: sport.v1.UpdateSportConfigRequest.stats:type_name -> sport.v1.SportStatConfigInput
+	4,  // 13: sport.v1.SportService.GetSport:input_type -> sport.v1.GetSportRequest
+	5,  // 14: sport.v1.SportService.ListSports:input_type -> sport.v1.ListSportsRequest
+	3,  // 15: sport.v1.SportService.CreateSport:input_type -> sport.v1.CreateSportRequest
+	7,  // 16: sport.v1.SportService.UpdateSport:input_type -> sport.v1.UpdateSportRequest
+	8,  // 17: sport.v1.SportService.DeleteSport:input_type -> sport.v1.DeleteSportRequest
+	10, // 18: sport.v1.SportService.UpdateSportConfig:input_type -> sport.v1.UpdateSportConfigRequest
+	11, // 19: sport.v1.SportService.GetSportConfig:input_type -> sport.v1.GetSportConfigRequest
+	0,  // 20: sport.v1.SportService.GetSport:output_type -> sport.v1.Sport
+	6,  // 21: sport.v1.SportService.ListSports:output_type -> sport.v1.ListSportsResponse
+	0,  // 22: sport.v1.SportService.CreateSport:output_type -> sport.v1.Sport
+	0,  // 23: sport.v1.SportService.UpdateSport:output_type -> sport.v1.Sport
+	16, // 24: sport.v1.SportService.DeleteSport:output_type -> google.protobuf.Empty
+	2,  // 25: sport.v1.SportService.UpdateSportConfig:output_type -> sport.v1.SportConfig
+	2,  // 26: sport.v1.SportService.GetSportConfig:output_type -> sport.v1.SportConfig
+	20, // [20:27] is the sub-list for method output_type
+	13, // [13:20] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_sport_v1_sport_proto_init() }
@@ -1040,16 +1180,16 @@ func file_sport_v1_sport_proto_init() {
 		return
 	}
 	file_sport_v1_regulator_proto_init()
-	file_sport_v1_sport_proto_msgTypes[4].OneofWrappers = []any{}
-	file_sport_v1_sport_proto_msgTypes[6].OneofWrappers = []any{}
-	file_sport_v1_sport_proto_msgTypes[8].OneofWrappers = []any{}
+	file_sport_v1_sport_proto_msgTypes[5].OneofWrappers = []any{}
+	file_sport_v1_sport_proto_msgTypes[7].OneofWrappers = []any{}
+	file_sport_v1_sport_proto_msgTypes[10].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sport_v1_sport_proto_rawDesc), len(file_sport_v1_sport_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

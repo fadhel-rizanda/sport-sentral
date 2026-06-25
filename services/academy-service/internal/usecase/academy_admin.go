@@ -5,11 +5,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
+	academyv1 "microservice-golang/gen/academy/v1"
 	"microservice-golang/services/academy-service/internal/dto"
 	"microservice-golang/services/academy-service/internal/entity"
 	"microservice-golang/services/academy-service/internal/mapper"
 	"microservice-golang/services/academy-service/internal/repository"
+	replicatedRepo "microservice-golang/services/academy-service/internal/repository/replicated"
 	"microservice-golang/shared/infrastructure/postgres"
 	apperr "microservice-golang/shared/pkg/errors"
 )
@@ -28,16 +31,27 @@ type AcademyAdminUseCase interface {
 }
 
 type academyAdminUseCase struct {
-	repo repository.AcademyAdminRepository
+	permissionRepo replicatedRepo.PermissionRepository
+	repo           repository.AcademyAdminRepository
+	publisher      AcademyAdminEventPublisher
 }
 
-func NewAcademyAdminUseCase(repo repository.AcademyAdminRepository) AcademyAdminUseCase {
+func NewAcademyAdminUseCase(
+	permissionRepo replicatedRepo.PermissionRepository,
+	repo repository.AcademyAdminRepository,
+	publisher AcademyAdminEventPublisher,
+) AcademyAdminUseCase {
 	return &academyAdminUseCase{
-		repo: repo,
+		permissionRepo: permissionRepo,
+		repo:           repo,
+		publisher:      publisher,
 	}
 }
 
 func (uc *academyAdminUseCase) Create(ctx context.Context, req dto.CreateAcademyAdminRequest) (*dto.AcademyAdminResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+		return nil, err
+	}
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -62,10 +76,31 @@ func (uc *academyAdminUseCase) Create(ctx context.Context, req dto.CreateAcademy
 		return nil, apperr.Internal(err)
 	}
 
+	// Publish event
+	evtID, _ := uuid.NewV7()
+	var branchIDStr *string
+	if resAdmin.BranchID != nil {
+		str := resAdmin.BranchID.String()
+		branchIDStr = &str
+	}
+	_ = uc.publisher.PublishAdminAssigned(ctx, &academyv1.AcademyAdminEvent{
+		EventId:    evtID.String(),
+		EventType:  academyv1.AcademyAdminEventType_ACADEMY_ADMIN_EVENT_TYPE_ASSIGNED,
+		OccurredAt: timestamppb.New(time.Now()),
+		AdminId:    resAdmin.ID.String(),
+		AcademyId:  resAdmin.AcademyID.String(),
+		BranchId:   branchIDStr,
+		UserId:     resAdmin.UserID.String(),
+		RoleId:     resAdmin.RoleID.String(),
+	})
+
 	return mapper.ToAcademyAdminResponse(resAdmin), nil
 }
 
 func (uc *academyAdminUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.AcademyAdminResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+		return nil, err
+	}
 	admin, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -77,6 +112,9 @@ func (uc *academyAdminUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.
 }
 
 func (uc *academyAdminUseCase) List(ctx context.Context, req dto.ListAcademyAdminsRequest) (*dto.ListAcademyAdminsResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+		return nil, err
+	}
 	filters := repository.AdminFilters{
 		AdminScope: repository.AdminScope{
 			HoldingID: req.AcademyID,
@@ -105,6 +143,9 @@ func (uc *academyAdminUseCase) List(ctx context.Context, req dto.ListAcademyAdmi
 }
 
 func (uc *academyAdminUseCase) Update(ctx context.Context, id uuid.UUID, req dto.UpdateAcademyAdminRequest) (*dto.AcademyAdminResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+		return nil, err
+	}
 	admin, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -125,11 +166,32 @@ func (uc *academyAdminUseCase) Update(ctx context.Context, id uuid.UUID, req dto
 		return nil, apperr.Internal(err)
 	}
 
+	// Publish event
+	evtID, _ := uuid.NewV7()
+	var branchIDStr *string
+	if resAdmin.BranchID != nil {
+		str := resAdmin.BranchID.String()
+		branchIDStr = &str
+	}
+	_ = uc.publisher.PublishAdminAssigned(ctx, &academyv1.AcademyAdminEvent{
+		EventId:    evtID.String(),
+		EventType:  academyv1.AcademyAdminEventType_ACADEMY_ADMIN_EVENT_TYPE_ASSIGNED,
+		OccurredAt: timestamppb.New(time.Now()),
+		AdminId:    resAdmin.ID.String(),
+		AcademyId:  resAdmin.AcademyID.String(),
+		BranchId:   branchIDStr,
+		UserId:     resAdmin.UserID.String(),
+		RoleId:     resAdmin.RoleID.String(),
+	})
+
 	return mapper.ToAcademyAdminResponse(resAdmin), nil
 }
 
 func (uc *academyAdminUseCase) Delete(ctx context.Context, req dto.DeleteAcademyAdminRequest) error {
-	_, err := uc.repo.GetByID(ctx, req.ID)
+	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+		return err
+	}
+	admin, err := uc.repo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
 			return apperr.NotFound("academy admin")
@@ -140,10 +202,32 @@ func (uc *academyAdminUseCase) Delete(ctx context.Context, req dto.DeleteAcademy
 	if err := uc.repo.Delete(ctx, req.ID); err != nil {
 		return apperr.Internal(err)
 	}
+
+	// Publish event
+	evtID, _ := uuid.NewV7()
+	var branchIDStr *string
+	if admin.BranchID != nil {
+		str := admin.BranchID.String()
+		branchIDStr = &str
+	}
+	_ = uc.publisher.PublishAdminRevoked(ctx, &academyv1.AcademyAdminEvent{
+		EventId:    evtID.String(),
+		EventType:  academyv1.AcademyAdminEventType_ACADEMY_ADMIN_EVENT_TYPE_REVOKED,
+		OccurredAt: timestamppb.New(time.Now()),
+		AdminId:    admin.ID.String(),
+		AcademyId:  admin.AcademyID.String(),
+		BranchId:   branchIDStr,
+		UserId:     admin.UserID.String(),
+		RoleId:     admin.RoleID.String(),
+	})
+
 	return nil
 }
 
 func (uc *academyAdminUseCase) GetByUser(ctx context.Context, scope repository.AdminScope, userID uuid.UUID) (*dto.AcademyAdminResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+		return nil, err
+	}
 	admin, err := uc.repo.GetByUser(ctx, scope, userID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -163,6 +247,9 @@ func (uc *academyAdminUseCase) CheckUserIsAdmin(ctx context.Context, scope repos
 }
 
 func (uc *academyAdminUseCase) Assign(ctx context.Context, req dto.AssignAcademyAdminRequest) (*dto.AcademyAdminResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+		return nil, err
+	}
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -190,11 +277,32 @@ func (uc *academyAdminUseCase) Assign(ctx context.Context, req dto.AssignAcademy
 		return nil, apperr.Internal(err)
 	}
 
+	// Publish event
+	evtID, _ := uuid.NewV7()
+	var branchIDStr *string
+	if resAdmin.BranchID != nil {
+		str := resAdmin.BranchID.String()
+		branchIDStr = &str
+	}
+	_ = uc.publisher.PublishAdminAssigned(ctx, &academyv1.AcademyAdminEvent{
+		EventId:    evtID.String(),
+		EventType:  academyv1.AcademyAdminEventType_ACADEMY_ADMIN_EVENT_TYPE_ASSIGNED,
+		OccurredAt: timestamppb.New(time.Now()),
+		AdminId:    resAdmin.ID.String(),
+		AcademyId:  resAdmin.AcademyID.String(),
+		BranchId:   branchIDStr,
+		UserId:     resAdmin.UserID.String(),
+		RoleId:     resAdmin.RoleID.String(),
+	})
+
 	return mapper.ToAcademyAdminResponse(resAdmin), nil
 }
 
 func (uc *academyAdminUseCase) Revoke(ctx context.Context, req dto.RevokeAcademyAdminRequest) error {
-	_, err := uc.repo.GetByID(ctx, req.ID)
+	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+		return err
+	}
+	admin, err := uc.repo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
 			return apperr.NotFound("academy admin")
@@ -205,5 +313,24 @@ func (uc *academyAdminUseCase) Revoke(ctx context.Context, req dto.RevokeAcademy
 	if err := uc.repo.Revoke(ctx, req.ID, req.RevokedByID); err != nil {
 		return apperr.Internal(err)
 	}
+
+	// Publish event
+	evtID, _ := uuid.NewV7()
+	var branchIDStr *string
+	if admin.BranchID != nil {
+		str := admin.BranchID.String()
+		branchIDStr = &str
+	}
+	_ = uc.publisher.PublishAdminRevoked(ctx, &academyv1.AcademyAdminEvent{
+		EventId:    evtID.String(),
+		EventType:  academyv1.AcademyAdminEventType_ACADEMY_ADMIN_EVENT_TYPE_REVOKED,
+		OccurredAt: timestamppb.New(time.Now()),
+		AdminId:    admin.ID.String(),
+		AcademyId:  admin.AcademyID.String(),
+		BranchId:   branchIDStr,
+		UserId:     admin.UserID.String(),
+		RoleId:     admin.RoleID.String(),
+	})
+
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	metav1 "microservice-golang/gen/meta/v1"
+	"microservice-golang/shared/pkg/grpc/interceptor"
 )
 
 type MetaClient struct {
@@ -18,6 +19,7 @@ func NewMetaClient(address string) (*MetaClient, error) {
 		address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+		grpc.WithUnaryInterceptor(interceptor.UnaryClientMetadataPropagator()),
 	)
 	if err != nil {
 		return nil, err

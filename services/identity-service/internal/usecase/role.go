@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"gorm.io/gorm"
+	sharedgrpc "microservice-golang/shared/pkg/grpc"
 )
 
 type RoleUseCase interface {
@@ -48,6 +48,9 @@ func NewRoleUseCase(roleRepo repository.RoleRepository, permissionRepo repositor
 }
 
 func (uc *roleUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.RoleResponse, error) {
+	if err := uc.validatePermission(ctx, "role", "read"); err != nil {
+		return nil, err
+	}
 	role, err := uc.roleRepo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -59,6 +62,9 @@ func (uc *roleUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.RoleResp
 }
 
 func (uc *roleUseCase) GetByName(ctx context.Context, name string) (*dto.RoleResponse, error) {
+	if err := uc.validatePermission(ctx, "role", "read"); err != nil {
+		return nil, err
+	}
 	role, err := uc.roleRepo.GetByName(ctx, name)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -70,6 +76,9 @@ func (uc *roleUseCase) GetByName(ctx context.Context, name string) (*dto.RoleRes
 }
 
 func (uc *roleUseCase) List(ctx context.Context, req dto.ListRequest) (*dto.ListRoleResponse, error) {
+	if err := uc.validatePermission(ctx, "role", "read"); err != nil {
+		return nil, err
+	}
 	roleList, total, err := uc.roleRepo.List(ctx, req.Page, req.PageSize)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -91,6 +100,9 @@ func (uc *roleUseCase) List(ctx context.Context, req dto.ListRequest) (*dto.List
 }
 
 func (uc *roleUseCase) Create(ctx context.Context, req dto.CreateRoleRequest) (*dto.RoleResponse, error) {
+	if err := uc.validatePermission(ctx, "role", "create"); err != nil {
+		return nil, err
+	}
 	role := &entity.Role{
 		Name:        req.Name,
 		Description: req.Description,
@@ -141,6 +153,9 @@ func (uc *roleUseCase) Create(ctx context.Context, req dto.CreateRoleRequest) (*
 }
 
 func (uc *roleUseCase) Update(ctx context.Context, req dto.UpdateRoleRequest) (*dto.RoleResponse, error) {
+	if err := uc.validatePermission(ctx, "role", "update"); err != nil {
+		return nil, err
+	}
 	role, err := uc.roleRepo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -204,6 +219,9 @@ func (uc *roleUseCase) Update(ctx context.Context, req dto.UpdateRoleRequest) (*
 }
 
 func (uc *roleUseCase) SoftDelete(ctx context.Context, req dto.DeleteRequest) error {
+	if err := uc.validatePermission(ctx, "role", "delete"); err != nil {
+		return err
+	}
 	role, err := uc.roleRepo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -212,7 +230,8 @@ func (uc *roleUseCase) SoftDelete(ctx context.Context, req dto.DeleteRequest) er
 		return apperr.Internal(err)
 	}
 	role.DeletedByID = &req.DeletedByID
-	role.DeletedAt = gorm.DeletedAt{Time: time.Now(), Valid: true}
+	role.DeletedAt.Time = time.Now()
+	role.DeletedAt.Valid = true
 
 	if err := uc.roleRepo.Update(ctx, role); err != nil {
 		return apperr.Internal(err)
@@ -228,6 +247,9 @@ func (uc *roleUseCase) SoftDelete(ctx context.Context, req dto.DeleteRequest) er
 }
 
 func (uc *roleUseCase) AssignPermission(ctx context.Context, roleID string, permissionIDs []string) error {
+	if err := uc.validatePermission(ctx, "role", "assign"); err != nil {
+		return err
+	}
 	rid, err := uuid.Parse(roleID)
 	if err != nil {
 		return apperr.InvalidArgument("invalid role id")
@@ -266,6 +288,9 @@ func (uc *roleUseCase) AssignPermission(ctx context.Context, roleID string, perm
 }
 
 func (uc *roleUseCase) RevokePermission(ctx context.Context, roleID string, permissionIDs []string) error {
+	if err := uc.validatePermission(ctx, "role", "assign"); err != nil {
+		return err
+	}
 	rid, err := uuid.Parse(roleID)
 	if err != nil {
 		return apperr.InvalidArgument("invalid role id")
@@ -304,6 +329,28 @@ func (uc *roleUseCase) RevokePermission(ctx context.Context, roleID string, perm
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
+
+func (uc *roleUseCase) validatePermission(ctx context.Context, resource, action string) error {
+	userID, err := sharedgrpc.ExtractUserID(ctx)
+	if err != nil {
+		return err
+	}
+	activeRole, err := sharedgrpc.ExtractActiveRole(ctx)
+	if err != nil {
+		return err
+	}
+	if activeRole == "platform_admin" {
+		return nil
+	}
+	has, err := uc.permissionRepo.CheckPermission(ctx, userID, resource, action)
+	if err != nil {
+		return err
+	}
+	if !has {
+		return apperr.Forbidden("insufficient permissions")
+	}
+	return nil
+}
 
 func parseUUIDs(ids []string) ([]uuid.UUID, error) {
 	uids := make([]uuid.UUID, 0, len(ids))

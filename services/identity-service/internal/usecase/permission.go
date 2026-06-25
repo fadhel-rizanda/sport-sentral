@@ -13,7 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"gorm.io/gorm"
+	sharedgrpc "microservice-golang/shared/pkg/grpc"
 )
 
 type PermissionUseCase interface {
@@ -38,6 +38,9 @@ func NewPermissionUseCase(permissionRepo repository.PermissionRepository, publis
 }
 
 func (uc *permissionUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.PermissionResponse, error) {
+	if err := uc.validatePermission(ctx, "permission", "read"); err != nil {
+		return nil, err
+	}
 	permission, err := uc.permissionRepo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -49,6 +52,9 @@ func (uc *permissionUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.Pe
 }
 
 func (uc *permissionUseCase) List(ctx context.Context, req dto.ListPermissionRequest) (*dto.ListPermissionResponse, error) {
+	if err := uc.validatePermission(ctx, "permission", "read"); err != nil {
+		return nil, err
+	}
 	permissionList, total, err := uc.permissionRepo.List(ctx, req.RoleId, req.Page, req.PageSize)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -69,6 +75,9 @@ func (uc *permissionUseCase) List(ctx context.Context, req dto.ListPermissionReq
 }
 
 func (uc *permissionUseCase) Create(ctx context.Context, req dto.CreatePermissionRequest) (*dto.PermissionResponse, error) {
+	if err := uc.validatePermission(ctx, "permission", "create"); err != nil {
+		return nil, err
+	}
 	permission := &entity.Permission{
 		Action:      req.Action,
 		Resource:    req.Resource,
@@ -94,6 +103,9 @@ func (uc *permissionUseCase) Create(ctx context.Context, req dto.CreatePermissio
 }
 
 func (uc *permissionUseCase) Update(ctx context.Context, req dto.UpdatePermissionRequest) (*dto.PermissionResponse, error) {
+	if err := uc.validatePermission(ctx, "permission", "update"); err != nil {
+		return nil, err
+	}
 	permission, err := uc.permissionRepo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -134,6 +146,9 @@ func (uc *permissionUseCase) Update(ctx context.Context, req dto.UpdatePermissio
 }
 
 func (uc *permissionUseCase) SoftDelete(ctx context.Context, req dto.DeleteRequest) error {
+	if err := uc.validatePermission(ctx, "permission", "delete"); err != nil {
+		return err
+	}
 	permission, err := uc.permissionRepo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -143,7 +158,8 @@ func (uc *permissionUseCase) SoftDelete(ctx context.Context, req dto.DeleteReque
 	}
 
 	permission.DeletedByID = &req.DeletedByID
-	permission.DeletedAt = gorm.DeletedAt{Time: time.Now(), Valid: true}
+	permission.DeletedAt.Time = time.Now()
+	permission.DeletedAt.Valid = true
 
 	if err := uc.permissionRepo.Update(ctx, permission); err != nil {
 		return apperr.Internal(err)
@@ -164,6 +180,28 @@ func (uc *permissionUseCase) CheckPermission(ctx context.Context, userID, resour
 		return false, apperr.InvalidArgument("invalid user id")
 	}
 	return uc.permissionRepo.CheckPermission(ctx, uID, resource, action)
+}
+
+func (uc *permissionUseCase) validatePermission(ctx context.Context, resource, action string) error {
+	userID, err := sharedgrpc.ExtractUserID(ctx)
+	if err != nil {
+		return err
+	}
+	activeRole, err := sharedgrpc.ExtractActiveRole(ctx)
+	if err != nil {
+		return err
+	}
+	if activeRole == "platform_admin" {
+		return nil
+	}
+	has, err := uc.permissionRepo.CheckPermission(ctx, userID, resource, action)
+	if err != nil {
+		return err
+	}
+	if !has {
+		return apperr.Forbidden("insufficient permissions")
+	}
+	return nil
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

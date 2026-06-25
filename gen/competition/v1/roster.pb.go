@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        (unknown)
-// source: academy/v1/roster.proto
+// source: competition/v1/roster.proto
 
-package academyv1
+package competitionv1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
@@ -48,7 +48,7 @@ type RosterMember struct {
 
 func (x *RosterMember) Reset() {
 	*x = RosterMember{}
-	mi := &file_academy_v1_roster_proto_msgTypes[0]
+	mi := &file_competition_v1_roster_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -60,7 +60,7 @@ func (x *RosterMember) String() string {
 func (*RosterMember) ProtoMessage() {}
 
 func (x *RosterMember) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[0]
+	mi := &file_competition_v1_roster_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -73,7 +73,7 @@ func (x *RosterMember) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RosterMember.ProtoReflect.Descriptor instead.
 func (*RosterMember) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{0}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *RosterMember) GetId() string {
@@ -211,7 +211,7 @@ type Roster struct {
 
 func (x *Roster) Reset() {
 	*x = Roster{}
-	mi := &file_academy_v1_roster_proto_msgTypes[1]
+	mi := &file_competition_v1_roster_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -223,7 +223,7 @@ func (x *Roster) String() string {
 func (*Roster) ProtoMessage() {}
 
 func (x *Roster) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[1]
+	mi := &file_competition_v1_roster_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -236,7 +236,7 @@ func (x *Roster) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Roster.ProtoReflect.Descriptor instead.
 func (*Roster) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{1}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Roster) GetId() string {
@@ -358,7 +358,7 @@ type CreateRosterRequest struct {
 
 func (x *CreateRosterRequest) Reset() {
 	*x = CreateRosterRequest{}
-	mi := &file_academy_v1_roster_proto_msgTypes[2]
+	mi := &file_competition_v1_roster_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -370,7 +370,7 @@ func (x *CreateRosterRequest) String() string {
 func (*CreateRosterRequest) ProtoMessage() {}
 
 func (x *CreateRosterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[2]
+	mi := &file_competition_v1_roster_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -383,7 +383,7 @@ func (x *CreateRosterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateRosterRequest.ProtoReflect.Descriptor instead.
 func (*CreateRosterRequest) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{2}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CreateRosterRequest) GetAcademyBranchId() string {
@@ -437,7 +437,7 @@ type CreateRosterResponse struct {
 
 func (x *CreateRosterResponse) Reset() {
 	*x = CreateRosterResponse{}
-	mi := &file_academy_v1_roster_proto_msgTypes[3]
+	mi := &file_competition_v1_roster_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -449,7 +449,7 @@ func (x *CreateRosterResponse) String() string {
 func (*CreateRosterResponse) ProtoMessage() {}
 
 func (x *CreateRosterResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[3]
+	mi := &file_competition_v1_roster_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -462,7 +462,7 @@ func (x *CreateRosterResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateRosterResponse.ProtoReflect.Descriptor instead.
 func (*CreateRosterResponse) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{3}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateRosterResponse) GetRoster() *Roster {
@@ -481,7 +481,7 @@ type GetRosterRequest struct {
 
 func (x *GetRosterRequest) Reset() {
 	*x = GetRosterRequest{}
-	mi := &file_academy_v1_roster_proto_msgTypes[4]
+	mi := &file_competition_v1_roster_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -493,7 +493,7 @@ func (x *GetRosterRequest) String() string {
 func (*GetRosterRequest) ProtoMessage() {}
 
 func (x *GetRosterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[4]
+	mi := &file_competition_v1_roster_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -506,7 +506,7 @@ func (x *GetRosterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRosterRequest.ProtoReflect.Descriptor instead.
 func (*GetRosterRequest) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{4}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetRosterRequest) GetId() string {
@@ -525,7 +525,7 @@ type GetRosterResponse struct {
 
 func (x *GetRosterResponse) Reset() {
 	*x = GetRosterResponse{}
-	mi := &file_academy_v1_roster_proto_msgTypes[5]
+	mi := &file_competition_v1_roster_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -537,7 +537,7 @@ func (x *GetRosterResponse) String() string {
 func (*GetRosterResponse) ProtoMessage() {}
 
 func (x *GetRosterResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[5]
+	mi := &file_competition_v1_roster_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -550,7 +550,7 @@ func (x *GetRosterResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRosterResponse.ProtoReflect.Descriptor instead.
 func (*GetRosterResponse) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{5}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetRosterResponse) GetRoster() *Roster {
@@ -575,7 +575,7 @@ type ListRostersRequest struct {
 
 func (x *ListRostersRequest) Reset() {
 	*x = ListRostersRequest{}
-	mi := &file_academy_v1_roster_proto_msgTypes[6]
+	mi := &file_competition_v1_roster_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -587,7 +587,7 @@ func (x *ListRostersRequest) String() string {
 func (*ListRostersRequest) ProtoMessage() {}
 
 func (x *ListRostersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[6]
+	mi := &file_competition_v1_roster_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -600,7 +600,7 @@ func (x *ListRostersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRostersRequest.ProtoReflect.Descriptor instead.
 func (*ListRostersRequest) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{6}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListRostersRequest) GetCompetitionId() string {
@@ -664,7 +664,7 @@ type ListRostersResponse struct {
 
 func (x *ListRostersResponse) Reset() {
 	*x = ListRostersResponse{}
-	mi := &file_academy_v1_roster_proto_msgTypes[7]
+	mi := &file_competition_v1_roster_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -676,7 +676,7 @@ func (x *ListRostersResponse) String() string {
 func (*ListRostersResponse) ProtoMessage() {}
 
 func (x *ListRostersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[7]
+	mi := &file_competition_v1_roster_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -689,7 +689,7 @@ func (x *ListRostersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRostersResponse.ProtoReflect.Descriptor instead.
 func (*ListRostersResponse) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{7}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ListRostersResponse) GetRosters() []*Roster {
@@ -734,7 +734,7 @@ type UpdateRosterRequest struct {
 
 func (x *UpdateRosterRequest) Reset() {
 	*x = UpdateRosterRequest{}
-	mi := &file_academy_v1_roster_proto_msgTypes[8]
+	mi := &file_competition_v1_roster_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -746,7 +746,7 @@ func (x *UpdateRosterRequest) String() string {
 func (*UpdateRosterRequest) ProtoMessage() {}
 
 func (x *UpdateRosterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[8]
+	mi := &file_competition_v1_roster_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -759,7 +759,7 @@ func (x *UpdateRosterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRosterRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRosterRequest) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{8}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *UpdateRosterRequest) GetId() string {
@@ -813,7 +813,7 @@ type UpdateRosterResponse struct {
 
 func (x *UpdateRosterResponse) Reset() {
 	*x = UpdateRosterResponse{}
-	mi := &file_academy_v1_roster_proto_msgTypes[9]
+	mi := &file_competition_v1_roster_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -825,7 +825,7 @@ func (x *UpdateRosterResponse) String() string {
 func (*UpdateRosterResponse) ProtoMessage() {}
 
 func (x *UpdateRosterResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[9]
+	mi := &file_competition_v1_roster_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -838,7 +838,7 @@ func (x *UpdateRosterResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRosterResponse.ProtoReflect.Descriptor instead.
 func (*UpdateRosterResponse) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{9}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *UpdateRosterResponse) GetRoster() *Roster {
@@ -858,7 +858,7 @@ type DeleteRosterRequest struct {
 
 func (x *DeleteRosterRequest) Reset() {
 	*x = DeleteRosterRequest{}
-	mi := &file_academy_v1_roster_proto_msgTypes[10]
+	mi := &file_competition_v1_roster_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -870,7 +870,7 @@ func (x *DeleteRosterRequest) String() string {
 func (*DeleteRosterRequest) ProtoMessage() {}
 
 func (x *DeleteRosterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[10]
+	mi := &file_competition_v1_roster_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -883,7 +883,7 @@ func (x *DeleteRosterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteRosterRequest.ProtoReflect.Descriptor instead.
 func (*DeleteRosterRequest) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{10}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DeleteRosterRequest) GetId() string {
@@ -909,7 +909,7 @@ type DeleteRosterResponse struct {
 
 func (x *DeleteRosterResponse) Reset() {
 	*x = DeleteRosterResponse{}
-	mi := &file_academy_v1_roster_proto_msgTypes[11]
+	mi := &file_competition_v1_roster_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -921,7 +921,7 @@ func (x *DeleteRosterResponse) String() string {
 func (*DeleteRosterResponse) ProtoMessage() {}
 
 func (x *DeleteRosterResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[11]
+	mi := &file_competition_v1_roster_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -934,7 +934,7 @@ func (x *DeleteRosterResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteRosterResponse.ProtoReflect.Descriptor instead.
 func (*DeleteRosterResponse) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{11}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DeleteRosterResponse) GetId() string {
@@ -953,7 +953,7 @@ type GetRosterMembersRequest struct {
 
 func (x *GetRosterMembersRequest) Reset() {
 	*x = GetRosterMembersRequest{}
-	mi := &file_academy_v1_roster_proto_msgTypes[12]
+	mi := &file_competition_v1_roster_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -965,7 +965,7 @@ func (x *GetRosterMembersRequest) String() string {
 func (*GetRosterMembersRequest) ProtoMessage() {}
 
 func (x *GetRosterMembersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[12]
+	mi := &file_competition_v1_roster_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -978,7 +978,7 @@ func (x *GetRosterMembersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRosterMembersRequest.ProtoReflect.Descriptor instead.
 func (*GetRosterMembersRequest) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{12}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *GetRosterMembersRequest) GetRosterId() string {
@@ -997,7 +997,7 @@ type GetRosterMembersResponse struct {
 
 func (x *GetRosterMembersResponse) Reset() {
 	*x = GetRosterMembersResponse{}
-	mi := &file_academy_v1_roster_proto_msgTypes[13]
+	mi := &file_competition_v1_roster_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1009,7 +1009,7 @@ func (x *GetRosterMembersResponse) String() string {
 func (*GetRosterMembersResponse) ProtoMessage() {}
 
 func (x *GetRosterMembersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[13]
+	mi := &file_competition_v1_roster_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1022,7 +1022,7 @@ func (x *GetRosterMembersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRosterMembersResponse.ProtoReflect.Descriptor instead.
 func (*GetRosterMembersResponse) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{13}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetRosterMembersResponse) GetMembers() []*RosterMember {
@@ -1042,7 +1042,7 @@ type GetRosterMemberRequest struct {
 
 func (x *GetRosterMemberRequest) Reset() {
 	*x = GetRosterMemberRequest{}
-	mi := &file_academy_v1_roster_proto_msgTypes[14]
+	mi := &file_competition_v1_roster_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1054,7 +1054,7 @@ func (x *GetRosterMemberRequest) String() string {
 func (*GetRosterMemberRequest) ProtoMessage() {}
 
 func (x *GetRosterMemberRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[14]
+	mi := &file_competition_v1_roster_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1067,7 +1067,7 @@ func (x *GetRosterMemberRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRosterMemberRequest.ProtoReflect.Descriptor instead.
 func (*GetRosterMemberRequest) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{14}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *GetRosterMemberRequest) GetRosterId() string {
@@ -1093,7 +1093,7 @@ type GetRosterMemberResponse struct {
 
 func (x *GetRosterMemberResponse) Reset() {
 	*x = GetRosterMemberResponse{}
-	mi := &file_academy_v1_roster_proto_msgTypes[15]
+	mi := &file_competition_v1_roster_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1105,7 +1105,7 @@ func (x *GetRosterMemberResponse) String() string {
 func (*GetRosterMemberResponse) ProtoMessage() {}
 
 func (x *GetRosterMemberResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[15]
+	mi := &file_competition_v1_roster_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1118,7 +1118,7 @@ func (x *GetRosterMemberResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRosterMemberResponse.ProtoReflect.Descriptor instead.
 func (*GetRosterMemberResponse) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{15}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetRosterMemberResponse) GetMember() *RosterMember {
@@ -1142,7 +1142,7 @@ type AddRosterMemberRequest struct {
 
 func (x *AddRosterMemberRequest) Reset() {
 	*x = AddRosterMemberRequest{}
-	mi := &file_academy_v1_roster_proto_msgTypes[16]
+	mi := &file_competition_v1_roster_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1154,7 +1154,7 @@ func (x *AddRosterMemberRequest) String() string {
 func (*AddRosterMemberRequest) ProtoMessage() {}
 
 func (x *AddRosterMemberRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[16]
+	mi := &file_competition_v1_roster_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1167,7 +1167,7 @@ func (x *AddRosterMemberRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddRosterMemberRequest.ProtoReflect.Descriptor instead.
 func (*AddRosterMemberRequest) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{16}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *AddRosterMemberRequest) GetRosterId() string {
@@ -1221,7 +1221,7 @@ type AddRosterMemberResponse struct {
 
 func (x *AddRosterMemberResponse) Reset() {
 	*x = AddRosterMemberResponse{}
-	mi := &file_academy_v1_roster_proto_msgTypes[17]
+	mi := &file_competition_v1_roster_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1233,7 +1233,7 @@ func (x *AddRosterMemberResponse) String() string {
 func (*AddRosterMemberResponse) ProtoMessage() {}
 
 func (x *AddRosterMemberResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[17]
+	mi := &file_competition_v1_roster_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1246,7 +1246,7 @@ func (x *AddRosterMemberResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddRosterMemberResponse.ProtoReflect.Descriptor instead.
 func (*AddRosterMemberResponse) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{17}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *AddRosterMemberResponse) GetMember() *RosterMember {
@@ -1268,7 +1268,7 @@ type RemoveRosterMemberRequest struct {
 
 func (x *RemoveRosterMemberRequest) Reset() {
 	*x = RemoveRosterMemberRequest{}
-	mi := &file_academy_v1_roster_proto_msgTypes[18]
+	mi := &file_competition_v1_roster_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1280,7 +1280,7 @@ func (x *RemoveRosterMemberRequest) String() string {
 func (*RemoveRosterMemberRequest) ProtoMessage() {}
 
 func (x *RemoveRosterMemberRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[18]
+	mi := &file_competition_v1_roster_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1293,7 +1293,7 @@ func (x *RemoveRosterMemberRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveRosterMemberRequest.ProtoReflect.Descriptor instead.
 func (*RemoveRosterMemberRequest) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{18}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *RemoveRosterMemberRequest) GetRosterId() string {
@@ -1333,7 +1333,7 @@ type RemoveRosterMemberResponse struct {
 
 func (x *RemoveRosterMemberResponse) Reset() {
 	*x = RemoveRosterMemberResponse{}
-	mi := &file_academy_v1_roster_proto_msgTypes[19]
+	mi := &file_competition_v1_roster_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1345,7 +1345,7 @@ func (x *RemoveRosterMemberResponse) String() string {
 func (*RemoveRosterMemberResponse) ProtoMessage() {}
 
 func (x *RemoveRosterMemberResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[19]
+	mi := &file_competition_v1_roster_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1358,7 +1358,7 @@ func (x *RemoveRosterMemberResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveRosterMemberResponse.ProtoReflect.Descriptor instead.
 func (*RemoveRosterMemberResponse) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{19}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *RemoveRosterMemberResponse) GetMemberId() string {
@@ -1378,7 +1378,7 @@ type DeleteRosterMemberRequest struct {
 
 func (x *DeleteRosterMemberRequest) Reset() {
 	*x = DeleteRosterMemberRequest{}
-	mi := &file_academy_v1_roster_proto_msgTypes[20]
+	mi := &file_competition_v1_roster_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1390,7 +1390,7 @@ func (x *DeleteRosterMemberRequest) String() string {
 func (*DeleteRosterMemberRequest) ProtoMessage() {}
 
 func (x *DeleteRosterMemberRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[20]
+	mi := &file_competition_v1_roster_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1403,7 +1403,7 @@ func (x *DeleteRosterMemberRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteRosterMemberRequest.ProtoReflect.Descriptor instead.
 func (*DeleteRosterMemberRequest) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{20}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *DeleteRosterMemberRequest) GetRosterId() string {
@@ -1429,7 +1429,7 @@ type DeleteRosterMemberResponse struct {
 
 func (x *DeleteRosterMemberResponse) Reset() {
 	*x = DeleteRosterMemberResponse{}
-	mi := &file_academy_v1_roster_proto_msgTypes[21]
+	mi := &file_competition_v1_roster_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1441,7 +1441,7 @@ func (x *DeleteRosterMemberResponse) String() string {
 func (*DeleteRosterMemberResponse) ProtoMessage() {}
 
 func (x *DeleteRosterMemberResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_academy_v1_roster_proto_msgTypes[21]
+	mi := &file_competition_v1_roster_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1454,7 +1454,7 @@ func (x *DeleteRosterMemberResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteRosterMemberResponse.ProtoReflect.Descriptor instead.
 func (*DeleteRosterMemberResponse) Descriptor() ([]byte, []int) {
-	return file_academy_v1_roster_proto_rawDescGZIP(), []int{21}
+	return file_competition_v1_roster_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *DeleteRosterMemberResponse) GetMemberId() string {
@@ -1464,12 +1464,11 @@ func (x *DeleteRosterMemberResponse) GetMemberId() string {
 	return ""
 }
 
-var File_academy_v1_roster_proto protoreflect.FileDescriptor
+var File_competition_v1_roster_proto protoreflect.FileDescriptor
 
-const file_academy_v1_roster_proto_rawDesc = "" +
+const file_competition_v1_roster_proto_rawDesc = "" +
 	"\n" +
-	"\x17academy/v1/roster.proto\x12\n" +
-	"academy.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16common/v1/common.proto\"\x84\x06\n" +
+	"\x1bcompetition/v1/roster.proto\x12\x0ecompetition.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16common/v1/common.proto\"\x84\x06\n" +
 	"\fRosterMember\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\troster_id\x18\x02 \x01(\tR\brosterId\x12\x1d\n" +
@@ -1496,7 +1495,7 @@ const file_academy_v1_roster_proto_rawDesc = "" +
 	"\v_removed_atB\x10\n" +
 	"\x0e_removed_by_idB\x11\n" +
 	"\x0f_removal_reasonB\r\n" +
-	"\v_removed_by\"\xba\x05\n" +
+	"\v_removed_by\"\xbe\x05\n" +
 	"\x06Roster\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12*\n" +
 	"\x11academy_branch_id\x18\x02 \x01(\tR\x0facademyBranchId\x12*\n" +
@@ -1513,8 +1512,8 @@ const file_academy_v1_roster_proto_rawDesc = "" +
 	"deleted_at\x18\n" +
 	" \x01(\v2\x1a.google.protobuf.TimestampH\x01R\tdeletedAt\x88\x01\x01\x12!\n" +
 	"\fmember_count\x18\v \x01(\x03R\vmemberCount\x12J\n" +
-	"\x0eacademy_branch\x18\f \x01(\v2\x1e.common.v1.AcademyBranchSimpleH\x02R\racademyBranch\x88\x01\x01\x122\n" +
-	"\amembers\x18\r \x03(\v2\x18.academy.v1.RosterMemberR\amembers\x12&\n" +
+	"\x0eacademy_branch\x18\f \x01(\v2\x1e.common.v1.AcademyBranchSimpleH\x02R\racademyBranch\x88\x01\x01\x126\n" +
+	"\amembers\x18\r \x03(\v2\x1c.competition.v1.RosterMemberR\amembers\x12&\n" +
 	"\x03tag\x18\x0e \x01(\v2\x14.common.v1.TagSimpleR\x03tag\x12/\n" +
 	"\x06status\x18\x0f \x01(\v2\x17.common.v1.StatusSimpleR\x06statusB\x11\n" +
 	"\x0f_competition_idB\r\n" +
@@ -1527,13 +1526,13 @@ const file_academy_v1_roster_proto_rawDesc = "" +
 	"\x06tag_id\x18\x04 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05tagId\x12%\n" +
 	"\tstatus_id\x18\x05 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\bstatusId\x12\"\n" +
 	"\bmax_size\x18\x06 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\amaxSizeB\x11\n" +
-	"\x0f_competition_id\"B\n" +
-	"\x14CreateRosterResponse\x12*\n" +
-	"\x06roster\x18\x01 \x01(\v2\x12.academy.v1.RosterR\x06roster\",\n" +
+	"\x0f_competition_id\"F\n" +
+	"\x14CreateRosterResponse\x12.\n" +
+	"\x06roster\x18\x01 \x01(\v2\x16.competition.v1.RosterR\x06roster\",\n" +
 	"\x10GetRosterRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"?\n" +
-	"\x11GetRosterResponse\x12*\n" +
-	"\x06roster\x18\x01 \x01(\v2\x12.academy.v1.RosterR\x06roster\"\xef\x02\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"C\n" +
+	"\x11GetRosterResponse\x12.\n" +
+	"\x06roster\x18\x01 \x01(\v2\x16.competition.v1.RosterR\x06roster\"\xef\x02\n" +
 	"\x12ListRostersRequest\x124\n" +
 	"\x0ecompetition_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01H\x00R\rcompetitionId\x88\x01\x01\x12*\n" +
 	"\tbranch_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01H\x01R\bbranchId\x88\x01\x01\x12*\n" +
@@ -1548,9 +1547,9 @@ const file_academy_v1_roster_proto_rawDesc = "" +
 	"\n" +
 	"_status_idB\t\n" +
 	"\a_tag_idB\t\n" +
-	"\a_search\"\x8a\x01\n" +
-	"\x13ListRostersResponse\x12,\n" +
-	"\arosters\x18\x01 \x03(\v2\x12.academy.v1.RosterR\arosters\x12\x14\n" +
+	"\a_search\"\x8e\x01\n" +
+	"\x13ListRostersResponse\x120\n" +
+	"\arosters\x18\x01 \x03(\v2\x16.competition.v1.RosterR\arosters\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"\xc4\x02\n" +
@@ -1566,23 +1565,23 @@ const file_academy_v1_roster_proto_rawDesc = "" +
 	"\a_tag_idB\f\n" +
 	"\n" +
 	"_status_idB\v\n" +
-	"\t_max_size\"B\n" +
-	"\x14UpdateRosterResponse\x12*\n" +
-	"\x06roster\x18\x01 \x01(\v2\x12.academy.v1.RosterR\x06roster\"]\n" +
+	"\t_max_size\"F\n" +
+	"\x14UpdateRosterResponse\x12.\n" +
+	"\x06roster\x18\x01 \x01(\v2\x16.competition.v1.RosterR\x06roster\"]\n" +
 	"\x13DeleteRosterRequest\x12\x18\n" +
 	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12,\n" +
 	"\rdeleted_by_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vdeletedById\"&\n" +
 	"\x14DeleteRosterResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"@\n" +
 	"\x17GetRosterMembersRequest\x12%\n" +
-	"\troster_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\brosterId\"N\n" +
-	"\x18GetRosterMembersResponse\x122\n" +
-	"\amembers\x18\x01 \x03(\v2\x18.academy.v1.RosterMemberR\amembers\"f\n" +
+	"\troster_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\brosterId\"R\n" +
+	"\x18GetRosterMembersResponse\x126\n" +
+	"\amembers\x18\x01 \x03(\v2\x1c.competition.v1.RosterMemberR\amembers\"f\n" +
 	"\x16GetRosterMemberRequest\x12%\n" +
 	"\troster_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\brosterId\x12%\n" +
-	"\tmember_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\bmemberId\"K\n" +
-	"\x17GetRosterMemberResponse\x120\n" +
-	"\x06member\x18\x01 \x01(\v2\x18.academy.v1.RosterMemberR\x06member\"\xa0\x02\n" +
+	"\tmember_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\bmemberId\"O\n" +
+	"\x17GetRosterMemberResponse\x124\n" +
+	"\x06member\x18\x01 \x01(\v2\x1c.competition.v1.RosterMemberR\x06member\"\xa0\x02\n" +
 	"\x16AddRosterMemberRequest\x12%\n" +
 	"\troster_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\brosterId\x12'\n" +
 	"\n" +
@@ -1592,9 +1591,9 @@ const file_academy_v1_roster_proto_rawDesc = "" +
 	"positionId\x12%\n" +
 	"\tstatus_id\x18\x05 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\bstatusId\x12(\n" +
 	"\vadded_by_id\x18\x06 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\taddedByIdB\x10\n" +
-	"\x0e_jersey_number\"K\n" +
-	"\x17AddRosterMemberResponse\x120\n" +
-	"\x06member\x18\x01 \x01(\v2\x18.academy.v1.RosterMemberR\x06member\"\xc7\x01\n" +
+	"\x0e_jersey_number\"O\n" +
+	"\x17AddRosterMemberResponse\x124\n" +
+	"\x06member\x18\x01 \x01(\v2\x1c.competition.v1.RosterMemberR\x06member\"\xc7\x01\n" +
 	"\x19RemoveRosterMemberRequest\x12%\n" +
 	"\troster_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\brosterId\x12%\n" +
 	"\tmember_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\bmemberId\x12,\n" +
@@ -1606,103 +1605,103 @@ const file_academy_v1_roster_proto_rawDesc = "" +
 	"\troster_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\brosterId\x12%\n" +
 	"\tmember_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\bmemberId\"9\n" +
 	"\x1aDeleteRosterMemberResponse\x12\x1b\n" +
-	"\tmember_id\x18\x01 \x01(\tR\bmemberId2\x83\a\n" +
-	"\rRosterService\x12Q\n" +
-	"\fCreateRoster\x12\x1f.academy.v1.CreateRosterRequest\x1a .academy.v1.CreateRosterResponse\x12H\n" +
-	"\tGetRoster\x12\x1c.academy.v1.GetRosterRequest\x1a\x1d.academy.v1.GetRosterResponse\x12N\n" +
-	"\vListRosters\x12\x1e.academy.v1.ListRostersRequest\x1a\x1f.academy.v1.ListRostersResponse\x12Q\n" +
-	"\fUpdateRoster\x12\x1f.academy.v1.UpdateRosterRequest\x1a .academy.v1.UpdateRosterResponse\x12Q\n" +
-	"\fDeleteRoster\x12\x1f.academy.v1.DeleteRosterRequest\x1a .academy.v1.DeleteRosterResponse\x12]\n" +
-	"\x10GetRosterMembers\x12#.academy.v1.GetRosterMembersRequest\x1a$.academy.v1.GetRosterMembersResponse\x12Z\n" +
-	"\x0fGetRosterMember\x12\".academy.v1.GetRosterMemberRequest\x1a#.academy.v1.GetRosterMemberResponse\x12Z\n" +
-	"\x0fAddRosterMember\x12\".academy.v1.AddRosterMemberRequest\x1a#.academy.v1.AddRosterMemberResponse\x12c\n" +
-	"\x12RemoveRosterMember\x12%.academy.v1.RemoveRosterMemberRequest\x1a&.academy.v1.RemoveRosterMemberResponse\x12c\n" +
-	"\x12DeleteRosterMember\x12%.academy.v1.DeleteRosterMemberRequest\x1a&.academy.v1.DeleteRosterMemberResponseB.Z,microservice-golang/gen/academy/v1;academyv1b\x06proto3"
+	"\tmember_id\x18\x01 \x01(\tR\bmemberId2\xd3\a\n" +
+	"\rRosterService\x12Y\n" +
+	"\fCreateRoster\x12#.competition.v1.CreateRosterRequest\x1a$.competition.v1.CreateRosterResponse\x12P\n" +
+	"\tGetRoster\x12 .competition.v1.GetRosterRequest\x1a!.competition.v1.GetRosterResponse\x12V\n" +
+	"\vListRosters\x12\".competition.v1.ListRostersRequest\x1a#.competition.v1.ListRostersResponse\x12Y\n" +
+	"\fUpdateRoster\x12#.competition.v1.UpdateRosterRequest\x1a$.competition.v1.UpdateRosterResponse\x12Y\n" +
+	"\fDeleteRoster\x12#.competition.v1.DeleteRosterRequest\x1a$.competition.v1.DeleteRosterResponse\x12e\n" +
+	"\x10GetRosterMembers\x12'.competition.v1.GetRosterMembersRequest\x1a(.competition.v1.GetRosterMembersResponse\x12b\n" +
+	"\x0fGetRosterMember\x12&.competition.v1.GetRosterMemberRequest\x1a'.competition.v1.GetRosterMemberResponse\x12b\n" +
+	"\x0fAddRosterMember\x12&.competition.v1.AddRosterMemberRequest\x1a'.competition.v1.AddRosterMemberResponse\x12k\n" +
+	"\x12RemoveRosterMember\x12).competition.v1.RemoveRosterMemberRequest\x1a*.competition.v1.RemoveRosterMemberResponse\x12k\n" +
+	"\x12DeleteRosterMember\x12).competition.v1.DeleteRosterMemberRequest\x1a*.competition.v1.DeleteRosterMemberResponseB6Z4microservice-golang/gen/competition/v1;competitionv1b\x06proto3"
 
 var (
-	file_academy_v1_roster_proto_rawDescOnce sync.Once
-	file_academy_v1_roster_proto_rawDescData []byte
+	file_competition_v1_roster_proto_rawDescOnce sync.Once
+	file_competition_v1_roster_proto_rawDescData []byte
 )
 
-func file_academy_v1_roster_proto_rawDescGZIP() []byte {
-	file_academy_v1_roster_proto_rawDescOnce.Do(func() {
-		file_academy_v1_roster_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_academy_v1_roster_proto_rawDesc), len(file_academy_v1_roster_proto_rawDesc)))
+func file_competition_v1_roster_proto_rawDescGZIP() []byte {
+	file_competition_v1_roster_proto_rawDescOnce.Do(func() {
+		file_competition_v1_roster_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_competition_v1_roster_proto_rawDesc), len(file_competition_v1_roster_proto_rawDesc)))
 	})
-	return file_academy_v1_roster_proto_rawDescData
+	return file_competition_v1_roster_proto_rawDescData
 }
 
-var file_academy_v1_roster_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
-var file_academy_v1_roster_proto_goTypes = []any{
-	(*RosterMember)(nil),               // 0: academy.v1.RosterMember
-	(*Roster)(nil),                     // 1: academy.v1.Roster
-	(*CreateRosterRequest)(nil),        // 2: academy.v1.CreateRosterRequest
-	(*CreateRosterResponse)(nil),       // 3: academy.v1.CreateRosterResponse
-	(*GetRosterRequest)(nil),           // 4: academy.v1.GetRosterRequest
-	(*GetRosterResponse)(nil),          // 5: academy.v1.GetRosterResponse
-	(*ListRostersRequest)(nil),         // 6: academy.v1.ListRostersRequest
-	(*ListRostersResponse)(nil),        // 7: academy.v1.ListRostersResponse
-	(*UpdateRosterRequest)(nil),        // 8: academy.v1.UpdateRosterRequest
-	(*UpdateRosterResponse)(nil),       // 9: academy.v1.UpdateRosterResponse
-	(*DeleteRosterRequest)(nil),        // 10: academy.v1.DeleteRosterRequest
-	(*DeleteRosterResponse)(nil),       // 11: academy.v1.DeleteRosterResponse
-	(*GetRosterMembersRequest)(nil),    // 12: academy.v1.GetRosterMembersRequest
-	(*GetRosterMembersResponse)(nil),   // 13: academy.v1.GetRosterMembersResponse
-	(*GetRosterMemberRequest)(nil),     // 14: academy.v1.GetRosterMemberRequest
-	(*GetRosterMemberResponse)(nil),    // 15: academy.v1.GetRosterMemberResponse
-	(*AddRosterMemberRequest)(nil),     // 16: academy.v1.AddRosterMemberRequest
-	(*AddRosterMemberResponse)(nil),    // 17: academy.v1.AddRosterMemberResponse
-	(*RemoveRosterMemberRequest)(nil),  // 18: academy.v1.RemoveRosterMemberRequest
-	(*RemoveRosterMemberResponse)(nil), // 19: academy.v1.RemoveRosterMemberResponse
-	(*DeleteRosterMemberRequest)(nil),  // 20: academy.v1.DeleteRosterMemberRequest
-	(*DeleteRosterMemberResponse)(nil), // 21: academy.v1.DeleteRosterMemberResponse
+var file_competition_v1_roster_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
+var file_competition_v1_roster_proto_goTypes = []any{
+	(*RosterMember)(nil),               // 0: competition.v1.RosterMember
+	(*Roster)(nil),                     // 1: competition.v1.Roster
+	(*CreateRosterRequest)(nil),        // 2: competition.v1.CreateRosterRequest
+	(*CreateRosterResponse)(nil),       // 3: competition.v1.CreateRosterResponse
+	(*GetRosterRequest)(nil),           // 4: competition.v1.GetRosterRequest
+	(*GetRosterResponse)(nil),          // 5: competition.v1.GetRosterResponse
+	(*ListRostersRequest)(nil),         // 6: competition.v1.ListRostersRequest
+	(*ListRostersResponse)(nil),        // 7: competition.v1.ListRostersResponse
+	(*UpdateRosterRequest)(nil),        // 8: competition.v1.UpdateRosterRequest
+	(*UpdateRosterResponse)(nil),       // 9: competition.v1.UpdateRosterResponse
+	(*DeleteRosterRequest)(nil),        // 10: competition.v1.DeleteRosterRequest
+	(*DeleteRosterResponse)(nil),       // 11: competition.v1.DeleteRosterResponse
+	(*GetRosterMembersRequest)(nil),    // 12: competition.v1.GetRosterMembersRequest
+	(*GetRosterMembersResponse)(nil),   // 13: competition.v1.GetRosterMembersResponse
+	(*GetRosterMemberRequest)(nil),     // 14: competition.v1.GetRosterMemberRequest
+	(*GetRosterMemberResponse)(nil),    // 15: competition.v1.GetRosterMemberResponse
+	(*AddRosterMemberRequest)(nil),     // 16: competition.v1.AddRosterMemberRequest
+	(*AddRosterMemberResponse)(nil),    // 17: competition.v1.AddRosterMemberResponse
+	(*RemoveRosterMemberRequest)(nil),  // 18: competition.v1.RemoveRosterMemberRequest
+	(*RemoveRosterMemberResponse)(nil), // 19: competition.v1.RemoveRosterMemberResponse
+	(*DeleteRosterMemberRequest)(nil),  // 20: competition.v1.DeleteRosterMemberRequest
+	(*DeleteRosterMemberResponse)(nil), // 21: competition.v1.DeleteRosterMemberResponse
 	(*timestamppb.Timestamp)(nil),      // 22: google.protobuf.Timestamp
 	(*v1.UserSimple)(nil),              // 23: common.v1.UserSimple
 	(*v1.TagSimple)(nil),               // 24: common.v1.TagSimple
 	(*v1.StatusSimple)(nil),            // 25: common.v1.StatusSimple
 	(*v1.AcademyBranchSimple)(nil),     // 26: common.v1.AcademyBranchSimple
 }
-var file_academy_v1_roster_proto_depIdxs = []int32{
-	22, // 0: academy.v1.RosterMember.added_at:type_name -> google.protobuf.Timestamp
-	22, // 1: academy.v1.RosterMember.removed_at:type_name -> google.protobuf.Timestamp
-	23, // 2: academy.v1.RosterMember.athlete:type_name -> common.v1.UserSimple
-	24, // 3: academy.v1.RosterMember.position:type_name -> common.v1.TagSimple
-	25, // 4: academy.v1.RosterMember.status:type_name -> common.v1.StatusSimple
-	23, // 5: academy.v1.RosterMember.added_by:type_name -> common.v1.UserSimple
-	23, // 6: academy.v1.RosterMember.removed_by:type_name -> common.v1.UserSimple
-	22, // 7: academy.v1.Roster.created_at:type_name -> google.protobuf.Timestamp
-	22, // 8: academy.v1.Roster.updated_at:type_name -> google.protobuf.Timestamp
-	22, // 9: academy.v1.Roster.deleted_at:type_name -> google.protobuf.Timestamp
-	26, // 10: academy.v1.Roster.academy_branch:type_name -> common.v1.AcademyBranchSimple
-	0,  // 11: academy.v1.Roster.members:type_name -> academy.v1.RosterMember
-	24, // 12: academy.v1.Roster.tag:type_name -> common.v1.TagSimple
-	25, // 13: academy.v1.Roster.status:type_name -> common.v1.StatusSimple
-	1,  // 14: academy.v1.CreateRosterResponse.roster:type_name -> academy.v1.Roster
-	1,  // 15: academy.v1.GetRosterResponse.roster:type_name -> academy.v1.Roster
-	1,  // 16: academy.v1.ListRostersResponse.rosters:type_name -> academy.v1.Roster
-	1,  // 17: academy.v1.UpdateRosterResponse.roster:type_name -> academy.v1.Roster
-	0,  // 18: academy.v1.GetRosterMembersResponse.members:type_name -> academy.v1.RosterMember
-	0,  // 19: academy.v1.GetRosterMemberResponse.member:type_name -> academy.v1.RosterMember
-	0,  // 20: academy.v1.AddRosterMemberResponse.member:type_name -> academy.v1.RosterMember
-	2,  // 21: academy.v1.RosterService.CreateRoster:input_type -> academy.v1.CreateRosterRequest
-	4,  // 22: academy.v1.RosterService.GetRoster:input_type -> academy.v1.GetRosterRequest
-	6,  // 23: academy.v1.RosterService.ListRosters:input_type -> academy.v1.ListRostersRequest
-	8,  // 24: academy.v1.RosterService.UpdateRoster:input_type -> academy.v1.UpdateRosterRequest
-	10, // 25: academy.v1.RosterService.DeleteRoster:input_type -> academy.v1.DeleteRosterRequest
-	12, // 26: academy.v1.RosterService.GetRosterMembers:input_type -> academy.v1.GetRosterMembersRequest
-	14, // 27: academy.v1.RosterService.GetRosterMember:input_type -> academy.v1.GetRosterMemberRequest
-	16, // 28: academy.v1.RosterService.AddRosterMember:input_type -> academy.v1.AddRosterMemberRequest
-	18, // 29: academy.v1.RosterService.RemoveRosterMember:input_type -> academy.v1.RemoveRosterMemberRequest
-	20, // 30: academy.v1.RosterService.DeleteRosterMember:input_type -> academy.v1.DeleteRosterMemberRequest
-	3,  // 31: academy.v1.RosterService.CreateRoster:output_type -> academy.v1.CreateRosterResponse
-	5,  // 32: academy.v1.RosterService.GetRoster:output_type -> academy.v1.GetRosterResponse
-	7,  // 33: academy.v1.RosterService.ListRosters:output_type -> academy.v1.ListRostersResponse
-	9,  // 34: academy.v1.RosterService.UpdateRoster:output_type -> academy.v1.UpdateRosterResponse
-	11, // 35: academy.v1.RosterService.DeleteRoster:output_type -> academy.v1.DeleteRosterResponse
-	13, // 36: academy.v1.RosterService.GetRosterMembers:output_type -> academy.v1.GetRosterMembersResponse
-	15, // 37: academy.v1.RosterService.GetRosterMember:output_type -> academy.v1.GetRosterMemberResponse
-	17, // 38: academy.v1.RosterService.AddRosterMember:output_type -> academy.v1.AddRosterMemberResponse
-	19, // 39: academy.v1.RosterService.RemoveRosterMember:output_type -> academy.v1.RemoveRosterMemberResponse
-	21, // 40: academy.v1.RosterService.DeleteRosterMember:output_type -> academy.v1.DeleteRosterMemberResponse
+var file_competition_v1_roster_proto_depIdxs = []int32{
+	22, // 0: competition.v1.RosterMember.added_at:type_name -> google.protobuf.Timestamp
+	22, // 1: competition.v1.RosterMember.removed_at:type_name -> google.protobuf.Timestamp
+	23, // 2: competition.v1.RosterMember.athlete:type_name -> common.v1.UserSimple
+	24, // 3: competition.v1.RosterMember.position:type_name -> common.v1.TagSimple
+	25, // 4: competition.v1.RosterMember.status:type_name -> common.v1.StatusSimple
+	23, // 5: competition.v1.RosterMember.added_by:type_name -> common.v1.UserSimple
+	23, // 6: competition.v1.RosterMember.removed_by:type_name -> common.v1.UserSimple
+	22, // 7: competition.v1.Roster.created_at:type_name -> google.protobuf.Timestamp
+	22, // 8: competition.v1.Roster.updated_at:type_name -> google.protobuf.Timestamp
+	22, // 9: competition.v1.Roster.deleted_at:type_name -> google.protobuf.Timestamp
+	26, // 10: competition.v1.Roster.academy_branch:type_name -> common.v1.AcademyBranchSimple
+	0,  // 11: competition.v1.Roster.members:type_name -> competition.v1.RosterMember
+	24, // 12: competition.v1.Roster.tag:type_name -> common.v1.TagSimple
+	25, // 13: competition.v1.Roster.status:type_name -> common.v1.StatusSimple
+	1,  // 14: competition.v1.CreateRosterResponse.roster:type_name -> competition.v1.Roster
+	1,  // 15: competition.v1.GetRosterResponse.roster:type_name -> competition.v1.Roster
+	1,  // 16: competition.v1.ListRostersResponse.rosters:type_name -> competition.v1.Roster
+	1,  // 17: competition.v1.UpdateRosterResponse.roster:type_name -> competition.v1.Roster
+	0,  // 18: competition.v1.GetRosterMembersResponse.members:type_name -> competition.v1.RosterMember
+	0,  // 19: competition.v1.GetRosterMemberResponse.member:type_name -> competition.v1.RosterMember
+	0,  // 20: competition.v1.AddRosterMemberResponse.member:type_name -> competition.v1.RosterMember
+	2,  // 21: competition.v1.RosterService.CreateRoster:input_type -> competition.v1.CreateRosterRequest
+	4,  // 22: competition.v1.RosterService.GetRoster:input_type -> competition.v1.GetRosterRequest
+	6,  // 23: competition.v1.RosterService.ListRosters:input_type -> competition.v1.ListRostersRequest
+	8,  // 24: competition.v1.RosterService.UpdateRoster:input_type -> competition.v1.UpdateRosterRequest
+	10, // 25: competition.v1.RosterService.DeleteRoster:input_type -> competition.v1.DeleteRosterRequest
+	12, // 26: competition.v1.RosterService.GetRosterMembers:input_type -> competition.v1.GetRosterMembersRequest
+	14, // 27: competition.v1.RosterService.GetRosterMember:input_type -> competition.v1.GetRosterMemberRequest
+	16, // 28: competition.v1.RosterService.AddRosterMember:input_type -> competition.v1.AddRosterMemberRequest
+	18, // 29: competition.v1.RosterService.RemoveRosterMember:input_type -> competition.v1.RemoveRosterMemberRequest
+	20, // 30: competition.v1.RosterService.DeleteRosterMember:input_type -> competition.v1.DeleteRosterMemberRequest
+	3,  // 31: competition.v1.RosterService.CreateRoster:output_type -> competition.v1.CreateRosterResponse
+	5,  // 32: competition.v1.RosterService.GetRoster:output_type -> competition.v1.GetRosterResponse
+	7,  // 33: competition.v1.RosterService.ListRosters:output_type -> competition.v1.ListRostersResponse
+	9,  // 34: competition.v1.RosterService.UpdateRoster:output_type -> competition.v1.UpdateRosterResponse
+	11, // 35: competition.v1.RosterService.DeleteRoster:output_type -> competition.v1.DeleteRosterResponse
+	13, // 36: competition.v1.RosterService.GetRosterMembers:output_type -> competition.v1.GetRosterMembersResponse
+	15, // 37: competition.v1.RosterService.GetRosterMember:output_type -> competition.v1.GetRosterMemberResponse
+	17, // 38: competition.v1.RosterService.AddRosterMember:output_type -> competition.v1.AddRosterMemberResponse
+	19, // 39: competition.v1.RosterService.RemoveRosterMember:output_type -> competition.v1.RemoveRosterMemberResponse
+	21, // 40: competition.v1.RosterService.DeleteRosterMember:output_type -> competition.v1.DeleteRosterMemberResponse
 	31, // [31:41] is the sub-list for method output_type
 	21, // [21:31] is the sub-list for method input_type
 	21, // [21:21] is the sub-list for extension type_name
@@ -1710,32 +1709,32 @@ var file_academy_v1_roster_proto_depIdxs = []int32{
 	0,  // [0:21] is the sub-list for field type_name
 }
 
-func init() { file_academy_v1_roster_proto_init() }
-func file_academy_v1_roster_proto_init() {
-	if File_academy_v1_roster_proto != nil {
+func init() { file_competition_v1_roster_proto_init() }
+func file_competition_v1_roster_proto_init() {
+	if File_competition_v1_roster_proto != nil {
 		return
 	}
-	file_academy_v1_roster_proto_msgTypes[0].OneofWrappers = []any{}
-	file_academy_v1_roster_proto_msgTypes[1].OneofWrappers = []any{}
-	file_academy_v1_roster_proto_msgTypes[2].OneofWrappers = []any{}
-	file_academy_v1_roster_proto_msgTypes[6].OneofWrappers = []any{}
-	file_academy_v1_roster_proto_msgTypes[8].OneofWrappers = []any{}
-	file_academy_v1_roster_proto_msgTypes[16].OneofWrappers = []any{}
+	file_competition_v1_roster_proto_msgTypes[0].OneofWrappers = []any{}
+	file_competition_v1_roster_proto_msgTypes[1].OneofWrappers = []any{}
+	file_competition_v1_roster_proto_msgTypes[2].OneofWrappers = []any{}
+	file_competition_v1_roster_proto_msgTypes[6].OneofWrappers = []any{}
+	file_competition_v1_roster_proto_msgTypes[8].OneofWrappers = []any{}
+	file_competition_v1_roster_proto_msgTypes[16].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_academy_v1_roster_proto_rawDesc), len(file_academy_v1_roster_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_competition_v1_roster_proto_rawDesc), len(file_competition_v1_roster_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_academy_v1_roster_proto_goTypes,
-		DependencyIndexes: file_academy_v1_roster_proto_depIdxs,
-		MessageInfos:      file_academy_v1_roster_proto_msgTypes,
+		GoTypes:           file_competition_v1_roster_proto_goTypes,
+		DependencyIndexes: file_competition_v1_roster_proto_depIdxs,
+		MessageInfos:      file_competition_v1_roster_proto_msgTypes,
 	}.Build()
-	File_academy_v1_roster_proto = out.File
-	file_academy_v1_roster_proto_goTypes = nil
-	file_academy_v1_roster_proto_depIdxs = nil
+	File_competition_v1_roster_proto = out.File
+	file_competition_v1_roster_proto_goTypes = nil
+	file_competition_v1_roster_proto_depIdxs = nil
 }

@@ -13,6 +13,7 @@ import (
 	"microservice-golang/services/identity-service/internal/repository/replicated"
 	"microservice-golang/services/identity-service/internal/usecase"
 	replicated2 "microservice-golang/services/identity-service/internal/usecase/replicated"
+	sharedPostgres "microservice-golang/shared/infrastructure/postgres"
 	envConfig "microservice-golang/shared/pkg/config"
 	"microservice-golang/shared/pkg/grpc/interceptor"
 	"microservice-golang/shared/pkg/jwt"
@@ -161,6 +162,8 @@ func main() {
 	statusCacheRepo := replicated.NewStatusRepository(db)
 
 	// ── Use Cases ─────────────────────────────────────────────────────────────
+	txManager := sharedPostgres.NewGormTransactionManager(db)
+
 	authUC := usecase.NewAuthUseCase(
 		userRepo,
 		userRoleRepo,
@@ -170,10 +173,11 @@ func main() {
 		statusCacheRepo,
 	)
 	userUC := usecase.NewUserUseCase(
-		db,
+		txManager,
 		userRepo,
 		userRoleRepo,
 		roleRepo,
+		permissionRepo,
 		mailerClient,
 		redisWrapper,
 		cfg.AppURL,
@@ -185,6 +189,7 @@ func main() {
 		userRepo,
 		userRoleRepo,
 		roleRepo,
+		permissionRepo,
 		statusCacheRepo,
 	)
 	roleUC := usecase.NewRoleUseCase(roleRepo, permissionRepo, userRepo, log, roleEventPublisher)

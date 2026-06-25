@@ -28,10 +28,23 @@ type Sport struct {
 	IsVerified  bool       `gorm:"default:false;index"`
 	RegulatorID *uuid.UUID `gorm:"type:uuid;index"`
 	Tier        string     `gorm:"type:varchar(20)"`
+
+	Stats []SportStat `gorm:"foreignKey:SportID;constraint:OnDelete:CASCADE"`
 }
 
 func (Sport) TableName() string {
 	return "replicated_sports"
+}
+
+type SportStat struct {
+	ID                uuid.UUID `gorm:"type:uuid;primaryKey"`
+	SportID           uuid.UUID `gorm:"type:uuid;not null;index"`
+	StatTypeTagID     uuid.UUID `gorm:"type:uuid;not null;index"`
+	AggregationMethod string    `gorm:"type:varchar(20);not null;default:'AVG'"`
+}
+
+func (SportStat) TableName() string {
+	return "replicated_sport_stats"
 }
 
 type Status struct {

@@ -3,10 +3,10 @@ package handler
 import (
 	"context"
 
-	academyv1 "microservice-golang/gen/academy/v1"
-	"microservice-golang/services/academy-service/internal/dto"
-	"microservice-golang/services/academy-service/internal/mapper"
-	"microservice-golang/services/academy-service/internal/usecase"
+	competitionv1 "microservice-golang/gen/competition/v1"
+	"microservice-golang/services/competition-service/internal/dto"
+	"microservice-golang/services/competition-service/internal/mapper"
+	"microservice-golang/services/competition-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
 
 	"github.com/google/uuid"
@@ -14,7 +14,7 @@ import (
 )
 
 type RosterHandler struct {
-	academyv1.UnimplementedRosterServiceServer
+	competitionv1.UnimplementedRosterServiceServer
 	uc usecase.RosterUseCase
 }
 
@@ -23,22 +23,21 @@ func NewRosterHandler(uc usecase.RosterUseCase) *RosterHandler {
 }
 
 func (h *RosterHandler) RegisterGRPC(s *grpc.Server) {
-	academyv1.RegisterRosterServiceServer(s, h)
+	competitionv1.RegisterRosterServiceServer(s, h)
 }
 
-func (h *RosterHandler) CreateRoster(ctx context.Context, req *academyv1.CreateRosterRequest) (*academyv1.CreateRosterResponse, error) {
+func (h *RosterHandler) CreateRoster(ctx context.Context, req *competitionv1.CreateRosterRequest) (*competitionv1.CreateRosterResponse, error) {
 	branchID, err := uuid.Parse(req.GetAcademyBranchId())
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid branch id"))
 	}
 
-	var competitionID *uuid.UUID
-	if req.CompetitionId != nil && *req.CompetitionId != "" {
-		id, err := uuid.Parse(*req.CompetitionId)
-		if err != nil {
-			return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid competition id"))
-		}
-		competitionID = &id
+	if req.CompetitionId == nil || *req.CompetitionId == "" {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("competition id is required"))
+	}
+	competitionID, err := uuid.Parse(*req.CompetitionId)
+	if err != nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid competition id"))
 	}
 
 	tagID, err := uuid.Parse(req.GetTagId())
@@ -65,12 +64,12 @@ func (h *RosterHandler) CreateRoster(ctx context.Context, req *academyv1.CreateR
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &academyv1.CreateRosterResponse{
+	return &competitionv1.CreateRosterResponse{
 		Roster: mapper.ToProtoRoster(res),
 	}, nil
 }
 
-func (h *RosterHandler) GetRoster(ctx context.Context, req *academyv1.GetRosterRequest) (*academyv1.GetRosterResponse, error) {
+func (h *RosterHandler) GetRoster(ctx context.Context, req *competitionv1.GetRosterRequest) (*competitionv1.GetRosterResponse, error) {
 	id, err := uuid.Parse(req.GetId())
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid roster id"))
@@ -81,12 +80,12 @@ func (h *RosterHandler) GetRoster(ctx context.Context, req *academyv1.GetRosterR
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &academyv1.GetRosterResponse{
+	return &competitionv1.GetRosterResponse{
 		Roster: mapper.ToProtoRoster(res),
 	}, nil
 }
 
-func (h *RosterHandler) ListRosters(ctx context.Context, req *academyv1.ListRostersRequest) (*academyv1.ListRostersResponse, error) {
+func (h *RosterHandler) ListRosters(ctx context.Context, req *competitionv1.ListRostersRequest) (*competitionv1.ListRostersResponse, error) {
 	var competitionID *uuid.UUID
 	if req.CompetitionId != nil && *req.CompetitionId != "" {
 		id, err := uuid.Parse(*req.CompetitionId)
@@ -148,12 +147,12 @@ func (h *RosterHandler) ListRosters(ctx context.Context, req *academyv1.ListRost
 		return nil, apperr.ToGRPC(err)
 	}
 
-	rosters := make([]*academyv1.Roster, len(res.Rosters))
+	rosters := make([]*competitionv1.Roster, len(res.Rosters))
 	for i, r := range res.Rosters {
 		rosters[i] = mapper.ToProtoRoster(r)
 	}
 
-	return &academyv1.ListRostersResponse{
+	return &competitionv1.ListRostersResponse{
 		Rosters:  rosters,
 		Total:    res.Total,
 		Page:     int32(res.Page),
@@ -161,7 +160,7 @@ func (h *RosterHandler) ListRosters(ctx context.Context, req *academyv1.ListRost
 	}, nil
 }
 
-func (h *RosterHandler) UpdateRoster(ctx context.Context, req *academyv1.UpdateRosterRequest) (*academyv1.UpdateRosterResponse, error) {
+func (h *RosterHandler) UpdateRoster(ctx context.Context, req *competitionv1.UpdateRosterRequest) (*competitionv1.UpdateRosterResponse, error) {
 	id, err := uuid.Parse(req.GetId())
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid roster id"))
@@ -213,12 +212,12 @@ func (h *RosterHandler) UpdateRoster(ctx context.Context, req *academyv1.UpdateR
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &academyv1.UpdateRosterResponse{
+	return &competitionv1.UpdateRosterResponse{
 		Roster: mapper.ToProtoRoster(res),
 	}, nil
 }
 
-func (h *RosterHandler) DeleteRoster(ctx context.Context, req *academyv1.DeleteRosterRequest) (*academyv1.DeleteRosterResponse, error) {
+func (h *RosterHandler) DeleteRoster(ctx context.Context, req *competitionv1.DeleteRosterRequest) (*competitionv1.DeleteRosterResponse, error) {
 	id, err := uuid.Parse(req.GetId())
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid roster id"))
@@ -239,12 +238,12 @@ func (h *RosterHandler) DeleteRoster(ctx context.Context, req *academyv1.DeleteR
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &academyv1.DeleteRosterResponse{
+	return &competitionv1.DeleteRosterResponse{
 		Id: req.GetId(),
 	}, nil
 }
 
-func (h *RosterHandler) GetRosterMembers(ctx context.Context, req *academyv1.GetRosterMembersRequest) (*academyv1.GetRosterMembersResponse, error) {
+func (h *RosterHandler) GetRosterMembers(ctx context.Context, req *competitionv1.GetRosterMembersRequest) (*competitionv1.GetRosterMembersResponse, error) {
 	rosterID, err := uuid.Parse(req.GetRosterId())
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid roster id"))
@@ -255,17 +254,17 @@ func (h *RosterHandler) GetRosterMembers(ctx context.Context, req *academyv1.Get
 		return nil, apperr.ToGRPC(err)
 	}
 
-	members := make([]*academyv1.RosterMember, len(res))
+	members := make([]*competitionv1.RosterMember, len(res))
 	for i, m := range res {
 		members[i] = mapper.ToProtoRosterMember(m)
 	}
 
-	return &academyv1.GetRosterMembersResponse{
+	return &competitionv1.GetRosterMembersResponse{
 		Members: members,
 	}, nil
 }
 
-func (h *RosterHandler) GetRosterMember(ctx context.Context, req *academyv1.GetRosterMemberRequest) (*academyv1.GetRosterMemberResponse, error) {
+func (h *RosterHandler) GetRosterMember(ctx context.Context, req *competitionv1.GetRosterMemberRequest) (*competitionv1.GetRosterMemberResponse, error) {
 	rosterID, err := uuid.Parse(req.GetRosterId())
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid roster id"))
@@ -281,12 +280,12 @@ func (h *RosterHandler) GetRosterMember(ctx context.Context, req *academyv1.GetR
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &academyv1.GetRosterMemberResponse{
+	return &competitionv1.GetRosterMemberResponse{
 		Member: mapper.ToProtoRosterMember(*res),
 	}, nil
 }
 
-func (h *RosterHandler) AddRosterMember(ctx context.Context, req *academyv1.AddRosterMemberRequest) (*academyv1.AddRosterMemberResponse, error) {
+func (h *RosterHandler) AddRosterMember(ctx context.Context, req *competitionv1.AddRosterMemberRequest) (*competitionv1.AddRosterMemberResponse, error) {
 	rosterID, err := uuid.Parse(req.GetRosterId())
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid roster id"))
@@ -332,12 +331,12 @@ func (h *RosterHandler) AddRosterMember(ctx context.Context, req *academyv1.AddR
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &academyv1.AddRosterMemberResponse{
+	return &competitionv1.AddRosterMemberResponse{
 		Member: mapper.ToProtoRosterMember(*res),
 	}, nil
 }
 
-func (h *RosterHandler) RemoveRosterMember(ctx context.Context, req *academyv1.RemoveRosterMemberRequest) (*academyv1.RemoveRosterMemberResponse, error) {
+func (h *RosterHandler) RemoveRosterMember(ctx context.Context, req *competitionv1.RemoveRosterMemberRequest) (*competitionv1.RemoveRosterMemberResponse, error) {
 	rosterID, err := uuid.Parse(req.GetRosterId())
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid roster id"))
@@ -363,12 +362,12 @@ func (h *RosterHandler) RemoveRosterMember(ctx context.Context, req *academyv1.R
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &academyv1.RemoveRosterMemberResponse{
+	return &competitionv1.RemoveRosterMemberResponse{
 		MemberId: req.GetMemberId(),
 	}, nil
 }
 
-func (h *RosterHandler) DeleteRosterMember(ctx context.Context, req *academyv1.DeleteRosterMemberRequest) (*academyv1.DeleteRosterMemberResponse, error) {
+func (h *RosterHandler) DeleteRosterMember(ctx context.Context, req *competitionv1.DeleteRosterMemberRequest) (*competitionv1.DeleteRosterMemberResponse, error) {
 	rosterID, err := uuid.Parse(req.GetRosterId())
 	if err != nil {
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid roster id"))
@@ -384,7 +383,7 @@ func (h *RosterHandler) DeleteRosterMember(ctx context.Context, req *academyv1.D
 		return nil, apperr.ToGRPC(err)
 	}
 
-	return &academyv1.DeleteRosterMemberResponse{
+	return &competitionv1.DeleteRosterMemberResponse{
 		MemberId: req.GetMemberId(),
 	}, nil
 }

@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package competition.v1;
+
+option go_package = "microservice-golang/gen/competition/v1;competitionv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
+import "competition/v1/roster.proto";
+
+message MatchParticipant {
+  string id = 1;
+  string match_id = 2;
+  string roster_id = 3;
+  string format_tag_id = 4;
+  string result_tag_id = 5;
+  int32 score = 6;
+  google.protobuf.Timestamp updated_at = 7;
+
+  optional Roster roster = 8;
+  optional common.v1.TagSimple format_tag = 9;
+  optional common.v1.TagSimple result_tag = 10;
+}
+
+message Match {
+  string id = 1;
+  string branch_id = 2;
+  google.protobuf.Timestamp scheduled_at = 3;
+  optional google.protobuf.Timestamp started_at = 4;
+  optional google.protobuf.Timestamp ended_at = 5;
+  string status = 6;
+  string location = 7;
+  string referee = 8;
+  string notes = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  optional google.protobuf.Timestamp deleted_at = 12;
+
+  repeated MatchParticipant participants = 13;
+}
+
+message CreateMatchParticipantRequest {
+  string roster_id = 1 [(buf.validate.field).string.uuid = true];
+  string format_tag_id = 2 [(buf.validate.field).string.uuid = true];
+  string result_tag_id = 3 [(buf.validate.field).string.uuid = true];
+  int32 score = 4;
+}
+
+message CreateMatchRequest {
+  string branch_id = 1 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp scheduled_at = 2;
+  string location = 3;
+  string referee = 4;
+  string notes = 5;
+  repeated CreateMatchParticipantRequest participants = 6 [(buf.validate.field).repeated.min_items = 1];
+}
+
+message CreateMatchResponse {
+  Match match = 1;
+}
+
+message GetMatchRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetMatchResponse {
+  Match match = 1;
+}
+
+message ListMatchesByBranchRequest {
+  string branch_id = 1 [(buf.validate.field).string.uuid = true];
+  int32 page = 2 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 3 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message ListMatchesByBranchResponse {
+  repeated Match matches = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message UpdateMatchStatusRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string status = 2 [(buf.validate.field).string.min_len = 1];
+}
+
+message UpdateMatchStatusResponse {
+  string id = 1;
+  string status = 2;
+}
+
+message UpdateParticipantScoreRequest {
+  string participant_id = 1 [(buf.validate.field).string.uuid = true];
+  int32 score = 2;
+}
+
+message UpdateMatchScoreRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  repeated UpdateParticipantScoreRequest participants = 2 [(buf.validate.field).repeated.min_items = 1];
+}
+
+message UpdateMatchScoreResponse {
+  string id = 1;
+}
+
+message DeleteMatchRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteMatchResponse {
+  string id = 1;
+}
+
+service MatchService {
+  rpc CreateMatch(CreateMatchRequest) returns (CreateMatchResponse);
+  rpc GetMatch(GetMatchRequest) returns (GetMatchResponse);
+  rpc ListMatchesByBranch(ListMatchesByBranchRequest) returns (ListMatchesByBranchResponse);
+  rpc UpdateMatchStatus(UpdateMatchStatusRequest) returns (UpdateMatchStatusResponse);
+  rpc UpdateMatchScore(UpdateMatchScoreRequest) returns (UpdateMatchScoreResponse);
+  rpc DeleteMatch(DeleteMatchRequest) returns (DeleteMatchResponse);
+}
