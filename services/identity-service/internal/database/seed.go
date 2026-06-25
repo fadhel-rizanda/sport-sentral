@@ -89,6 +89,13 @@ func seedPermissions(db *gorm.DB) error {
 		// Platform Administration
 		{Resource: "platform", Action: "admin", Slug: "platform.admin", Description: "Platform administration access", CreatedByID: createdBy, UpdatedByID: createdBy},
 		{Resource: "platform", Action: "analytics", Slug: "platform.analytics", Description: "View platform analytics", CreatedByID: createdBy, UpdatedByID: createdBy},
+
+		// Sport Management
+		{Resource: "sport", Action: "read", Slug: "sport.read", Description: "View sports details", CreatedByID: createdBy, UpdatedByID: createdBy},
+		{Resource: "sport", Action: "create", Slug: "sport.create", Description: "Create sports", CreatedByID: createdBy, UpdatedByID: createdBy},
+		{Resource: "sport", Action: "update", Slug: "sport.update", Description: "Update sports", CreatedByID: createdBy, UpdatedByID: createdBy},
+		{Resource: "sport", Action: "delete", Slug: "sport.delete", Description: "Delete sports", CreatedByID: createdBy, UpdatedByID: createdBy},
+		{Resource: "sport", Action: "manage", Slug: "sport.manage", Description: "Full sport management", CreatedByID: createdBy, UpdatedByID: createdBy},
 	}
 
 	for _, p := range permissions {
@@ -152,6 +159,13 @@ func seedRoles(db *gorm.DB) error {
 			UpdatedByID: createdBy,
 			Description: "Internal platform administrator.",
 		},
+		{
+			Name:        constants.RoleOrganizer,
+			Slug:        "organizer",
+			CreatedByID: createdBy,
+			UpdatedByID: createdBy,
+			Description: "Organizes competitions and tournaments. Requires admin verification.",
+		},
 	}
 
 	for _, r := range roles {
@@ -177,22 +191,31 @@ func seedRolePermissions(db *gorm.DB) error {
 			"booking.read", "booking.create", "booking.update", "booking.delete",
 			"competition.read", "competition.join",
 			"leaderboard.read",
+			"sport.read",
 		},
 		constants.RoleScout: {
 			"user.read",
 			"athlete.read", "athlete.read_premium",
 			"leaderboard.read", "leaderboard.read_premium",
+			"sport.read",
 		},
 		constants.RoleCourtOwner: {
 			"user.read", "user.update",
 			"court.read", "court.create", "court.update", "court.delete", "court.manage",
 			"booking.read", "booking.update",
+			"sport.read",
 		},
 		constants.RoleAcademyAdmin: {
 			"user.read", "user.update",
 			"academy.read", "academy.create", "academy.update", "academy.delete", "academy.manage",
 			"athlete.read",
-			"competition.read", "competition.create",
+			"competition.read", "competition.create", "competition.update", "competition.delete", "competition.regulate",
+			"sport.read",
+		},
+		constants.RoleOrganizer: {
+			"user.read", "user.update",
+			"competition.read", "competition.create", "competition.update", "competition.delete", "competition.regulate",
+			"sport.read",
 		},
 		constants.RoleRegulator: {
 			"user.read",
@@ -200,6 +223,7 @@ func seedRolePermissions(db *gorm.DB) error {
 			"competition.read", "competition.regulate",
 			"leaderboard.read", "leaderboard.read_premium",
 			"verification.approve", "verification.reject",
+			"sport.read",
 		},
 		constants.RolePlatformAdmin: {
 			// Full access - all permissions
@@ -214,6 +238,7 @@ func seedRolePermissions(db *gorm.DB) error {
 			"leaderboard.read", "leaderboard.read_premium",
 			"verification.approve", "verification.reject",
 			"platform.admin", "platform.analytics",
+			"sport.read", "sport.create", "sport.update", "sport.delete", "sport.manage",
 		},
 	}
 

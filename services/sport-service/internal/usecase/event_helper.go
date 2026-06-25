@@ -31,6 +31,18 @@ func buildSportEvent(
 		tier = s.TierTag.Slug
 	}
 
+	var stats []*sportv1.SportStatEvent
+	if s.Config != nil && len(s.Config.Stats) > 0 {
+		stats = make([]*sportv1.SportStatEvent, len(s.Config.Stats))
+		for i, stat := range s.Config.Stats {
+			stats[i] = &sportv1.SportStatEvent{
+				Id:                stat.ID.String(),
+				StatTypeTagId:     stat.StatTypeTagID.String(),
+				AggregationMethod: stat.AggregationMethod,
+			}
+		}
+	}
+
 	evt := &sportv1.SportEvent{
 		EventId:          evtID.String(),
 		EventType:        eventType,
@@ -42,6 +54,7 @@ func buildSportEvent(
 		IsVerified:       s.RegulatorID != nil,
 		RegulatorId:      regulatorID,
 		Tier:             tier,
+		Stats:            stats,
 	}
 
 	if s.DeletedAt.Valid {

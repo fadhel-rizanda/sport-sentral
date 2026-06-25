@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package academy.v1;
+
+option go_package = "microservice-golang/gen/academy/v1;academyv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum AcademyHoldingEventType {
+  ACADEMY_HOLDING_EVENT_TYPE_UNSPECIFIED = 0;
+  ACADEMY_HOLDING_EVENT_TYPE_CREATED     = 1;
+  ACADEMY_HOLDING_EVENT_TYPE_UPDATED     = 2;
+  ACADEMY_HOLDING_EVENT_TYPE_DELETED     = 3;
+}
+
+enum AcademyBranchEventType {
+  ACADEMY_BRANCH_EVENT_TYPE_UNSPECIFIED = 0;
+  ACADEMY_BRANCH_EVENT_TYPE_CREATED     = 1;
+  ACADEMY_BRANCH_EVENT_TYPE_UPDATED     = 2;
+  ACADEMY_BRANCH_EVENT_TYPE_DELETED     = 3;
+}
+
+enum AcademyAdminEventType {
+  ACADEMY_ADMIN_EVENT_TYPE_UNSPECIFIED = 0;
+  ACADEMY_ADMIN_EVENT_TYPE_ASSIGNED    = 1;
+  ACADEMY_ADMIN_EVENT_TYPE_REVOKED     = 2;
+}
+
+// ─── Event Envelopes ─────────────────────────────────────────────────────────
+
+message AcademyHoldingEvent {
+  string event_id = 1 [(buf.validate.field).string.uuid = true];
+  AcademyHoldingEventType event_type = 2 [(buf.validate.field).enum.defined_only = true];
+  google.protobuf.Timestamp occurred_at = 3 [(buf.validate.field).required = true];
+
+  string holding_id = 4 [(buf.validate.field).string.uuid = true];
+  string name = 5 [(buf.validate.field).string.min_len = 1];
+  string description = 6;
+  string email = 7;
+  string phone_number = 8;
+  optional string image_attachment_id = 9;
+  string status_id = 10 [(buf.validate.field).string.uuid = true];
+  optional google.protobuf.Timestamp deleted_at = 11;
+}
+
+message AcademyBranchEvent {
+  string event_id = 1 [(buf.validate.field).string.uuid = true];
+  AcademyBranchEventType event_type = 2 [(buf.validate.field).enum.defined_only = true];
+  google.protobuf.Timestamp occurred_at = 3 [(buf.validate.field).required = true];
+
+  string branch_id = 4 [(buf.validate.field).string.uuid = true];
+  string holding_id = 5 [(buf.validate.field).string.uuid = true];
+  string sport_id = 6 [(buf.validate.field).string.uuid = true];
+  string name = 7 [(buf.validate.field).string.min_len = 1];
+  string status_id = 8 [(buf.validate.field).string.uuid = true];
+  optional google.protobuf.Timestamp deleted_at = 9;
+}
+
+message AcademyAdminEvent {
+  string event_id = 1 [(buf.validate.field).string.uuid = true];
+  AcademyAdminEventType event_type = 2 [(buf.validate.field).enum.defined_only = true];
+  google.protobuf.Timestamp occurred_at = 3 [(buf.validate.field).required = true];
+
+  string admin_id = 4 [(buf.validate.field).string.uuid = true];
+  string academy_id = 5 [(buf.validate.field).string.uuid = true];
+  optional string branch_id = 6;
+  string user_id = 7 [(buf.validate.field).string.uuid = true];
+  string role_id = 8 [(buf.validate.field).string.uuid = true];
+  optional google.protobuf.Timestamp deleted_at = 9;
+}

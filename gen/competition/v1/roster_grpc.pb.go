@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.2
 // - protoc             (unknown)
-// source: academy/v1/roster.proto
+// source: competition/v1/roster.proto
 
-package academyv1
+package competitionv1
 
 import (
 	context "context"
@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RosterService_CreateRoster_FullMethodName       = "/academy.v1.RosterService/CreateRoster"
-	RosterService_GetRoster_FullMethodName          = "/academy.v1.RosterService/GetRoster"
-	RosterService_ListRosters_FullMethodName        = "/academy.v1.RosterService/ListRosters"
-	RosterService_UpdateRoster_FullMethodName       = "/academy.v1.RosterService/UpdateRoster"
-	RosterService_DeleteRoster_FullMethodName       = "/academy.v1.RosterService/DeleteRoster"
-	RosterService_GetRosterMembers_FullMethodName   = "/academy.v1.RosterService/GetRosterMembers"
-	RosterService_GetRosterMember_FullMethodName    = "/academy.v1.RosterService/GetRosterMember"
-	RosterService_AddRosterMember_FullMethodName    = "/academy.v1.RosterService/AddRosterMember"
-	RosterService_RemoveRosterMember_FullMethodName = "/academy.v1.RosterService/RemoveRosterMember"
-	RosterService_DeleteRosterMember_FullMethodName = "/academy.v1.RosterService/DeleteRosterMember"
+	RosterService_CreateRoster_FullMethodName       = "/competition.v1.RosterService/CreateRoster"
+	RosterService_GetRoster_FullMethodName          = "/competition.v1.RosterService/GetRoster"
+	RosterService_ListRosters_FullMethodName        = "/competition.v1.RosterService/ListRosters"
+	RosterService_UpdateRoster_FullMethodName       = "/competition.v1.RosterService/UpdateRoster"
+	RosterService_DeleteRoster_FullMethodName       = "/competition.v1.RosterService/DeleteRoster"
+	RosterService_GetRosterMembers_FullMethodName   = "/competition.v1.RosterService/GetRosterMembers"
+	RosterService_GetRosterMember_FullMethodName    = "/competition.v1.RosterService/GetRosterMember"
+	RosterService_AddRosterMember_FullMethodName    = "/competition.v1.RosterService/AddRosterMember"
+	RosterService_RemoveRosterMember_FullMethodName = "/competition.v1.RosterService/RemoveRosterMember"
+	RosterService_DeleteRosterMember_FullMethodName = "/competition.v1.RosterService/DeleteRosterMember"
 )
 
 // RosterServiceClient is the client API for RosterService service.
@@ -414,7 +414,7 @@ func _RosterService_DeleteRosterMember_Handler(srv interface{}, ctx context.Cont
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var RosterService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "academy.v1.RosterService",
+	ServiceName: "competition.v1.RosterService",
 	HandlerType: (*RosterServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -459,5 +459,5 @@ var RosterService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "academy/v1/roster.proto",
+	Metadata: "competition/v1/roster.proto",
 }

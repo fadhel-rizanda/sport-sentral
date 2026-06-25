@@ -2,13 +2,17 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
+	academyv1 "microservice-golang/gen/academy/v1"
 	"microservice-golang/services/academy-service/internal/dto"
 	"microservice-golang/services/academy-service/internal/entity"
 	"microservice-golang/services/academy-service/internal/mapper"
 	"microservice-golang/services/academy-service/internal/repository"
+	replicatedRepo "microservice-golang/services/academy-service/internal/repository/replicated"
 	"microservice-golang/shared/infrastructure/postgres"
 	apperr "microservice-golang/shared/pkg/errors"
 )
@@ -22,16 +26,27 @@ type AcademyHoldingUseCase interface {
 }
 
 type academyHoldingUseCase struct {
-	repo repository.AcademyHoldingRepository
+	permissionRepo replicatedRepo.PermissionRepository
+	repo           repository.AcademyHoldingRepository
+	publisher      AcademyHoldingEventPublisher
 }
 
-func NewAcademyHoldingUseCase(repo repository.AcademyHoldingRepository) AcademyHoldingUseCase {
+func NewAcademyHoldingUseCase(
+	permissionRepo replicatedRepo.PermissionRepository,
+	repo repository.AcademyHoldingRepository,
+	publisher AcademyHoldingEventPublisher,
+) AcademyHoldingUseCase {
 	return &academyHoldingUseCase{
-		repo: repo,
+		permissionRepo: permissionRepo,
+		repo:           repo,
+		publisher:      publisher,
 	}
 }
 
 func (uc *academyHoldingUseCase) Create(ctx context.Context, req dto.CreateAcademyHoldingRequest) (*dto.AcademyHoldingResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "academy.create"); err != nil {
+		return nil, err
+	}
 	holdingID, err := uuid.NewV7()
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -78,10 +93,33 @@ func (uc *academyHoldingUseCase) Create(ctx context.Context, req dto.CreateAcade
 		return nil, apperr.Internal(err)
 	}
 
+	// Publish event
+	evtID, _ := uuid.NewV7()
+	var imgID *string
+	if resHolding.ImageAttachmentID != nil {
+		str := resHolding.ImageAttachmentID.String()
+		imgID = &str
+	}
+	_ = uc.publisher.PublishHoldingCreated(ctx, &academyv1.AcademyHoldingEvent{
+		EventId:           evtID.String(),
+		EventType:         academyv1.AcademyHoldingEventType_ACADEMY_HOLDING_EVENT_TYPE_CREATED,
+		OccurredAt:        timestamppb.New(time.Now()),
+		HoldingId:         resHolding.ID.String(),
+		Name:              resHolding.Name,
+		Description:       resHolding.Description,
+		Email:             resHolding.Email,
+		PhoneNumber:       resHolding.PhoneNumber,
+		ImageAttachmentId: imgID,
+		StatusId:          resHolding.StatusID.String(),
+	})
+
 	return mapper.ToAcademyHoldingResponse(resHolding), nil
 }
 
 func (uc *academyHoldingUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.AcademyHoldingResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+		return nil, err
+	}
 	holding, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -93,6 +131,9 @@ func (uc *academyHoldingUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dt
 }
 
 func (uc *academyHoldingUseCase) List(ctx context.Context, req dto.ListAcademyHoldingsRequest) (*dto.ListAcademyHoldingsResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+		return nil, err
+	}
 	filters := repository.AcademyHoldingFilters{
 		StatusID: req.StatusID,
 		Search:   req.Search,
@@ -117,6 +158,9 @@ func (uc *academyHoldingUseCase) List(ctx context.Context, req dto.ListAcademyHo
 }
 
 func (uc *academyHoldingUseCase) Update(ctx context.Context, id uuid.UUID, req dto.UpdateAcademyHoldingRequest) (*dto.AcademyHoldingResponse, error) {
+	if err := uc.permissionRepo.Validate(ctx, "academy.update"); err != nil {
+		return nil, err
+	}
 	holding, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -163,12 +207,35 @@ func (uc *academyHoldingUseCase) Update(ctx context.Context, id uuid.UUID, req d
 		return nil, apperr.Internal(err)
 	}
 
+	// Publish event
+	evtID, _ := uuid.NewV7()
+	var imgID *string
+	if resHolding.ImageAttachmentID != nil {
+		str := resHolding.ImageAttachmentID.String()
+		imgID = &str
+	}
+	_ = uc.publisher.PublishHoldingUpdated(ctx, &academyv1.AcademyHoldingEvent{
+		EventId:           evtID.String(),
+		EventType:         academyv1.AcademyHoldingEventType_ACADEMY_HOLDING_EVENT_TYPE_UPDATED,
+		OccurredAt:        timestamppb.New(time.Now()),
+		HoldingId:         resHolding.ID.String(),
+		Name:              resHolding.Name,
+		Description:       resHolding.Description,
+		Email:             resHolding.Email,
+		PhoneNumber:       resHolding.PhoneNumber,
+		ImageAttachmentId: imgID,
+		StatusId:          resHolding.StatusID.String(),
+	})
+
 	return mapper.ToAcademyHoldingResponse(resHolding), nil
 }
 
 func (uc *academyHoldingUseCase) Delete(ctx context.Context, req dto.DeleteAcademyHoldingRequest) error {
+	if err := uc.permissionRepo.Validate(ctx, "academy.delete"); err != nil {
+		return err
+	}
 	// Check if exists
-	_, err := uc.repo.GetByID(ctx, req.ID)
+	holding, err := uc.repo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
 			return apperr.NotFound("academy holding")
@@ -179,5 +246,26 @@ func (uc *academyHoldingUseCase) Delete(ctx context.Context, req dto.DeleteAcade
 	if err := uc.repo.Delete(ctx, req.ID); err != nil {
 		return apperr.Internal(err)
 	}
+
+	// Publish event
+	evtID, _ := uuid.NewV7()
+	var imgID *string
+	if holding.ImageAttachmentID != nil {
+		str := holding.ImageAttachmentID.String()
+		imgID = &str
+	}
+	_ = uc.publisher.PublishHoldingDeleted(ctx, &academyv1.AcademyHoldingEvent{
+		EventId:           evtID.String(),
+		EventType:         academyv1.AcademyHoldingEventType_ACADEMY_HOLDING_EVENT_TYPE_DELETED,
+		OccurredAt:        timestamppb.New(time.Now()),
+		HoldingId:         holding.ID.String(),
+		Name:              holding.Name,
+		Description:       holding.Description,
+		Email:             holding.Email,
+		PhoneNumber:       holding.PhoneNumber,
+		ImageAttachmentId: imgID,
+		StatusId:          holding.StatusID.String(),
+	})
+
 	return nil
 }

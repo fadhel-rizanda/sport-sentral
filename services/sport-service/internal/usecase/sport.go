@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	sportv1 "microservice-golang/gen/sport/v1"
 	"microservice-golang/services/sport-service/internal/dto"
@@ -15,7 +14,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
+	sharedgrpc "microservice-golang/shared/pkg/grpc"
 )
 
 type SportUseCase interface {
@@ -52,6 +51,14 @@ func NewSportUseCase(
 }
 
 func (uc *sportUseCase) Create(ctx context.Context, req dto.CreateSportRequest) (*dto.SportResponse, error) {
+	activeRole, err := sharedgrpc.ExtractActiveRole(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if activeRole != "platform_admin" {
+		return nil, apperr.Forbidden("insufficient permissions")
+	}
+
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -59,7 +66,7 @@ func (uc *sportUseCase) Create(ctx context.Context, req dto.CreateSportRequest) 
 
 	// Validate status exists
 	if _, err := uc.statusRepo.GetByID(ctx, req.StatusID); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("status")
 		}
 		return nil, apperr.Internal(err)
@@ -67,7 +74,7 @@ func (uc *sportUseCase) Create(ctx context.Context, req dto.CreateSportRequest) 
 
 	// Validate tier tag exists
 	if _, err := uc.tagRepo.GetByID(ctx, req.TierTagID); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("tier tag")
 		}
 		return nil, apperr.Internal(err)
@@ -111,7 +118,7 @@ func (uc *sportUseCase) Create(ctx context.Context, req dto.CreateSportRequest) 
 func (uc *sportUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.SportResponse, error) {
 	sport, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("sport")
 		}
 		return nil, apperr.Internal(err)
@@ -145,9 +152,17 @@ func (uc *sportUseCase) List(ctx context.Context, req dto.ListSportsRequest) (*d
 }
 
 func (uc *sportUseCase) Update(ctx context.Context, req dto.UpdateSportRequest) (*dto.SportResponse, error) {
+	activeRole, err := sharedgrpc.ExtractActiveRole(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if activeRole != "platform_admin" {
+		return nil, apperr.Forbidden("insufficient permissions")
+	}
+
 	sport, err := uc.repo.GetByID(ctx, req.ID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("sport")
 		}
 		return nil, apperr.Internal(err)
@@ -169,7 +184,7 @@ func (uc *sportUseCase) Update(ctx context.Context, req dto.UpdateSportRequest) 
 	if req.TierTagID != nil {
 		// Validate tier tag
 		if _, err := uc.tagRepo.GetByID(ctx, *req.TierTagID); err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
+			if postgres.IsNotFound(err) {
 				return nil, apperr.NotFound("tier tag")
 			}
 			return nil, apperr.Internal(err)
@@ -180,7 +195,7 @@ func (uc *sportUseCase) Update(ctx context.Context, req dto.UpdateSportRequest) 
 	if req.StatusID != nil {
 		// Validate status
 		if _, err := uc.statusRepo.GetByID(ctx, *req.StatusID); err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
+			if postgres.IsNotFound(err) {
 				return nil, apperr.NotFound("status")
 			}
 			return nil, apperr.Internal(err)
@@ -216,9 +231,17 @@ func (uc *sportUseCase) Update(ctx context.Context, req dto.UpdateSportRequest) 
 }
 
 func (uc *sportUseCase) Delete(ctx context.Context, id uuid.UUID) error {
+	activeRole, err := sharedgrpc.ExtractActiveRole(ctx)
+	if err != nil {
+		return err
+	}
+	if activeRole != "platform_admin" {
+		return apperr.Forbidden("insufficient permissions")
+	}
+
 	sport, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return apperr.NotFound("sport")
 		}
 		return apperr.Internal(err)
@@ -228,7 +251,8 @@ func (uc *sportUseCase) Delete(ctx context.Context, id uuid.UUID) error {
 		return apperr.Internal(err)
 	}
 
-	sport.DeletedAt = gorm.DeletedAt{Time: time.Now(), Valid: true}
+	sport.DeletedAt.Time = time.Now()
+	sport.DeletedAt.Valid = true
 	evt := buildSportEvent(sportv1.SportEventType_SPORT_EVENT_TYPE_DELETED, sport)
 	if err := uc.publisher.PublishSportDeleted(ctx, evt); err != nil {
 		return apperr.Internal(err)
@@ -240,7 +264,7 @@ func (uc *sportUseCase) Delete(ctx context.Context, id uuid.UUID) error {
 func (uc *sportUseCase) GetConfig(ctx context.Context, sportID uuid.UUID) (*dto.SportConfigResponse, error) {
 	config, err := uc.repo.GetConfigBySportID(ctx, sportID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("sport configuration")
 		}
 		return nil, apperr.Internal(err)
@@ -249,9 +273,17 @@ func (uc *sportUseCase) GetConfig(ctx context.Context, sportID uuid.UUID) (*dto.
 }
 
 func (uc *sportUseCase) UpdateConfig(ctx context.Context, req dto.UpdateSportConfigRequest) (*dto.SportConfigResponse, error) {
+	activeRole, err := sharedgrpc.ExtractActiveRole(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if activeRole != "platform_admin" {
+		return nil, apperr.Forbidden("insufficient permissions")
+	}
+
 	// Verify sport exists
 	if _, err := uc.repo.GetByID(ctx, req.SportID); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("sport")
 		}
 		return nil, apperr.Internal(err)
@@ -259,23 +291,35 @@ func (uc *sportUseCase) UpdateConfig(ctx context.Context, req dto.UpdateSportCon
 
 	// Verify participant type tag exists
 	if _, err := uc.tagRepo.GetByID(ctx, req.ParticipantTypeTagID); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("participant type tag")
 		}
 		return nil, apperr.Internal(err)
 	}
 
 	// Verify stat tags exist
-	statTags := make([]entity.Tag, len(req.StatTagIDs))
-	for i, tagID := range req.StatTagIDs {
-		tag, err := uc.tagRepo.GetByID(ctx, tagID)
+	stats := make([]entity.SportStat, len(req.Stats))
+	for i, sInput := range req.Stats {
+		tag, err := uc.tagRepo.GetByID(ctx, sInput.StatTypeTagID)
 		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, apperr.NotFound(fmt.Sprintf("stat tag with id %s", tagID))
+			if postgres.IsNotFound(err) {
+				return nil, apperr.NotFound(fmt.Sprintf("stat tag with id %s", sInput.StatTypeTagID))
 			}
 			return nil, apperr.Internal(err)
 		}
-		statTags[i] = *tag
+		statID, err := uuid.NewV7()
+		if err != nil {
+			return nil, apperr.Internal(err)
+		}
+		stats[i] = entity.SportStat{
+			ID:                statID,
+			SportID:           req.SportID,
+			StatTypeTagID:     sInput.StatTypeTagID,
+			AggregationMethod: sInput.AggregationMethod,
+			CreatedAt:         time.Now(),
+			UpdatedAt:         time.Now(),
+			StatTypeTag:       tag,
+		}
 	}
 
 	// Get existing config or construct a new one
@@ -283,7 +327,7 @@ func (uc *sportUseCase) UpdateConfig(ctx context.Context, req dto.UpdateSportCon
 	var configID uuid.UUID
 	var isNew bool
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			newID, err := uuid.NewV7()
 			if err != nil {
 				return nil, apperr.Internal(err)
@@ -308,7 +352,7 @@ func (uc *sportUseCase) UpdateConfig(ctx context.Context, req dto.UpdateSportCon
 	config.TypicalRosterSize = req.TypicalRosterSize
 	config.RulesURL = req.RulesURL
 	config.Description = req.Description
-	config.StatTags = statTags
+	config.Stats = stats
 	config.UpdatedAt = time.Now()
 
 	// GORM schema doesn't have CreatedByID / UpdatedByID for SportConfig, but let's make sure it operates properly.
@@ -321,6 +365,15 @@ func (uc *sportUseCase) UpdateConfig(ctx context.Context, req dto.UpdateSportCon
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
+
+	// Publish NATS event with updated stats config
+	go func() {
+		sport, err := uc.repo.GetByID(context.Background(), req.SportID)
+		if err == nil {
+			evt := buildSportEvent(sportv1.SportEventType_SPORT_EVENT_TYPE_UPDATED, sport)
+			_ = uc.publisher.PublishSportUpdated(context.Background(), evt)
+		}
+	}()
 
 	if isNew {
 		// Log config creation or do other side effects

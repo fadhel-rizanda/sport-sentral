@@ -1,0 +1,107 @@
+syntax = "proto3";
+
+package competition.v1;
+
+option go_package = "microservice-golang/gen/competition/v1;competitionv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
+
+message MatchStat {
+  string id = 1;
+  string match_id = 2;
+  string athlete_id = 3;
+  string stat_type_id = 4;
+  double value = 5;
+  string recorded_by_id = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+
+  optional common.v1.UserSimple athlete = 9;
+  optional common.v1.TagSimple stat_type = 10;
+  optional common.v1.UserSimple recorded_by = 11;
+}
+
+message AthleteStatsAggregate {
+  string id = 1;
+  string competition_id = 2;
+  string branch_id = 3;
+  string athlete_id = 4;
+  string stat_type_id = 5;
+  int32 total_matches = 6;
+  double avg_value = 7;
+  double max_value = 8;
+  double min_value = 9;
+  google.protobuf.Timestamp last_updated_at = 10;
+
+  optional common.v1.UserSimple athlete = 11;
+  optional common.v1.TagSimple stat_type = 12;
+
+  double sum_value = 13;
+}
+
+message RecordMatchStatRequest {
+  string match_id = 1 [(buf.validate.field).string.uuid = true];
+  string athlete_id = 2 [(buf.validate.field).string.uuid = true];
+  string stat_type_id = 3 [(buf.validate.field).string.uuid = true];
+  double value = 4;
+}
+
+message RecordMatchStatResponse {
+  MatchStat stat = 1;
+}
+
+message UpdateMatchStatRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  double value = 2;
+}
+
+message UpdateMatchStatResponse {
+  string id = 1;
+  double value = 2;
+}
+
+message DeleteMatchStatRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteMatchStatResponse {
+  string id = 1;
+}
+
+message GetMatchStatsRequest {
+  string match_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetMatchStatsResponse {
+  repeated MatchStat stats = 1;
+}
+
+message GetAthleteAggregateRequest {
+  string athlete_id = 1 [(buf.validate.field).string.uuid = true];
+  string competition_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message GetAthleteAggregateResponse {
+  repeated AthleteStatsAggregate aggregates = 1;
+}
+
+message RecalculateAggregateRequest {
+  string athlete_id = 1 [(buf.validate.field).string.uuid = true];
+  string competition_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message RecalculateAggregateResponse {
+  string athlete_id = 1;
+  string competition_id = 2;
+}
+
+service StatService {
+  rpc RecordMatchStat(RecordMatchStatRequest) returns (RecordMatchStatResponse);
+  rpc UpdateMatchStat(UpdateMatchStatRequest) returns (UpdateMatchStatResponse);
+  rpc DeleteMatchStat(DeleteMatchStatRequest) returns (DeleteMatchStatResponse);
+  rpc GetMatchStats(GetMatchStatsRequest) returns (GetMatchStatsResponse);
+  rpc GetAthleteAggregate(GetAthleteAggregateRequest) returns (GetAthleteAggregateResponse);
+  rpc RecalculateAggregate(RecalculateAggregateRequest) returns (RecalculateAggregateResponse);
+}

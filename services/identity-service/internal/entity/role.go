@@ -47,6 +47,7 @@ var RolesInstantActive = map[string]bool{
 var RolesPendingApproval = map[string]bool{
 	constants.RoleCourtOwner:   true,
 	constants.RoleAcademyAdmin: true,
+	constants.RoleOrganizer:    true,
 }
 
 var RolesAdminAssignOnly = map[string]bool{
@@ -55,5 +56,5 @@ var RolesAdminAssignOnly = map[string]bool{
 }
 
 var RolesExpandableFrom = map[string][]string{
-	constants.RoleAthlete: {constants.RoleScout, constants.RoleCourtOwner, constants.RoleAcademyAdmin},
+	constants.RoleAthlete: {constants.RoleScout, constants.RoleCourtOwner, constants.RoleAcademyAdmin, constants.RoleOrganizer},
 }

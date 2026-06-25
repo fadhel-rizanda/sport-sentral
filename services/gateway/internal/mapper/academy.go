@@ -6,6 +6,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	academyv1 "microservice-golang/gen/academy/v1"
 	commonv1 "microservice-golang/gen/common/v1"
+	competitionv1 "microservice-golang/gen/competition/v1"
 	"microservice-golang/services/gateway/internal/dto"
 )
 
@@ -303,7 +304,7 @@ func ToEnrollmentResponse(e *academyv1.Enrollment) dto.EnrollmentResponse {
 	}
 }
 
-func ToRosterMemberResponse(m *academyv1.RosterMember) dto.RosterMemberResponse {
+func ToRosterMemberResponse(m *competitionv1.RosterMember) dto.RosterMemberResponse {
 	if m == nil {
 		return dto.RosterMemberResponse{}
 	}
@@ -334,7 +335,7 @@ func ToRosterMemberResponse(m *academyv1.RosterMember) dto.RosterMemberResponse 
 	}
 }
 
-func ToRosterResponse(r *academyv1.Roster) dto.RosterResponse {
+func ToRosterResponse(r *competitionv1.Roster) dto.RosterResponse {
 	if r == nil {
 		return dto.RosterResponse{}
 	}

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"microservice-golang/services/identity-service/internal/entity"
+	"microservice-golang/shared/infrastructure/postgres"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -38,12 +39,12 @@ func (r *userRepository) List(ctx context.Context, page, pageSize int) ([]*entit
 	var total int64
 	offset := (page - 1) * pageSize
 
-	if err := r.db.WithContext(ctx).Model(&entity.User{}).Count(&total).Error; err != nil {
+	if err := postgres.GetTx(ctx, r.db).WithContext(ctx).Model(&entity.User{}).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
 	var rows []userWithStatus
-	err := r.db.WithContext(ctx).
+	err := postgres.GetTx(ctx, r.db).WithContext(ctx).
 		Table("users").
 		Preload("UserRoles", "is_active = ?", true).
 		Preload("UserRoles.Role").
@@ -77,7 +78,7 @@ func (r *userRepository) List(ctx context.Context, page, pageSize int) ([]*entit
 
 		if len(statusIDs) > 0 {
 			var replicatedStatuses []entity.Status
-			if err := r.db.WithContext(ctx).
+			if err := postgres.GetTx(ctx, r.db).WithContext(ctx).
 				Table("replicated_statuses").
 				Where("id IN ?", statusIDs).
 				Find(&replicatedStatuses).Error; err != nil {
@@ -105,7 +106,7 @@ func (r *userRepository) List(ctx context.Context, page, pageSize int) ([]*entit
 func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	var row userWithStatus
 
-	err := r.db.WithContext(ctx).
+	err := postgres.GetTx(ctx, r.db).WithContext(ctx).
 		Table("users").
 		Preload("UserRoles", func(db *gorm.DB) *gorm.DB {
 			return db.Order("user_roles.created_at DESC")
@@ -138,7 +139,7 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Use
 		}
 
 		var replicatedStatuses []entity.Status
-		if err := r.db.WithContext(ctx).
+		if err := postgres.GetTx(ctx, r.db).WithContext(ctx).
 			Table("replicated_statuses").
 			Where("id IN ?", statusIDs).
 			Find(&replicatedStatuses).Error; err != nil {
@@ -179,7 +180,7 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Use
 func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
 	var row userWithStatus
 
-	err := r.db.WithContext(ctx).
+	err := postgres.GetTx(ctx, r.db).WithContext(ctx).
 		Table("users").
 		Preload("UserRoles", func(db *gorm.DB) *gorm.DB {
 			return db.Order("user_roles.created_at DESC")
@@ -212,7 +213,7 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.
 		}
 
 		var replicatedStatuses []entity.Status
-		if err := r.db.WithContext(ctx).
+		if err := postgres.GetTx(ctx, r.db).WithContext(ctx).
 			Table("replicated_statuses").
 			Where("id IN ?", statusIDs).
 			Find(&replicatedStatuses).Error; err != nil {
@@ -251,23 +252,23 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.
 }
 
 func (r *userRepository) Create(ctx context.Context, user *entity.User) error {
-	return r.db.WithContext(ctx).Create(user).Error
+	return postgres.GetTx(ctx, r.db).WithContext(ctx).Create(user).Error
 }
 
 func (r *userRepository) Update(ctx context.Context, user *entity.User) error {
-	return r.db.WithContext(ctx).Save(user).Error
+	return postgres.GetTx(ctx, r.db).WithContext(ctx).Save(user).Error
 }
 
 func (r *userRepository) AssignRoles(ctx context.Context, userID uuid.UUID, roleIDs []uuid.UUID) error {
 	roles := toRoleRefs(roleIDs)
 	user := &entity.User{ID: userID}
-	return r.db.WithContext(ctx).Model(user).Association("Roles").Append(roles)
+	return postgres.GetTx(ctx, r.db).WithContext(ctx).Model(user).Association("Roles").Append(roles)
 }
 
 func (r *userRepository) RemoveRoles(ctx context.Context, userID uuid.UUID, roleIDs []uuid.UUID) error {
 	roles := toRoleRefs(roleIDs)
 	user := &entity.User{ID: userID}
-	return r.db.WithContext(ctx).Model(user).Association("Roles").Delete(roles)
+	return postgres.GetTx(ctx, r.db).WithContext(ctx).Model(user).Association("Roles").Delete(roles)
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

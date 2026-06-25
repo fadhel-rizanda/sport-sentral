@@ -8,11 +8,56 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"runtime/debug"
 	"time"
 )
+
+type userValuer interface {
+	UserValue(key any) any
+}
+
+// UnaryClientMetadataPropagator extracts metadata like user-id and active-role from
+// context user values (e.g. from fiber ContextUserID) and injects them as gRPC outgoing metadata.
+func UnaryClientMetadataPropagator() grpc.UnaryClientInterceptor {
+	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		var userID string
+		var activeRole string
+
+		if uv, ok := ctx.(userValuer); ok {
+			if uidVal := uv.UserValue("user_id"); uidVal != nil {
+				userID, _ = uidVal.(string)
+			}
+			if roleVal := uv.UserValue("active_role_name"); roleVal != nil {
+				activeRole, _ = roleVal.(string)
+			}
+		}
+
+		// Also check standard context keys just in case
+		if userID == "" {
+			if val, ok := ctx.Value("user_id").(string); ok {
+				userID = val
+			}
+		}
+		if activeRole == "" {
+			if val, ok := ctx.Value("active_role_name").(string); ok {
+				activeRole = val
+			}
+		}
+
+		if userID != "" {
+			md := metadata.Pairs(
+				"user-id", userID,
+				"active-role", activeRole,
+			)
+			ctx = metadata.NewOutgoingContext(ctx, md)
+		}
+
+		return invoker(ctx, method, req, reply, cc, opts...)
+	}
+}
 
 // UnaryLogger logs every unary RPC with duration and status code.
 func UnaryLogger(log *zap.Logger) grpc.UnaryServerInterceptor {

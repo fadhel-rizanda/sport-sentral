@@ -56,4 +56,12 @@ message SportEvent {
   ];
 
   optional google.protobuf.Timestamp deleted_at = 11;
+
+  repeated SportStatEvent stats = 12;
+}
+
+message SportStatEvent {
+  string id                 = 1;
+  string stat_type_tag_id   = 2;
+  string aggregation_method = 3;
 }

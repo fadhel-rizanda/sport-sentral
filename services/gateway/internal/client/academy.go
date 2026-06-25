@@ -5,6 +5,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	academyv1 "microservice-golang/gen/academy/v1"
+	"microservice-golang/shared/pkg/grpc/interceptor"
 )
 
 type AcademyClient struct {
@@ -12,7 +13,6 @@ type AcademyClient struct {
 	AcademyBranch  academyv1.AcademyBranchServiceClient
 	AcademyAdmin   academyv1.AcademyAdminServiceClient
 	Enrollment     academyv1.EnrollmentServiceClient
-	Roster         academyv1.RosterServiceClient
 	conn           *grpc.ClientConn
 }
 
@@ -21,6 +21,7 @@ func NewAcademyClient(address string) (*AcademyClient, error) {
 		address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+		grpc.WithUnaryInterceptor(interceptor.UnaryClientMetadataPropagator()),
 	)
 	if err != nil {
 		return nil, err
@@ -31,7 +32,6 @@ func NewAcademyClient(address string) (*AcademyClient, error) {
 		AcademyBranch:  academyv1.NewAcademyBranchServiceClient(conn),
 		AcademyAdmin:   academyv1.NewAcademyAdminServiceClient(conn),
 		Enrollment:     academyv1.NewEnrollmentServiceClient(conn),
-		Roster:         academyv1.NewRosterServiceClient(conn),
 		conn:           conn,
 	}, nil
 }

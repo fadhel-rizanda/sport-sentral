@@ -1,0 +1,50 @@
+package replicated
+
+import (
+	"context"
+	"microservice-golang/services/competition-service/internal/entity"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+)
+
+type StatusRepository interface {
+	Upsert(ctx context.Context, status entity.Status) error
+	Delete(ctx context.Context, id uuid.UUID) error
+	GetByID(ctx context.Context, id uuid.UUID) (*entity.Status, error)
+}
+
+type statusRepository struct {
+	db *gorm.DB
+}
+
+func NewStatusRepository(db *gorm.DB) StatusRepository {
+	return &statusRepository{
+		db: db,
+	}
+}
+
+func (r *statusRepository) Upsert(ctx context.Context, status entity.Status) error {
+	return r.db.WithContext(ctx).
+		Clauses(clause.OnConflict{
+			Columns: []clause.Column{{Name: "id"}},
+			DoUpdates: clause.AssignmentColumns([]string{
+				"type",
+				"name",
+				"slug",
+				"deleted_at",
+			}),
+		}).
+		Create(&status).Error
+}
+
+func (r *statusRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	return r.db.WithContext(ctx).Delete(&entity.Status{}, "id = ?", id).Error
+}
+
+func (r *statusRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Status, error) {
+	var status entity.Status
+	err := r.db.WithContext(ctx).First(&status, "id = ?", id).Error
+	return &status, err
+}

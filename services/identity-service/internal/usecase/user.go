@@ -15,12 +15,13 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 
 	"microservice-golang/services/identity-service/internal/entity"
 	"microservice-golang/services/identity-service/internal/repository"
 	"microservice-golang/shared/infrastructure/postgres"
+	"microservice-golang/shared/pkg/database"
 	apperr "microservice-golang/shared/pkg/errors"
+	sharedgrpc "microservice-golang/shared/pkg/grpc"
 	"microservice-golang/shared/pkg/mailer"
 	"microservice-golang/shared/pkg/redisclient"
 	"microservice-golang/shared/pkg/token"
@@ -43,10 +44,11 @@ type UserUseCase interface {
 }
 
 type userUseCase struct {
-	db              *gorm.DB
+	txManager       database.TransactionManager
 	userRepo        repository.UserRepository
 	userRoleRepo    repository.UserRoleRepository
 	roleRepo        repository.RoleRepository
+	permissionRepo  repository.PermissionRepository
 	mailer          *mailer.Mailer
 	redis           redisclient.Client
 	AppURL          string
@@ -56,10 +58,11 @@ type userUseCase struct {
 }
 
 func NewUserUseCase(
-	db *gorm.DB,
+	txManager database.TransactionManager,
 	userRepo repository.UserRepository,
 	userRoleRepo repository.UserRoleRepository,
 	roleRepo repository.RoleRepository,
+	permissionRepo repository.PermissionRepository,
 	mailer *mailer.Mailer,
 	redis redisclient.Client,
 	AppURL string,
@@ -68,10 +71,11 @@ func NewUserUseCase(
 	publisher UserEventPublisher,
 ) UserUseCase {
 	return &userUseCase{
-		db:              db,
+		txManager:       txManager,
 		userRepo:        userRepo,
 		userRoleRepo:    userRoleRepo,
 		roleRepo:        roleRepo,
+		permissionRepo:  permissionRepo,
 		redis:           redis,
 		mailer:          mailer,
 		AppURL:          AppURL,
@@ -87,8 +91,19 @@ func (uc *userUseCase) Create(ctx context.Context, req dto.CreateUserRequest) (*
 		return nil, apperr.NotFound("role")
 	}
 
-	if entity.RolesAdminAssignOnly[role.Name] {
-		return nil, apperr.Forbidden("cannot self-register with this role")
+	userID, errExtract := sharedgrpc.ExtractUserID(ctx)
+	if errExtract == nil {
+		activeRole, _ := sharedgrpc.ExtractActiveRole(ctx)
+		if activeRole != "platform_admin" {
+			has, _ := uc.permissionRepo.CheckPermission(ctx, userID, "user", "create")
+			if !has {
+				return nil, apperr.Forbidden("insufficient permissions")
+			}
+		}
+	} else {
+		if entity.RolesAdminAssignOnly[role.Name] {
+			return nil, apperr.Forbidden("cannot self-register with this role")
+		}
 	}
 
 	userStatusName := constants.StatusActive
@@ -136,11 +151,8 @@ func (uc *userUseCase) Create(ctx context.Context, req dto.CreateUserRequest) (*
 		StatusID:       statusCache.ID,
 	}
 
-	if err := uc.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		txUserRepo := repository.NewUserRepository(tx)
-		txUserRoleRepo := repository.NewUserRoleRepository(tx)
-
-		if err := txUserRepo.Create(ctx, user); err != nil {
+	if err := uc.txManager.Run(ctx, func(txCtx context.Context) error {
+		if err := uc.userRepo.Create(txCtx, user); err != nil {
 			if postgres.IsUniqueConstraint(err, "idx_users_email") {
 				return apperr.Conflict("email")
 			}
@@ -150,7 +162,7 @@ func (uc *userUseCase) Create(ctx context.Context, req dto.CreateUserRequest) (*
 			return apperr.Internal(err)
 		}
 
-		if err := txUserRoleRepo.Add(ctx, &entity.UserRole{
+		if err := uc.userRoleRepo.Add(txCtx, &entity.UserRole{
 			UserID:   user.ID,
 			RoleID:   role.ID,
 			IsActive: true,
@@ -174,6 +186,20 @@ func (uc *userUseCase) Create(ctx context.Context, req dto.CreateUserRequest) (*
 }
 
 func (uc *userUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.UserResponse, error) {
+	userID, err := sharedgrpc.ExtractUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if userID != id {
+		activeRole, _ := sharedgrpc.ExtractActiveRole(ctx)
+		if activeRole != "platform_admin" {
+			has, _ := uc.permissionRepo.CheckPermission(ctx, userID, "user", "read")
+			if !has {
+				return nil, apperr.Forbidden("insufficient permissions")
+			}
+		}
+	}
+
 	user, err := uc.userRepo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -196,6 +222,20 @@ func (uc *userUseCase) GetByEmail(ctx context.Context, email string) (*dto.UserR
 }
 
 func (uc *userUseCase) Update(ctx context.Context, req dto.UpdateUserRequest) (*dto.UserResponse, error) {
+	userID, err := sharedgrpc.ExtractUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if userID != req.ID {
+		activeRole, _ := sharedgrpc.ExtractActiveRole(ctx)
+		if activeRole != "platform_admin" {
+			has, _ := uc.permissionRepo.CheckPermission(ctx, userID, "user", "update")
+			if !has {
+				return nil, apperr.Forbidden("insufficient permissions")
+			}
+		}
+	}
+
 	user, err := uc.userRepo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -236,6 +276,20 @@ func (uc *userUseCase) Update(ctx context.Context, req dto.UpdateUserRequest) (*
 }
 
 func (uc *userUseCase) SoftDelete(ctx context.Context, req dto.DeleteUserRequest) error {
+	userID, err := sharedgrpc.ExtractUserID(ctx)
+	if err != nil {
+		return err
+	}
+	if userID != req.ID {
+		activeRole, _ := sharedgrpc.ExtractActiveRole(ctx)
+		if activeRole != "platform_admin" {
+			has, _ := uc.permissionRepo.CheckPermission(ctx, userID, "user", "delete")
+			if !has {
+				return apperr.Forbidden("insufficient permissions")
+			}
+		}
+	}
+
 	user, err := uc.userRepo.GetByID(ctx, req.ID)
 	if err != nil {
 		if postgres.IsNotFound(err) {
@@ -248,7 +302,8 @@ func (uc *userUseCase) SoftDelete(ctx context.Context, req dto.DeleteUserRequest
 		return apperr.Unauthorized("invalid email or password")
 	}
 
-	user.DeletedAt = gorm.DeletedAt{Time: time.Now(), Valid: true}
+	user.DeletedAt.Time = time.Now()
+	user.DeletedAt.Valid = true
 
 	if err := uc.userRepo.Update(ctx, user); err != nil {
 		return apperr.Internal(err)
@@ -272,6 +327,18 @@ func (uc *userUseCase) SoftDelete(ctx context.Context, req dto.DeleteUserRequest
 }
 
 func (uc *userUseCase) List(ctx context.Context, req dto.ListRequest) (*dto.ListUsersResponse, error) {
+	userID, err := sharedgrpc.ExtractUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	activeRole, _ := sharedgrpc.ExtractActiveRole(ctx)
+	if activeRole != "platform_admin" {
+		has, _ := uc.permissionRepo.CheckPermission(ctx, userID, "user", "read")
+		if !has {
+			return nil, apperr.Forbidden("insufficient permissions")
+		}
+	}
+
 	users, total, err := uc.userRepo.List(ctx, req.Page, req.PageSize)
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -413,6 +480,18 @@ func (uc *userUseCase) ResetPassword(ctx context.Context, tokenStr, newPassword 
 }
 
 func (uc *userUseCase) AssignRolesToUser(ctx context.Context, userID string, roleID []string) error {
+	callerID, errExtract := sharedgrpc.ExtractUserID(ctx)
+	if errExtract != nil {
+		return errExtract
+	}
+	activeRole, _ := sharedgrpc.ExtractActiveRole(ctx)
+	if activeRole != "platform_admin" {
+		has, _ := uc.permissionRepo.CheckPermission(ctx, callerID, "role", "assign")
+		if !has {
+			return apperr.Forbidden("insufficient permissions")
+		}
+	}
+
 	uid, err := uuid.Parse(userID)
 	if err != nil {
 		return apperr.InvalidArgument("invalid user id")
@@ -447,6 +526,18 @@ func (uc *userUseCase) AssignRolesToUser(ctx context.Context, userID string, rol
 }
 
 func (uc *userUseCase) RemoveRolesFromUser(ctx context.Context, userID string, roleIDs []string) error {
+	callerID, errExtract := sharedgrpc.ExtractUserID(ctx)
+	if errExtract != nil {
+		return errExtract
+	}
+	activeRole, _ := sharedgrpc.ExtractActiveRole(ctx)
+	if activeRole != "platform_admin" {
+		has, _ := uc.permissionRepo.CheckPermission(ctx, callerID, "role", "assign")
+		if !has {
+			return apperr.Forbidden("insufficient permissions")
+		}
+	}
+
 	uID, err := uuid.Parse(userID)
 	if err != nil {
 		return apperr.InvalidArgument("invalid user id")

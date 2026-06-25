@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"github.com/gofiber/fiber/v2"
 	userv1 "microservice-golang/gen/user/v1"
 	"microservice-golang/services/gateway/internal/dto"
@@ -46,7 +45,7 @@ func (h *UserHandler) Routes(router fiber.Router, auth fiber.Handler, admin ...f
 func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	resp, err := h.userClient.GetUser(context.Background(), &userv1.GetUserRequest{
+	resp, err := h.userClient.GetUser(c.Context(), &userv1.GetUserRequest{
 		Id: id,
 	})
 	if err != nil {
@@ -67,7 +66,7 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	resp, err := h.userClient.UpdateUser(context.Background(), &userv1.UpdateUserRequest{
+	resp, err := h.userClient.UpdateUser(c.Context(), &userv1.UpdateUserRequest{
 		Id:       userID,
 		FullName: body.FullName,
 		Username: body.Username,
@@ -83,7 +82,7 @@ func (h *UserHandler) ListUsers(c *fiber.Ctx) error {
 	page := c.QueryInt("page", 1)
 	pageSize := c.QueryInt("pageSize", 10)
 
-	resp, err := h.userClient.ListUsers(context.Background(), &userv1.ListUsersRequest{
+	resp, err := h.userClient.ListUsers(c.Context(), &userv1.ListUsersRequest{
 		Page:     int32(page),
 		PageSize: int32(pageSize),
 	})
@@ -113,7 +112,7 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := h.userClient.DeleteUser(context.Background(), &userv1.DeleteUserRequest{
+	_, err := h.userClient.DeleteUser(c.Context(), &userv1.DeleteUserRequest{
 		Id:       userID,
 		Password: body.Password,
 	})
@@ -135,7 +134,7 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
-	resp, err := h.userClient.CreateUser(context.Background(), &userv1.CreateUserRequest{
+	resp, err := h.userClient.CreateUser(c.Context(), &userv1.CreateUserRequest{
 		Email:    body.Email,
 		Username: body.Username,
 		FullName: body.FullName,
@@ -155,7 +154,7 @@ func (h *UserHandler) SendVerifyEmail(c *fiber.Ctx) error {
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
-	_, err := h.userClient.SendVerifyEmail(context.Background(), &userv1.SendVerifyEmailRequest{
+	_, err := h.userClient.SendVerifyEmail(c.Context(), &userv1.SendVerifyEmailRequest{
 		Email: body.Email,
 	})
 	if err != nil {
@@ -171,7 +170,7 @@ func (h *UserHandler) VerifyAccount(c *fiber.Ctx) error {
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
-	_, err := h.userClient.VerifyAccount(context.Background(), &userv1.VerifyAccountRequest{
+	_, err := h.userClient.VerifyAccount(c.Context(), &userv1.VerifyAccountRequest{
 		Token: body.Token,
 	})
 	if err != nil {
@@ -187,7 +186,7 @@ func (h *UserHandler) ForgotPassword(c *fiber.Ctx) error {
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
-	_, err := h.userClient.ForgotPassword(context.Background(), &userv1.ForgotPasswordRequest{
+	_, err := h.userClient.ForgotPassword(c.Context(), &userv1.ForgotPasswordRequest{
 		Email: body.Email,
 	})
 	if err != nil {
@@ -204,7 +203,7 @@ func (h *UserHandler) ResetPassword(c *fiber.Ctx) error {
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
-	_, err := h.userClient.ResetPassword(context.Background(), &userv1.ResetPasswordRequest{
+	_, err := h.userClient.ResetPassword(c.Context(), &userv1.ResetPasswordRequest{
 		Token:    body.Token,
 		Password: body.Password,
 	})
@@ -222,7 +221,7 @@ func (h *UserHandler) AssignRolesToUser(c *fiber.Ctx) error {
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
-	_, err := h.userClient.AssignRolesToUser(context.Background(), &userv1.AssignRolesToUserRequest{
+	_, err := h.userClient.AssignRolesToUser(c.Context(), &userv1.AssignRolesToUserRequest{
 		UserId:  body.UserID,
 		RoleIds: body.Roles,
 	})
@@ -240,7 +239,7 @@ func (h *UserHandler) RemoveRolesFromUser(c *fiber.Ctx) error {
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
-	_, err := h.userClient.RemoveRolesFromUser(context.Background(), &userv1.RemoveRolesFromUserRequest{
+	_, err := h.userClient.RemoveRolesFromUser(c.Context(), &userv1.RemoveRolesFromUserRequest{
 		UserId:  body.UserID,
 		RoleIds: body.Roles,
 	})

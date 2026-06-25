@@ -128,16 +128,16 @@ func ToGRPC(err error) error {
 		return st.Err()
 
 	case errors.As(err, &notFound):
-		return status.Errorf(codes.NotFound, err.Error())
+		return status.Errorf(codes.NotFound, "%s", err.Error())
 
 	case errors.As(err, &forbidden):
-		return status.Errorf(codes.PermissionDenied, err.Error())
+		return status.Errorf(codes.PermissionDenied, "%s", err.Error())
 
 	case errors.As(err, &unauthorized):
-		return status.Errorf(codes.Unauthenticated, err.Error())
+		return status.Errorf(codes.Unauthenticated, "%s", err.Error())
 
 	case errors.As(err, &invalidArg):
-		return status.Errorf(codes.InvalidArgument, err.Error())
+		return status.Errorf(codes.InvalidArgument, "%s", err.Error())
 
 	case errors.As(err, &internal):
 

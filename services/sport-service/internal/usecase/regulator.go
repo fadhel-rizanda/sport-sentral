@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	sportv1 "microservice-golang/gen/sport/v1"
 	"microservice-golang/services/sport-service/internal/dto"
@@ -15,7 +14,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
+	sharedgrpc "microservice-golang/shared/pkg/grpc"
 )
 
 type RegulatorUseCase interface {
@@ -58,6 +57,14 @@ func NewRegulatorUseCase(
 }
 
 func (uc *regulatorUseCase) Create(ctx context.Context, req dto.CreateRegulatorRequest) (*dto.RegulatorResponse, error) {
+	activeRole, err := sharedgrpc.ExtractActiveRole(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if activeRole != "platform_admin" {
+		return nil, apperr.Forbidden("insufficient permissions")
+	}
+
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -70,7 +77,7 @@ func (uc *regulatorUseCase) Create(ctx context.Context, req dto.CreateRegulatorR
 
 	// Validate status exists
 	if _, err := uc.statusRepo.GetByID(ctx, req.StatusID); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("status")
 		}
 		return nil, apperr.Internal(err)
@@ -118,7 +125,7 @@ func (uc *regulatorUseCase) Create(ctx context.Context, req dto.CreateRegulatorR
 func (uc *regulatorUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.RegulatorResponse, error) {
 	regulator, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("regulator")
 		}
 		return nil, apperr.Internal(err)
@@ -127,6 +134,14 @@ func (uc *regulatorUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.Reg
 }
 
 func (uc *regulatorUseCase) AddStaff(ctx context.Context, req dto.AddStaffRequest) (*dto.RegulatorStaffResponse, error) {
+	activeRole, err := sharedgrpc.ExtractActiveRole(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if activeRole != "platform_admin" {
+		return nil, apperr.Forbidden("insufficient permissions")
+	}
+
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -134,7 +149,7 @@ func (uc *regulatorUseCase) AddStaff(ctx context.Context, req dto.AddStaffReques
 
 	// Verify regulator exists
 	if _, err := uc.repo.GetByID(ctx, req.RegulatorID); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("regulator")
 		}
 		return nil, apperr.Internal(err)
@@ -142,7 +157,7 @@ func (uc *regulatorUseCase) AddStaff(ctx context.Context, req dto.AddStaffReques
 
 	// Verify user exists (replicated_users)
 	if _, err := uc.userRepo.GetByID(ctx, req.UserID); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("user")
 		}
 		return nil, apperr.Internal(err)
@@ -150,7 +165,7 @@ func (uc *regulatorUseCase) AddStaff(ctx context.Context, req dto.AddStaffReques
 
 	// Verify role tag exists
 	if _, err := uc.tagRepo.GetByID(ctx, req.RoleTagID); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return nil, apperr.NotFound("role tag")
 		}
 		return nil, apperr.Internal(err)
@@ -179,9 +194,17 @@ func (uc *regulatorUseCase) AddStaff(ctx context.Context, req dto.AddStaffReques
 }
 
 func (uc *regulatorUseCase) RemoveStaff(ctx context.Context, req dto.RemoveStaffRequest) error {
-	_, err := uc.repo.GetStaffByID(ctx, req.StaffID)
+	activeRole, err := sharedgrpc.ExtractActiveRole(ctx)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	if activeRole != "platform_admin" {
+		return apperr.Forbidden("insufficient permissions")
+	}
+
+	_, err = uc.repo.GetStaffByID(ctx, req.StaffID)
+	if err != nil {
+		if postgres.IsNotFound(err) {
 			return apperr.NotFound("regulator staff")
 		}
 		return apperr.Internal(err)
@@ -195,9 +218,17 @@ func (uc *regulatorUseCase) RemoveStaff(ctx context.Context, req dto.RemoveStaff
 }
 
 func (uc *regulatorUseCase) AssignSport(ctx context.Context, req dto.AssignSportToRegulatorRequest) error {
+	activeRole, err := sharedgrpc.ExtractActiveRole(ctx)
+	if err != nil {
+		return err
+	}
+	if activeRole != "platform_admin" {
+		return apperr.Forbidden("insufficient permissions")
+	}
+
 	// Verify regulator exists
 	if _, err := uc.repo.GetByID(ctx, req.RegulatorID); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return apperr.NotFound("regulator")
 		}
 		return apperr.Internal(err)
@@ -206,7 +237,7 @@ func (uc *regulatorUseCase) AssignSport(ctx context.Context, req dto.AssignSport
 	// Verify sport exists
 	sport, err := uc.sportRepo.GetByID(ctx, req.SportID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if postgres.IsNotFound(err) {
 			return apperr.NotFound("sport")
 		}
 		return apperr.Internal(err)

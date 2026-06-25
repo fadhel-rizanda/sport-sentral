@@ -70,6 +70,21 @@ func (uc *SyncSportUseCase) upsert(ctx context.Context, evt *sportv1.SportEvent)
 		}
 	}
 
+	stats := make([]entity.SportStat, len(evt.GetStats()))
+	for i, statEvt := range evt.GetStats() {
+		statID, err := uuid.Parse(statEvt.GetId())
+		if err != nil {
+			statID, _ = uuid.NewV7()
+		}
+		statTypeTagID, _ := uuid.Parse(statEvt.GetStatTypeTagId())
+		stats[i] = entity.SportStat{
+			ID:                statID,
+			SportID:           id,
+			StatTypeTagID:     statTypeTagID,
+			AggregationMethod: statEvt.GetAggregationMethod(),
+		}
+	}
+
 	if err := uc.sportRepo.Upsert(ctx, entity.Sport{
 		ID:               id,
 		Name:             evt.Name,
@@ -78,6 +93,7 @@ func (uc *SyncSportUseCase) upsert(ctx context.Context, evt *sportv1.SportEvent)
 		IsVerified:       evt.IsVerified,
 		RegulatorID:      regulatorID,
 		Tier:             evt.Tier,
+		Stats:            stats,
 	}); err != nil {
 		return apperr.Internal(fmt.Errorf("upsert sport replicas: %w", err))
 	}

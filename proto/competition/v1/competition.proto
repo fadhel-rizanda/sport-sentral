@@ -1,0 +1,122 @@
+syntax = "proto3";
+
+package competition.v1;
+
+option go_package = "microservice-golang/gen/competition/v1;competitionv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
+import "competition/v1/competition_branch.proto";
+
+message Competition {
+  string id = 1;
+  string sport_id = 2;
+  string host_academy_branch_id = 3;
+  string name = 4;
+  string description = 5;
+  string tier_id = 6;
+  google.protobuf.Timestamp start_date = 7;
+  optional google.protobuf.Timestamp end_date = 8;
+  string status_id = 9;
+  string created_by_id = 10;
+  string updated_by_id = 11;
+  optional string deleted_by_id = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+  optional google.protobuf.Timestamp deleted_at = 15;
+
+  optional common.v1.SportSimple sport = 16;
+  optional common.v1.AcademyBranchSimple host_academy = 17;
+  optional common.v1.TagSimple tier_tag = 18;
+  optional common.v1.StatusSimple status = 19;
+  optional common.v1.UserSimple created_by = 20;
+  optional common.v1.UserSimple updated_by = 21;
+  repeated Branch branches = 22;
+}
+
+message CreateCompetitionRequest {
+  string sport_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string host_academy_branch_id = 2 [(buf.validate.field).string.uuid = true];
+  string name = 3 [(buf.validate.field).string.min_len = 1];
+  string description = 4;
+  string tier_id = 5 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp start_date = 6;
+  optional google.protobuf.Timestamp end_date = 7;
+  string status_id = 8 [(buf.validate.field).string.uuid = true];
+}
+
+message CreateCompetitionResponse {
+  Competition competition = 1;
+}
+
+message GetCompetitionRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetCompetitionResponse {
+  Competition competition = 1;
+}
+
+message ListCompetitionsRequest {
+  optional string branch_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string sport_id = 2 [(buf.validate.field).string.uuid = true];
+  optional string tier_id = 3 [(buf.validate.field).string.uuid = true];
+  optional string status_id = 4 [(buf.validate.field).string.uuid = true];
+  optional string search = 5;
+  int32 page = 6 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 7 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message ListCompetitionsResponse {
+  repeated Competition competitions = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message UpdateCompetitionRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  optional string sport_id = 2 [(buf.validate.field).string.uuid = true];
+  optional string host_academy_branch_id = 3 [(buf.validate.field).string.uuid = true];
+  optional string name = 4 [(buf.validate.field).string.min_len = 1];
+  optional string description = 5;
+  optional string tier_id = 6 [(buf.validate.field).string.uuid = true];
+  optional google.protobuf.Timestamp start_date = 7;
+  optional google.protobuf.Timestamp end_date = 8;
+  optional string status_id = 9 [(buf.validate.field).string.uuid = true];
+}
+
+message UpdateCompetitionResponse {
+  Competition competition = 1;
+}
+
+message DeleteCompetitionRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteCompetitionResponse {
+  string id = 1;
+}
+
+message UpdateCompetitionStatusRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string status_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message UpdateCompetitionStatusResponse {
+  string id = 1;
+  string status_id = 2;
+}
+
+service CompetitionService {
+  rpc CreateCompetition(CreateCompetitionRequest) returns (CreateCompetitionResponse);
+  rpc GetCompetition(GetCompetitionRequest) returns (GetCompetitionResponse);
+  rpc ListCompetitions(ListCompetitionsRequest) returns (ListCompetitionsResponse);
+  rpc UpdateCompetition(UpdateCompetitionRequest) returns (UpdateCompetitionResponse);
+  rpc DeleteCompetition(DeleteCompetitionRequest) returns (DeleteCompetitionResponse);
+  rpc UpdateCompetitionStatus(UpdateCompetitionStatusRequest) returns (UpdateCompetitionStatusResponse);
+}

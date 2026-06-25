@@ -26,12 +26,26 @@ func NewSportRepository(db *gorm.DB) SportRepository {
 }
 
 func (r *sportRepository) Upsert(ctx context.Context, s entity.Sport) error {
-	return r.db.WithContext(ctx).
-		Clauses(clause.OnConflict{
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "id"}},
 			DoUpdates: clause.AssignmentColumns([]string{"name", "slug", "icon_attachment_id", "is_verified", "regulator_id", "tier"}),
-		}).
-		Create(&s).Error
+		}).Omit("Stats").Create(&s).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Where("sport_id = ?", s.ID).Delete(&entity.SportStat{}).Error; err != nil {
+			return err
+		}
+
+		if len(s.Stats) > 0 {
+			if err := tx.Create(&s.Stats).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
 func (r *sportRepository) Delete(ctx context.Context, id uuid.UUID) error {

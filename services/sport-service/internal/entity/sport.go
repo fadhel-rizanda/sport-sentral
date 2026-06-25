@@ -56,7 +56,25 @@ type SportConfig struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	// Relations
-	Sport              *Sport `gorm:"foreignKey:SportID;references:ID;constraint:-;"`
-	ParticipantTypeTag *Tag   `gorm:"foreignKey:ParticipantTypeTagID;references:ID;constraint:-;"`
-	StatTags           []Tag  `gorm:"many2many:sport_config_stat_tags;constraint:OnDelete:CASCADE"`
+	Sport              *Sport      `gorm:"foreignKey:SportID;references:ID;constraint:-;"`
+	ParticipantTypeTag *Tag        `gorm:"foreignKey:ParticipantTypeTagID;references:ID;constraint:-;"`
+	Stats              []SportStat `gorm:"foreignKey:SportID;references:SportID;constraint:OnDelete:CASCADE"`
+}
+
+type SportStat struct {
+	ID                uuid.UUID      `gorm:"type:uuid;primaryKey"`
+	SportID           uuid.UUID      `gorm:"type:uuid;not null;index"`
+	StatTypeTagID     uuid.UUID      `gorm:"type:uuid;not null;index"`
+	AggregationMethod string         `gorm:"type:varchar(20);not null;default:'AVG'"` // AVG, SUM, MAX, MIN
+	CreatedAt         time.Time      `gorm:"not null"`
+	UpdatedAt         time.Time      `gorm:"not null"`
+	DeletedAt         gorm.DeletedAt `gorm:"index"`
+
+	// Relations
+	Sport       *Sport `gorm:"foreignKey:SportID;references:ID;constraint:-;"`
+	StatTypeTag *Tag   `gorm:"foreignKey:StatTypeTagID;references:ID;constraint:-;"`
+}
+
+func (SportStat) TableName() string {
+	return "sport_stats"
 }

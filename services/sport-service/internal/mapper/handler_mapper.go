@@ -102,9 +102,9 @@ func ToProtoSportConfig(c *dto.SportConfigResponse) *sportv1.SportConfig {
 	if c == nil {
 		return nil
 	}
-	statTags := make([]*commonv1.TagSimple, len(c.StatTags))
-	for i, t := range c.StatTags {
-		statTags[i] = ToProtoTagSimple(&t)
+	stats := make([]*sportv1.SportStat, len(c.Stats))
+	for i, s := range c.Stats {
+		stats[i] = ToProtoSportStat(&s)
 	}
 	var rules string
 	if c.RulesURL != nil {
@@ -113,7 +113,7 @@ func ToProtoSportConfig(c *dto.SportConfigResponse) *sportv1.SportConfig {
 	return &sportv1.SportConfig{
 		Id:                 c.ID.String(),
 		SportId:            c.SportID.String(),
-		StatTags:           statTags,
+		Stats:              stats,
 		ParticipantTypeTag: ToProtoTagSimple(c.ParticipantTypeTag),
 		MinRosterSize:      c.MinRosterSize,
 		MaxRosterSize:      c.MaxRosterSize,
@@ -122,6 +122,19 @@ func ToProtoSportConfig(c *dto.SportConfigResponse) *sportv1.SportConfig {
 		Description:        c.Description,
 		CreatedAt:          timestamppb.New(c.CreatedAt),
 		UpdatedAt:          timestamppb.New(c.UpdatedAt),
+	}
+}
+
+func ToProtoSportStat(s *dto.SportStatResponse) *sportv1.SportStat {
+	if s == nil {
+		return nil
+	}
+	return &sportv1.SportStat{
+		Id:                s.ID.String(),
+		SportId:           s.SportID.String(),
+		StatTypeTagId:     s.StatTypeTagID.String(),
+		StatTypeTag:       ToProtoTagSimple(s.StatTypeTag),
+		AggregationMethod: s.AggregationMethod,
 	}
 }
 

@@ -88,14 +88,14 @@ func ToSportConfigResponse(c *entity.SportConfig) *dto.SportConfigResponse {
 	if c == nil {
 		return nil
 	}
-	statTags := make([]dto.TagSimpleResponse, len(c.StatTags))
-	for i, t := range c.StatTags {
-		statTags[i] = *ToTagSimpleResponse(&t)
+	stats := make([]dto.SportStatResponse, len(c.Stats))
+	for i, s := range c.Stats {
+		stats[i] = *ToSportStatResponse(&s)
 	}
 	return &dto.SportConfigResponse{
 		ID:                 c.ID,
 		SportID:            c.SportID,
-		StatTags:           statTags,
+		Stats:              stats,
 		ParticipantTypeTag: ToTagSimpleResponse(c.ParticipantTypeTag),
 		MinRosterSize:      c.MinRosterSize,
 		MaxRosterSize:      c.MaxRosterSize,
@@ -104,6 +104,19 @@ func ToSportConfigResponse(c *entity.SportConfig) *dto.SportConfigResponse {
 		Description:        c.Description,
 		CreatedAt:          c.CreatedAt,
 		UpdatedAt:          c.UpdatedAt,
+	}
+}
+
+func ToSportStatResponse(s *entity.SportStat) *dto.SportStatResponse {
+	if s == nil {
+		return nil
+	}
+	return &dto.SportStatResponse{
+		ID:                s.ID,
+		SportID:           s.SportID,
+		StatTypeTagID:     s.StatTypeTagID,
+		StatTypeTag:       ToTagSimpleResponse(s.StatTypeTag),
+		AggregationMethod: s.AggregationMethod,
 	}
 }
 

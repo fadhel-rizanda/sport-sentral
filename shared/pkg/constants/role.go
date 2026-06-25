@@ -7,4 +7,5 @@ const (
 	RoleAcademyAdmin  = "academy_admin"
 	RoleRegulator     = "regulator"
 	RolePlatformAdmin = "platform_admin"
+	RoleOrganizer     = "organizer"
 )

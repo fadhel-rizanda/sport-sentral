@@ -224,13 +224,16 @@ func (h *SportHandler) UpdateSportConfig(ctx context.Context, req *sportv1.Updat
 		return nil, apperr.ToGRPC(apperr.InvalidArgument("invalid updated by id"))
 	}
 
-	statTagIDs := make([]uuid.UUID, len(req.GetStatTagIds()))
-	for i, tagStr := range req.GetStatTagIds() {
-		tagID, err := uuid.Parse(tagStr)
+	statsInput := make([]dto.SportStatConfigInput, len(req.GetStats()))
+	for i, s := range req.GetStats() {
+		tagID, err := uuid.Parse(s.GetStatTypeTagId())
 		if err != nil {
 			return nil, apperr.ToGRPC(apperr.InvalidArgument(fmt.Sprintf("invalid stat tag id at index %d", i)))
 		}
-		statTagIDs[i] = tagID
+		statsInput[i] = dto.SportStatConfigInput{
+			StatTypeTagID:     tagID,
+			AggregationMethod: s.GetAggregationMethod(),
+		}
 	}
 
 	var rulesURL *string
@@ -245,7 +248,7 @@ func (h *SportHandler) UpdateSportConfig(ctx context.Context, req *sportv1.Updat
 
 	dtoReq := dto.UpdateSportConfigRequest{
 		SportID:              sportID,
-		StatTagIDs:           statTagIDs,
+		Stats:                statsInput,
 		ParticipantTypeTagID: participantTypeTagID,
 		MinRosterSize:        req.GetMinRosterSize(),
 		MaxRosterSize:        req.GetMaxRosterSize(),
