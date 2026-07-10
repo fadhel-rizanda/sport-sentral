@@ -9,8 +9,12 @@ import (
 )
 
 type CompetitionClient struct {
-	Roster competitionv1.RosterServiceClient
-	conn   *grpc.ClientConn
+	Roster      competitionv1.RosterServiceClient
+	Competition competitionv1.CompetitionServiceClient
+	Branch      competitionv1.CompetitionBranchServiceClient
+	Match       competitionv1.MatchServiceClient
+	Stat        competitionv1.StatServiceClient
+	conn        *grpc.ClientConn
 }
 
 func NewCompetitionClient(address string) (*CompetitionClient, error) {
@@ -25,8 +29,12 @@ func NewCompetitionClient(address string) (*CompetitionClient, error) {
 	}
 
 	return &CompetitionClient{
-		Roster: competitionv1.NewRosterServiceClient(conn),
-		conn:   conn,
+		Roster:      competitionv1.NewRosterServiceClient(conn),
+		Competition: competitionv1.NewCompetitionServiceClient(conn),
+		Branch:      competitionv1.NewCompetitionBranchServiceClient(conn),
+		Match:       competitionv1.NewMatchServiceClient(conn),
+		Stat:        competitionv1.NewStatServiceClient(conn),
+		conn:        conn,
 	}, nil
 }
 

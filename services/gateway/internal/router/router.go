@@ -18,6 +18,8 @@ func Setup(
 	roleHandler *handler.RoleHandler,
 	permissionHandler *handler.PermissionHandler,
 	academyHandler *handler.AcademyHandler,
+	sportHandler *handler.SportHandler,
+	competitionHandler *handler.CompetitionHandler,
 ) {
 	api := app.Group("/api/v1")
 
@@ -34,4 +36,6 @@ func Setup(
 	roleHandler.Routes(api, auth, adminOnly)
 	permissionHandler.Routes(api, auth, adminOnly)
 	academyHandler.Routes(api, auth, adminOnly)
+	sportHandler.Routes(api, auth, adminOnly)
+	competitionHandler.Routes(api, auth, adminOnly)
 }
