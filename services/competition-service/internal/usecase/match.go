@@ -190,6 +190,7 @@ func (uc *matchUseCase) UpdateScore(ctx context.Context, adminID, id uuid.UUID, 
 		return err
 	}
 
+	// TODO need a transaction
 	for _, p := range req.Participants {
 		participant, err := uc.repo.GetParticipantByID(ctx, id, p.ParticipantID)
 		if err != nil {

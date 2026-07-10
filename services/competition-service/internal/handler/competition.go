@@ -83,6 +83,10 @@ func (h *CompetitionHandler) CreateCompetition(ctx context.Context, req *competi
 		endDate = &t
 	}
 
+	if req.StartDate == nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("start date is required"))
+	}
+
 	dtoReq := dto.CreateCompetitionRequest{
 		SportID:             sportID,
 		HostAcademyBranchID: hostAcademyBranchID,

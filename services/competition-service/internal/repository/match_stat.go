@@ -20,6 +20,7 @@ type MatchStatRepository interface {
 	GetAggregate(ctx context.Context, competitionID, branchID, athleteID, statTypeID uuid.UUID) (*entity.AthleteStatsAggregate, error)
 	SaveAggregate(ctx context.Context, aggregate *entity.AthleteStatsAggregate) error
 	ListAggregates(ctx context.Context, filters AggregateFilters, page, pageSize int) ([]*entity.AthleteStatsAggregate, int64, error)
+	DeleteAggregate(ctx context.Context, id uuid.UUID) error
 }
 
 type MatchStatFilters struct {
@@ -168,4 +169,8 @@ func (r *matchStatRepository) ListAggregates(ctx context.Context, filters Aggreg
 		Find(&aggregates).Error
 
 	return aggregates, total, err
+}
+
+func (r *matchStatRepository) DeleteAggregate(ctx context.Context, id uuid.UUID) error {
+	return r.db.WithContext(ctx).Unscoped().Delete(&entity.AthleteStatsAggregate{}, "id = ?", id).Error
 }

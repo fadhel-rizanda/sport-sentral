@@ -255,6 +255,7 @@ func (uc *statUseCase) RecalculateAggregate(ctx context.Context, adminID, athlet
 	}
 	groups := make(map[groupKey][]float64)
 
+	// TODO need a validation for the match status
 	for _, s := range stats {
 		if s.Match == nil {
 			continue
@@ -267,6 +268,27 @@ func (uc *statUseCase) RecalculateAggregate(ctx context.Context, adminID, athlet
 					StatTypeID: s.StatTypeID,
 				}
 				groups[key] = append(groups[key], s.Value)
+			}
+		}
+	}
+
+	// Prune stale aggregates (aggregates in DB that no longer have any matching stats)
+	existingAggs, _, err := uc.statRepo.ListAggregates(ctx, repository.AggregateFilters{
+		AthleteID:     &athleteID,
+		CompetitionID: &competitionID,
+	}, 1, 1000)
+	if err != nil {
+		return apperr.Internal(err)
+	}
+
+	for _, agg := range existingAggs {
+		key := groupKey{
+			BranchID:   agg.BranchID,
+			StatTypeID: agg.StatTypeID,
+		}
+		if _, exists := groups[key]; !exists {
+			if err := uc.statRepo.DeleteAggregate(ctx, agg.ID); err != nil {
+				return apperr.Internal(err)
 			}
 		}
 	}

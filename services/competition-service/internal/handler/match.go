@@ -60,6 +60,10 @@ func (h *MatchHandler) CreateMatch(ctx context.Context, req *competitionv1.Creat
 		}
 	}
 
+	if req.ScheduledAt == nil {
+		return nil, apperr.ToGRPC(apperr.InvalidArgument("scheduled date is required"))
+	}
+
 	dtoReq := dto.CreateMatchRequest{
 		ScheduledAt:  req.ScheduledAt.AsTime(),
 		Location:     req.GetLocation(),
