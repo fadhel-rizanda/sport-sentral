@@ -72,7 +72,11 @@ func (uc *competitionUseCase) Create(ctx context.Context, adminID uuid.UUID, req
 			if err != nil {
 				return nil, apperr.Forbidden("user is not an academy admin")
 			}
-			if academyAdmin.BranchID == nil || *academyAdmin.BranchID != *req.HostAcademyBranchID {
+			if academyAdmin.BranchID != nil {
+				if *academyAdmin.BranchID != *req.HostAcademyBranchID {
+					return nil, apperr.Forbidden("insufficient permissions for this academy branch")
+				}
+			} else {
 				// Check if user is academy holding admin
 				branch, err := uc.academyBranchRepo.GetByID(ctx, *req.HostAcademyBranchID)
 				if err != nil {
@@ -113,6 +117,7 @@ func (uc *competitionUseCase) Create(ctx context.Context, adminID uuid.UUID, req
 		UpdatedByID:         adminID,
 	}
 
+	// TODO need a transaction
 	if err := uc.repo.Create(ctx, comp); err != nil {
 		if postgres.IsUniqueConstraint(err, "idx_competition_name") {
 			return nil, apperr.Conflict("a competition with this name already exists")

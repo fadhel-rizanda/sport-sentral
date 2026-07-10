@@ -54,10 +54,11 @@ func validateCompetitionAdmin(
 	if comp.HostAcademyBranchID != nil && *comp.HostAcademyBranchID != uuid.Nil {
 		academyAdmin, err := academyAdminRepo.GetByUserID(ctx, adminID)
 		if err == nil {
-			if academyAdmin.BranchID != nil && *academyAdmin.BranchID == *comp.HostAcademyBranchID {
-				return nil
-			}
-			if comp.HostAcademy != nil && academyAdmin.AcademyID == comp.HostAcademy.HoldingID {
+			if academyAdmin.BranchID != nil {
+				if *academyAdmin.BranchID == *comp.HostAcademyBranchID {
+					return nil
+				}
+			} else if comp.HostAcademy != nil && academyAdmin.AcademyID == comp.HostAcademy.HoldingID {
 				return nil
 			}
 		}
