@@ -50,7 +50,7 @@ func CreateIndexes(db *gorm.DB) error {
 	if err := db.Exec(`
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_roster_athlete 
 		ON roster_members(roster_id, athlete_id) 
-		WHERE deleted_at IS NULL
+		WHERE removed_at IS NULL
 	`).Error; err != nil {
 		return err
 	}

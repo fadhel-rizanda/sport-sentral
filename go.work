@@ -5,6 +5,7 @@ use (
 	./proto
 	./services/academy-service
 	./services/competition-service
+	./services/venue-service
 	./services/gateway
 	./services/identity-service
 	./services/meta-service
