@@ -27,6 +27,7 @@ type GRPCClients struct {
 	AcademyAddress     string
 	CompetitionAddress string
 	SportAddress       string
+	VenueAddress       string
 }
 
 type RedisConfig struct {
@@ -64,6 +65,9 @@ func Load() (*Config, error) {
 	sportHost := envConfig.GetEnv("SPORT_SERVICE_HOST", "localhost")
 	sportPort := envConfig.GetEnvInt("SPORT_SERVICE_PORT", 50055)
 
+	venueHost := envConfig.GetEnv("VENUE_SERVICE_HOST", "localhost")
+	venuePort := envConfig.GetEnvInt("VENUE_SERVICE_PORT", 50058)
+
 	jaegerHost := envConfig.GetEnv("JAEGER_HOST", "localhost")
 	jaegerPort := envConfig.GetEnvInt("JAEGER_PORT", 4317)
 
@@ -80,6 +84,7 @@ func Load() (*Config, error) {
 			AcademyAddress:     fmt.Sprintf("%s:%d", academyHost, academyPort),
 			CompetitionAddress: fmt.Sprintf("%s:%d", competitionHost, competitionPort),
 			SportAddress:       fmt.Sprintf("%s:%d", sportHost, sportPort),
+			VenueAddress:       fmt.Sprintf("%s:%d", venueHost, venuePort),
 		},
 		Redis: RedisConfig{
 			Address:  fmt.Sprintf("%s:%d", redisHost, redisPort),

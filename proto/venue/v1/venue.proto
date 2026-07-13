@@ -1,0 +1,310 @@
+syntax = "proto3";
+
+package venue.v1;
+
+option go_package = "microservice-golang/gen/venue/v1;venuev1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/common.proto";
+import "google/protobuf/empty.proto";
+
+message Venue {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string street_address = 4;
+  optional string notes = 5;
+  optional double latitude = 6;
+  optional double longitude = 7;
+  common.v1.AdministrativeDivisionSimple administrative_division = 8;
+  string owner_id = 9;
+  common.v1.UserSimple owner = 10;
+  optional common.v1.StatusSimple status = 11;
+  string status_id = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+}
+
+message Court {
+  string id = 1;
+  string venue_id = 2;
+  optional Venue venue = 3;
+  string name = 4;
+  string description = 5;
+  string sport_id = 6;
+  common.v1.SportSimple sport = 7;
+  int64 price_per_hour = 8; // in cents
+  optional string image_attachment_id = 9;
+  optional common.v1.StatusSimple status = 10;
+  string status_id = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+}
+
+message CourtSlot {
+  string id = 1;
+  string court_id = 2;
+  google.protobuf.Timestamp start_time = 3;
+  google.protobuf.Timestamp end_time = 4;
+  int64 price = 5; // in cents
+  string status_id = 6;
+  optional common.v1.StatusSimple status = 7;
+  optional string booking_id = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message Booking {
+  string id = 1;
+  string court_id = 2;
+  Court court = 3;
+  string user_id = 4;
+  common.v1.UserSimple user = 5;
+  repeated CourtSlot slots = 6;
+  int64 total_price = 7; // in cents
+  string status_id = 8;
+  common.v1.StatusSimple status = 9;
+  string payment_status = 10; // e.g. "UNPAID", "PAID"
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+// Venue Request / Response
+message CreateVenueRequest {
+  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string description = 2;
+  string street_address = 3 [(buf.validate.field).string.min_len = 1];
+  optional string notes = 4;
+  optional double latitude = 5;
+  optional double longitude = 6;
+  string admin_division_id = 7 [(buf.validate.field).string.uuid = true];
+  string owner_id = 8 [(buf.validate.field).string.uuid = true];
+  string status_id = 9 [(buf.validate.field).string.uuid = true];
+}
+
+message CreateVenueResponse {
+  Venue venue = 1;
+}
+
+message GetVenueRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetVenueResponse {
+  Venue venue = 1;
+}
+
+message ListVenuesRequest {
+  optional string owner_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string status_id = 2 [(buf.validate.field).string.uuid = true];
+  optional string search = 3;
+  int32 page = 4 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 5 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message ListVenuesResponse {
+  repeated Venue venues = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message UpdateVenueRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  optional string name = 2;
+  optional string description = 3;
+  optional string street_address = 4;
+  optional string notes = 5;
+  optional double latitude = 6;
+  optional double longitude = 7;
+  optional string status_id = 8;
+}
+
+message UpdateVenueResponse {
+  Venue venue = 1;
+}
+
+message DeleteVenueRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+// Create Court Request
+message CreateCourtRequest {
+  string venue_id = 1 [(buf.validate.field).string.uuid = true];
+  string name = 2 [(buf.validate.field).string.min_len = 1];
+  string description = 3;
+  string sport_id = 4 [(buf.validate.field).string.uuid = true];
+  int64 price_per_hour = 5 [(buf.validate.field).int64.gt = 0];
+  optional string image_attachment_id = 6;
+  string status_id = 7 [(buf.validate.field).string.uuid = true];
+}
+
+message CreateCourtResponse {
+  Court court = 1;
+}
+
+// Get Court Request
+message GetCourtRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetCourtResponse {
+  Court court = 1;
+}
+
+// List Courts Request
+message ListCourtsRequest {
+  optional string venue_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string sport_id = 2 [(buf.validate.field).string.uuid = true];
+  optional string status_id = 3 [(buf.validate.field).string.uuid = true];
+  optional string search = 4;
+  int32 page = 5 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 6 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message ListCourtsResponse {
+  repeated Court courts = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// Update Court Request
+message UpdateCourtRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  optional string name = 2;
+  optional string description = 3;
+  optional string sport_id = 4;
+  optional int64 price_per_hour = 5;
+  optional string image_attachment_id = 6;
+  optional string status_id = 7;
+}
+
+message UpdateCourtResponse {
+  Court court = 1;
+}
+
+// Delete Court Request
+message DeleteCourtRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+// Create Court Slots Request (Bulk)
+message SlotInput {
+  google.protobuf.Timestamp start_time = 1;
+  google.protobuf.Timestamp end_time = 2;
+  optional int64 price = 3; // in cents, if empty defaults to court's price_per_hour
+}
+
+message CreateCourtSlotsRequest {
+  string court_id = 1 [(buf.validate.field).string.uuid = true];
+  repeated SlotInput slots = 2;
+  string status_id = 3 [(buf.validate.field).string.uuid = true]; // status AVAILABLE
+}
+
+message CreateCourtSlotsResponse {
+  repeated CourtSlot slots = 1;
+}
+
+// List Court Slots Request
+message ListCourtSlotsRequest {
+  string court_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string status_id = 2 [(buf.validate.field).string.uuid = true];
+  optional google.protobuf.Timestamp start_date = 3;
+  optional google.protobuf.Timestamp end_date = 4;
+}
+
+message ListCourtSlotsResponse {
+  repeated CourtSlot slots = 1;
+}
+
+// Delete Court Slot Request
+message DeleteCourtSlotRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+// Create Booking Request
+message CreateBookingRequest {
+  string court_id = 1 [(buf.validate.field).string.uuid = true];
+  string user_id = 2 [(buf.validate.field).string.uuid = true];
+  repeated string slot_ids = 3 [(buf.validate.field).repeated.min_items = 1];
+  string status_id = 4 [(buf.validate.field).string.uuid = true]; // status PENDING
+}
+
+message CreateBookingResponse {
+  Booking booking = 1;
+}
+
+// Get Booking Request
+message GetBookingRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetBookingResponse {
+  Booking booking = 1;
+}
+
+// List Bookings Request
+message ListBookingsRequest {
+  optional string court_id = 1 [(buf.validate.field).string.uuid = true];
+  optional string user_id = 2 [(buf.validate.field).string.uuid = true];
+  optional string status_id = 3 [(buf.validate.field).string.uuid = true];
+  int32 page = 4 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 5 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message ListBookingsResponse {
+  repeated Booking bookings = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// Update Booking Status Request (Confirm/Cancel/Complete)
+message UpdateBookingStatusRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string status_id = 2 [(buf.validate.field).string.uuid = true];
+  optional string payment_status = 3;
+}
+
+message UpdateBookingStatusResponse {
+  Booking booking = 1;
+}
+
+// Venue Service
+service VenueService {
+  // Venue Management
+  rpc CreateVenue(CreateVenueRequest) returns (CreateVenueResponse);
+  rpc GetVenue(GetVenueRequest) returns (GetVenueResponse);
+  rpc ListVenues(ListVenuesRequest) returns (ListVenuesResponse);
+  rpc UpdateVenue(UpdateVenueRequest) returns (UpdateVenueResponse);
+  rpc DeleteVenue(DeleteVenueRequest) returns (google.protobuf.Empty);
+
+  // Court Management
+  rpc CreateCourt(CreateCourtRequest) returns (CreateCourtResponse);
+  rpc GetCourt(GetCourtRequest) returns (GetCourtResponse);
+  rpc ListCourts(ListCourtsRequest) returns (ListCourtsResponse);
+  rpc UpdateCourt(UpdateCourtRequest) returns (UpdateCourtResponse);
+  rpc DeleteCourt(DeleteCourtRequest) returns (google.protobuf.Empty);
+
+  // Slot Management
+  rpc CreateCourtSlots(CreateCourtSlotsRequest) returns (CreateCourtSlotsResponse);
+  rpc ListCourtSlots(ListCourtSlotsRequest) returns (ListCourtSlotsResponse);
+  rpc DeleteCourtSlot(DeleteCourtSlotRequest) returns (google.protobuf.Empty);
+
+  // Booking Management
+  rpc CreateBooking(CreateBookingRequest) returns (CreateBookingResponse);
+  rpc GetBooking(GetBookingRequest) returns (GetBookingResponse);
+  rpc ListBookings(ListBookingsRequest) returns (ListBookingsResponse);
+  rpc UpdateBookingStatus(UpdateBookingStatusRequest) returns (UpdateBookingStatusResponse);
+}
