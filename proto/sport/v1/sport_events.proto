@@ -6,6 +6,7 @@ option go_package = "microservice-golang/gen/sport/v1;sportv1";
 
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
+import "sport/v1/sport.proto";
 
 // ─── Enum ─────────────────────────────────────────────────────────────────────
 enum SportEventType {
@@ -63,5 +64,5 @@ message SportEvent {
 message SportStatEvent {
   string id                 = 1;
   string stat_type_tag_id   = 2;
-  string aggregation_method = 3;
+  AggregationMethod aggregation_method = 3;
 }

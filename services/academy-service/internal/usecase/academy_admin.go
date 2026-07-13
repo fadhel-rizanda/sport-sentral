@@ -14,6 +14,7 @@ import (
 	"microservice-golang/services/academy-service/internal/repository"
 	replicatedRepo "microservice-golang/services/academy-service/internal/repository/replicated"
 	"microservice-golang/shared/infrastructure/postgres"
+	"microservice-golang/shared/pkg/constants"
 	apperr "microservice-golang/shared/pkg/errors"
 )
 
@@ -49,7 +50,7 @@ func NewAcademyAdminUseCase(
 }
 
 func (uc *academyAdminUseCase) Create(ctx context.Context, req dto.CreateAcademyAdminRequest) (*dto.AcademyAdminResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyManage); err != nil {
 		return nil, err
 	}
 	id, err := uuid.NewV7()
@@ -98,7 +99,7 @@ func (uc *academyAdminUseCase) Create(ctx context.Context, req dto.CreateAcademy
 }
 
 func (uc *academyAdminUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.AcademyAdminResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyRead); err != nil {
 		return nil, err
 	}
 	admin, err := uc.repo.GetByID(ctx, id)
@@ -112,7 +113,7 @@ func (uc *academyAdminUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.
 }
 
 func (uc *academyAdminUseCase) List(ctx context.Context, req dto.ListAcademyAdminsRequest) (*dto.ListAcademyAdminsResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyRead); err != nil {
 		return nil, err
 	}
 	filters := repository.AdminFilters{
@@ -143,7 +144,7 @@ func (uc *academyAdminUseCase) List(ctx context.Context, req dto.ListAcademyAdmi
 }
 
 func (uc *academyAdminUseCase) Update(ctx context.Context, id uuid.UUID, req dto.UpdateAcademyAdminRequest) (*dto.AcademyAdminResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyManage); err != nil {
 		return nil, err
 	}
 	admin, err := uc.repo.GetByID(ctx, id)
@@ -188,7 +189,7 @@ func (uc *academyAdminUseCase) Update(ctx context.Context, id uuid.UUID, req dto
 }
 
 func (uc *academyAdminUseCase) Delete(ctx context.Context, req dto.DeleteAcademyAdminRequest) error {
-	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyManage); err != nil {
 		return err
 	}
 	admin, err := uc.repo.GetByID(ctx, req.ID)
@@ -225,7 +226,7 @@ func (uc *academyAdminUseCase) Delete(ctx context.Context, req dto.DeleteAcademy
 }
 
 func (uc *academyAdminUseCase) GetByUser(ctx context.Context, scope repository.AdminScope, userID uuid.UUID) (*dto.AcademyAdminResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyRead); err != nil {
 		return nil, err
 	}
 	admin, err := uc.repo.GetByUser(ctx, scope, userID)
@@ -247,7 +248,7 @@ func (uc *academyAdminUseCase) CheckUserIsAdmin(ctx context.Context, scope repos
 }
 
 func (uc *academyAdminUseCase) Assign(ctx context.Context, req dto.AssignAcademyAdminRequest) (*dto.AcademyAdminResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyManage); err != nil {
 		return nil, err
 	}
 	id, err := uuid.NewV7()
@@ -299,7 +300,7 @@ func (uc *academyAdminUseCase) Assign(ctx context.Context, req dto.AssignAcademy
 }
 
 func (uc *academyAdminUseCase) Revoke(ctx context.Context, req dto.RevokeAcademyAdminRequest) error {
-	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyManage); err != nil {
 		return err
 	}
 	admin, err := uc.repo.GetByID(ctx, req.ID)

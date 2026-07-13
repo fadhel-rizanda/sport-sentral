@@ -12,6 +12,7 @@ import (
 	"microservice-golang/services/venue-service/internal/repository"
 	replicatedRepo "microservice-golang/services/venue-service/internal/repository/replicated"
 	"microservice-golang/shared/infrastructure/postgres"
+	"microservice-golang/shared/pkg/constants"
 	apperr "microservice-golang/shared/pkg/errors"
 )
 
@@ -39,7 +40,7 @@ func NewVenueUseCase(
 }
 
 func (uc *venueUseCase) Create(ctx context.Context, req dto.CreateVenueRequest) (*dto.VenueResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "court.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCourtManage); err != nil {
 		return nil, err
 	}
 
@@ -76,7 +77,7 @@ func (uc *venueUseCase) Create(ctx context.Context, req dto.CreateVenueRequest) 
 }
 
 func (uc *venueUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.VenueResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "court.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCourtRead); err != nil {
 		return nil, err
 	}
 
@@ -92,7 +93,7 @@ func (uc *venueUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.VenueRe
 }
 
 func (uc *venueUseCase) List(ctx context.Context, req dto.ListVenuesRequest) (*dto.ListVenuesResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "court.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCourtRead); err != nil {
 		return nil, err
 	}
 
@@ -121,7 +122,7 @@ func (uc *venueUseCase) List(ctx context.Context, req dto.ListVenuesRequest) (*d
 }
 
 func (uc *venueUseCase) Update(ctx context.Context, id uuid.UUID, req dto.UpdateVenueRequest) (*dto.VenueResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "court.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCourtManage); err != nil {
 		return nil, err
 	}
 
@@ -169,7 +170,7 @@ func (uc *venueUseCase) Update(ctx context.Context, id uuid.UUID, req dto.Update
 }
 
 func (uc *venueUseCase) Delete(ctx context.Context, id uuid.UUID) error {
-	if err := uc.permissionRepo.Validate(ctx, "court.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCourtManage); err != nil {
 		return err
 	}
 

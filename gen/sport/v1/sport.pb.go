@@ -25,6 +25,61 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type AggregationMethod int32
+
+const (
+	AggregationMethod_AGGREGATION_METHOD_UNSPECIFIED AggregationMethod = 0
+	AggregationMethod_AGGREGATION_METHOD_SUM         AggregationMethod = 1
+	AggregationMethod_AGGREGATION_METHOD_AVG         AggregationMethod = 2
+	AggregationMethod_AGGREGATION_METHOD_MAX         AggregationMethod = 3
+	AggregationMethod_AGGREGATION_METHOD_MIN         AggregationMethod = 4
+)
+
+// Enum value maps for AggregationMethod.
+var (
+	AggregationMethod_name = map[int32]string{
+		0: "AGGREGATION_METHOD_UNSPECIFIED",
+		1: "AGGREGATION_METHOD_SUM",
+		2: "AGGREGATION_METHOD_AVG",
+		3: "AGGREGATION_METHOD_MAX",
+		4: "AGGREGATION_METHOD_MIN",
+	}
+	AggregationMethod_value = map[string]int32{
+		"AGGREGATION_METHOD_UNSPECIFIED": 0,
+		"AGGREGATION_METHOD_SUM":         1,
+		"AGGREGATION_METHOD_AVG":         2,
+		"AGGREGATION_METHOD_MAX":         3,
+		"AGGREGATION_METHOD_MIN":         4,
+	}
+)
+
+func (x AggregationMethod) Enum() *AggregationMethod {
+	p := new(AggregationMethod)
+	*p = x
+	return p
+}
+
+func (x AggregationMethod) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AggregationMethod) Descriptor() protoreflect.EnumDescriptor {
+	return file_sport_v1_sport_proto_enumTypes[0].Descriptor()
+}
+
+func (AggregationMethod) Type() protoreflect.EnumType {
+	return &file_sport_v1_sport_proto_enumTypes[0]
+}
+
+func (x AggregationMethod) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AggregationMethod.Descriptor instead.
+func (AggregationMethod) EnumDescriptor() ([]byte, []int) {
+	return file_sport_v1_sport_proto_rawDescGZIP(), []int{0}
+}
+
 type Sport struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -179,7 +234,7 @@ type SportStat struct {
 	SportId           string                 `protobuf:"bytes,2,opt,name=sport_id,json=sportId,proto3" json:"sport_id,omitempty"`
 	StatTypeTagId     string                 `protobuf:"bytes,3,opt,name=stat_type_tag_id,json=statTypeTagId,proto3" json:"stat_type_tag_id,omitempty"`
 	StatTypeTag       *v1.TagSimple          `protobuf:"bytes,4,opt,name=stat_type_tag,json=statTypeTag,proto3" json:"stat_type_tag,omitempty"`
-	AggregationMethod string                 `protobuf:"bytes,5,opt,name=aggregation_method,json=aggregationMethod,proto3" json:"aggregation_method,omitempty"` // e.g. "SUM", "AVG", "MAX", "MIN"
+	AggregationMethod AggregationMethod      `protobuf:"varint,5,opt,name=aggregation_method,json=aggregationMethod,proto3,enum=sport.v1.AggregationMethod" json:"aggregation_method,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -242,11 +297,11 @@ func (x *SportStat) GetStatTypeTag() *v1.TagSimple {
 	return nil
 }
 
-func (x *SportStat) GetAggregationMethod() string {
+func (x *SportStat) GetAggregationMethod() AggregationMethod {
 	if x != nil {
 		return x.AggregationMethod
 	}
-	return ""
+	return AggregationMethod_AGGREGATION_METHOD_UNSPECIFIED
 }
 
 type SportConfig struct {
@@ -792,7 +847,7 @@ func (x *DeleteSportRequest) GetId() string {
 type SportStatConfigInput struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	StatTypeTagId     string                 `protobuf:"bytes,1,opt,name=stat_type_tag_id,json=statTypeTagId,proto3" json:"stat_type_tag_id,omitempty"`
-	AggregationMethod string                 `protobuf:"bytes,2,opt,name=aggregation_method,json=aggregationMethod,proto3" json:"aggregation_method,omitempty"`
+	AggregationMethod AggregationMethod      `protobuf:"varint,2,opt,name=aggregation_method,json=aggregationMethod,proto3,enum=sport.v1.AggregationMethod" json:"aggregation_method,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -834,11 +889,11 @@ func (x *SportStatConfigInput) GetStatTypeTagId() string {
 	return ""
 }
 
-func (x *SportStatConfigInput) GetAggregationMethod() string {
+func (x *SportStatConfigInput) GetAggregationMethod() AggregationMethod {
 	if x != nil {
 		return x.AggregationMethod
 	}
-	return ""
+	return AggregationMethod_AGGREGATION_METHOD_UNSPECIFIED
 }
 
 type UpdateSportConfigRequest struct {
@@ -1015,13 +1070,13 @@ const file_sport_v1_sport_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xc8\x01\n" +
+	"updated_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xef\x01\n" +
 	"\tSportStat\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\bsport_id\x18\x02 \x01(\tR\asportId\x12'\n" +
 	"\x10stat_type_tag_id\x18\x03 \x01(\tR\rstatTypeTagId\x128\n" +
-	"\rstat_type_tag\x18\x04 \x01(\v2\x14.common.v1.TagSimpleR\vstatTypeTag\x12-\n" +
-	"\x12aggregation_method\x18\x05 \x01(\tR\x11aggregationMethod\"\xe0\x03\n" +
+	"\rstat_type_tag\x18\x04 \x01(\v2\x14.common.v1.TagSimpleR\vstatTypeTag\x12T\n" +
+	"\x12aggregation_method\x18\x05 \x01(\x0e2\x1b.sport.v1.AggregationMethodB\b\xbaH\x05\x82\x01\x02\x10\x01R\x11aggregationMethod\"\xe0\x03\n" +
 	"\vSportConfig\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\bsport_id\x18\x02 \x01(\tR\asportId\x12)\n" +
@@ -1078,10 +1133,10 @@ const file_sport_v1_sport_proto_rawDesc = "" +
 	"\n" +
 	"_status_id\".\n" +
 	"\x12DeleteSportRequest\x12\x18\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\x81\x01\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\"\x9f\x01\n" +
 	"\x14SportStatConfigInput\x121\n" +
-	"\x10stat_type_tag_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\rstatTypeTagId\x126\n" +
-	"\x12aggregation_method\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x02R\x11aggregationMethod\"\xe6\x03\n" +
+	"\x10stat_type_tag_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\rstatTypeTagId\x12T\n" +
+	"\x12aggregation_method\x18\x02 \x01(\x0e2\x1b.sport.v1.AggregationMethodB\b\xbaH\x05\x82\x01\x02\x10\x01R\x11aggregationMethod\"\xe6\x03\n" +
 	"\x18UpdateSportConfigRequest\x12#\n" +
 	"\bsport_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\asportId\x124\n" +
 	"\x05stats\x18\x02 \x03(\v2\x1e.sport.v1.SportStatConfigInputR\x05stats\x12?\n" +
@@ -1096,7 +1151,13 @@ const file_sport_v1_sport_proto_rawDesc = "" +
 	"_rules_urlB\x0e\n" +
 	"\f_description\"<\n" +
 	"\x15GetSportConfigRequest\x12#\n" +
-	"\bsport_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\asportId2\xea\x03\n" +
+	"\bsport_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\asportId*\xa7\x01\n" +
+	"\x11AggregationMethod\x12\"\n" +
+	"\x1eAGGREGATION_METHOD_UNSPECIFIED\x10\x00\x12\x1a\n" +
+	"\x16AGGREGATION_METHOD_SUM\x10\x01\x12\x1a\n" +
+	"\x16AGGREGATION_METHOD_AVG\x10\x02\x12\x1a\n" +
+	"\x16AGGREGATION_METHOD_MAX\x10\x03\x12\x1a\n" +
+	"\x16AGGREGATION_METHOD_MIN\x10\x042\xea\x03\n" +
 	"\fSportService\x126\n" +
 	"\bGetSport\x12\x19.sport.v1.GetSportRequest\x1a\x0f.sport.v1.Sport\x12G\n" +
 	"\n" +
@@ -1119,59 +1180,63 @@ func file_sport_v1_sport_proto_rawDescGZIP() []byte {
 	return file_sport_v1_sport_proto_rawDescData
 }
 
+var file_sport_v1_sport_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_sport_v1_sport_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_sport_v1_sport_proto_goTypes = []any{
-	(*Sport)(nil),                    // 0: sport.v1.Sport
-	(*SportStat)(nil),                // 1: sport.v1.SportStat
-	(*SportConfig)(nil),              // 2: sport.v1.SportConfig
-	(*CreateSportRequest)(nil),       // 3: sport.v1.CreateSportRequest
-	(*GetSportRequest)(nil),          // 4: sport.v1.GetSportRequest
-	(*ListSportsRequest)(nil),        // 5: sport.v1.ListSportsRequest
-	(*ListSportsResponse)(nil),       // 6: sport.v1.ListSportsResponse
-	(*UpdateSportRequest)(nil),       // 7: sport.v1.UpdateSportRequest
-	(*DeleteSportRequest)(nil),       // 8: sport.v1.DeleteSportRequest
-	(*SportStatConfigInput)(nil),     // 9: sport.v1.SportStatConfigInput
-	(*UpdateSportConfigRequest)(nil), // 10: sport.v1.UpdateSportConfigRequest
-	(*GetSportConfigRequest)(nil),    // 11: sport.v1.GetSportConfigRequest
-	(*v1.StatusSimple)(nil),          // 12: common.v1.StatusSimple
-	(*v1.TagSimple)(nil),             // 13: common.v1.TagSimple
-	(*Regulator)(nil),                // 14: sport.v1.Regulator
-	(*timestamppb.Timestamp)(nil),    // 15: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),            // 16: google.protobuf.Empty
+	(AggregationMethod)(0),           // 0: sport.v1.AggregationMethod
+	(*Sport)(nil),                    // 1: sport.v1.Sport
+	(*SportStat)(nil),                // 2: sport.v1.SportStat
+	(*SportConfig)(nil),              // 3: sport.v1.SportConfig
+	(*CreateSportRequest)(nil),       // 4: sport.v1.CreateSportRequest
+	(*GetSportRequest)(nil),          // 5: sport.v1.GetSportRequest
+	(*ListSportsRequest)(nil),        // 6: sport.v1.ListSportsRequest
+	(*ListSportsResponse)(nil),       // 7: sport.v1.ListSportsResponse
+	(*UpdateSportRequest)(nil),       // 8: sport.v1.UpdateSportRequest
+	(*DeleteSportRequest)(nil),       // 9: sport.v1.DeleteSportRequest
+	(*SportStatConfigInput)(nil),     // 10: sport.v1.SportStatConfigInput
+	(*UpdateSportConfigRequest)(nil), // 11: sport.v1.UpdateSportConfigRequest
+	(*GetSportConfigRequest)(nil),    // 12: sport.v1.GetSportConfigRequest
+	(*v1.StatusSimple)(nil),          // 13: common.v1.StatusSimple
+	(*v1.TagSimple)(nil),             // 14: common.v1.TagSimple
+	(*Regulator)(nil),                // 15: sport.v1.Regulator
+	(*timestamppb.Timestamp)(nil),    // 16: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),            // 17: google.protobuf.Empty
 }
 var file_sport_v1_sport_proto_depIdxs = []int32{
-	12, // 0: sport.v1.Sport.status:type_name -> common.v1.StatusSimple
-	13, // 1: sport.v1.Sport.tier_tag:type_name -> common.v1.TagSimple
-	14, // 2: sport.v1.Sport.active_regulator:type_name -> sport.v1.Regulator
-	2,  // 3: sport.v1.Sport.config:type_name -> sport.v1.SportConfig
-	15, // 4: sport.v1.Sport.created_at:type_name -> google.protobuf.Timestamp
-	15, // 5: sport.v1.Sport.updated_at:type_name -> google.protobuf.Timestamp
-	13, // 6: sport.v1.SportStat.stat_type_tag:type_name -> common.v1.TagSimple
-	1,  // 7: sport.v1.SportConfig.stats:type_name -> sport.v1.SportStat
-	13, // 8: sport.v1.SportConfig.participant_type_tag:type_name -> common.v1.TagSimple
-	15, // 9: sport.v1.SportConfig.created_at:type_name -> google.protobuf.Timestamp
-	15, // 10: sport.v1.SportConfig.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 11: sport.v1.ListSportsResponse.sports:type_name -> sport.v1.Sport
-	9,  // 12: sport.v1.UpdateSportConfigRequest.stats:type_name -> sport.v1.SportStatConfigInput
-	4,  // 13: sport.v1.SportService.GetSport:input_type -> sport.v1.GetSportRequest
-	5,  // 14: sport.v1.SportService.ListSports:input_type -> sport.v1.ListSportsRequest
-	3,  // 15: sport.v1.SportService.CreateSport:input_type -> sport.v1.CreateSportRequest
-	7,  // 16: sport.v1.SportService.UpdateSport:input_type -> sport.v1.UpdateSportRequest
-	8,  // 17: sport.v1.SportService.DeleteSport:input_type -> sport.v1.DeleteSportRequest
-	10, // 18: sport.v1.SportService.UpdateSportConfig:input_type -> sport.v1.UpdateSportConfigRequest
-	11, // 19: sport.v1.SportService.GetSportConfig:input_type -> sport.v1.GetSportConfigRequest
-	0,  // 20: sport.v1.SportService.GetSport:output_type -> sport.v1.Sport
-	6,  // 21: sport.v1.SportService.ListSports:output_type -> sport.v1.ListSportsResponse
-	0,  // 22: sport.v1.SportService.CreateSport:output_type -> sport.v1.Sport
-	0,  // 23: sport.v1.SportService.UpdateSport:output_type -> sport.v1.Sport
-	16, // 24: sport.v1.SportService.DeleteSport:output_type -> google.protobuf.Empty
-	2,  // 25: sport.v1.SportService.UpdateSportConfig:output_type -> sport.v1.SportConfig
-	2,  // 26: sport.v1.SportService.GetSportConfig:output_type -> sport.v1.SportConfig
-	20, // [20:27] is the sub-list for method output_type
-	13, // [13:20] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	13, // 0: sport.v1.Sport.status:type_name -> common.v1.StatusSimple
+	14, // 1: sport.v1.Sport.tier_tag:type_name -> common.v1.TagSimple
+	15, // 2: sport.v1.Sport.active_regulator:type_name -> sport.v1.Regulator
+	3,  // 3: sport.v1.Sport.config:type_name -> sport.v1.SportConfig
+	16, // 4: sport.v1.Sport.created_at:type_name -> google.protobuf.Timestamp
+	16, // 5: sport.v1.Sport.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 6: sport.v1.SportStat.stat_type_tag:type_name -> common.v1.TagSimple
+	0,  // 7: sport.v1.SportStat.aggregation_method:type_name -> sport.v1.AggregationMethod
+	2,  // 8: sport.v1.SportConfig.stats:type_name -> sport.v1.SportStat
+	14, // 9: sport.v1.SportConfig.participant_type_tag:type_name -> common.v1.TagSimple
+	16, // 10: sport.v1.SportConfig.created_at:type_name -> google.protobuf.Timestamp
+	16, // 11: sport.v1.SportConfig.updated_at:type_name -> google.protobuf.Timestamp
+	1,  // 12: sport.v1.ListSportsResponse.sports:type_name -> sport.v1.Sport
+	0,  // 13: sport.v1.SportStatConfigInput.aggregation_method:type_name -> sport.v1.AggregationMethod
+	10, // 14: sport.v1.UpdateSportConfigRequest.stats:type_name -> sport.v1.SportStatConfigInput
+	5,  // 15: sport.v1.SportService.GetSport:input_type -> sport.v1.GetSportRequest
+	6,  // 16: sport.v1.SportService.ListSports:input_type -> sport.v1.ListSportsRequest
+	4,  // 17: sport.v1.SportService.CreateSport:input_type -> sport.v1.CreateSportRequest
+	8,  // 18: sport.v1.SportService.UpdateSport:input_type -> sport.v1.UpdateSportRequest
+	9,  // 19: sport.v1.SportService.DeleteSport:input_type -> sport.v1.DeleteSportRequest
+	11, // 20: sport.v1.SportService.UpdateSportConfig:input_type -> sport.v1.UpdateSportConfigRequest
+	12, // 21: sport.v1.SportService.GetSportConfig:input_type -> sport.v1.GetSportConfigRequest
+	1,  // 22: sport.v1.SportService.GetSport:output_type -> sport.v1.Sport
+	7,  // 23: sport.v1.SportService.ListSports:output_type -> sport.v1.ListSportsResponse
+	1,  // 24: sport.v1.SportService.CreateSport:output_type -> sport.v1.Sport
+	1,  // 25: sport.v1.SportService.UpdateSport:output_type -> sport.v1.Sport
+	17, // 26: sport.v1.SportService.DeleteSport:output_type -> google.protobuf.Empty
+	3,  // 27: sport.v1.SportService.UpdateSportConfig:output_type -> sport.v1.SportConfig
+	3,  // 28: sport.v1.SportService.GetSportConfig:output_type -> sport.v1.SportConfig
+	22, // [22:29] is the sub-list for method output_type
+	15, // [15:22] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_sport_v1_sport_proto_init() }
@@ -1188,13 +1253,14 @@ func file_sport_v1_sport_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sport_v1_sport_proto_rawDesc), len(file_sport_v1_sport_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_sport_v1_sport_proto_goTypes,
 		DependencyIndexes: file_sport_v1_sport_proto_depIdxs,
+		EnumInfos:         file_sport_v1_sport_proto_enumTypes,
 		MessageInfos:      file_sport_v1_sport_proto_msgTypes,
 	}.Build()
 	File_sport_v1_sport_proto = out.File

@@ -14,6 +14,7 @@ import (
 	"microservice-golang/services/academy-service/internal/repository"
 	replicatedRepo "microservice-golang/services/academy-service/internal/repository/replicated"
 	"microservice-golang/shared/infrastructure/postgres"
+	"microservice-golang/shared/pkg/constants"
 	apperr "microservice-golang/shared/pkg/errors"
 )
 
@@ -44,7 +45,7 @@ func NewAcademyBranchUseCase(
 }
 
 func (uc *academyBranchUseCase) Create(ctx context.Context, req dto.CreateAcademyBranchRequest) (*dto.AcademyBranchResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.create"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyCreate); err != nil {
 		return nil, err
 	}
 	branchID, err := uuid.NewV7()
@@ -108,7 +109,7 @@ func (uc *academyBranchUseCase) Create(ctx context.Context, req dto.CreateAcadem
 }
 
 func (uc *academyBranchUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.AcademyBranchResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyRead); err != nil {
 		return nil, err
 	}
 	branch, err := uc.repo.GetByID(ctx, id)
@@ -122,7 +123,7 @@ func (uc *academyBranchUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto
 }
 
 func (uc *academyBranchUseCase) List(ctx context.Context, req dto.ListAcademyBranchesRequest) (*dto.ListAcademyBranchesResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyRead); err != nil {
 		return nil, err
 	}
 	filters := repository.AcademyBranchFilters{
@@ -151,7 +152,7 @@ func (uc *academyBranchUseCase) List(ctx context.Context, req dto.ListAcademyBra
 }
 
 func (uc *academyBranchUseCase) Update(ctx context.Context, id uuid.UUID, req dto.UpdateAcademyBranchRequest) (*dto.AcademyBranchResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.update"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyUpdate); err != nil {
 		return nil, err
 	}
 	branch, err := uc.repo.GetByID(ctx, id)
@@ -209,7 +210,7 @@ func (uc *academyBranchUseCase) Update(ctx context.Context, id uuid.UUID, req dt
 }
 
 func (uc *academyBranchUseCase) Delete(ctx context.Context, req dto.DeleteAcademyBranchRequest) error {
-	if err := uc.permissionRepo.Validate(ctx, "academy.delete"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyDelete); err != nil {
 		return err
 	}
 	// Check if exists

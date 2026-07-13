@@ -3,6 +3,7 @@ package usecase
 import (
 	sportv1 "microservice-golang/gen/sport/v1"
 	"microservice-golang/services/sport-service/internal/entity"
+	"microservice-golang/shared/pkg/utils"
 
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -38,7 +39,7 @@ func buildSportEvent(
 			stats[i] = &sportv1.SportStatEvent{
 				Id:                stat.ID.String(),
 				StatTypeTagId:     stat.StatTypeTagID.String(),
-				AggregationMethod: stat.AggregationMethod,
+				AggregationMethod: utils.ParseAggregationMethod(stat.AggregationMethod),
 			}
 		}
 	}

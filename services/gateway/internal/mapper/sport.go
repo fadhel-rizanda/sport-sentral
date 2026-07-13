@@ -5,6 +5,7 @@ import (
 
 	sportv1 "microservice-golang/gen/sport/v1"
 	"microservice-golang/services/gateway/internal/dto"
+	"microservice-golang/shared/pkg/utils"
 )
 
 func ToSportStatResponse(st *sportv1.SportStat) dto.SportStatResponse {
@@ -16,7 +17,7 @@ func ToSportStatResponse(st *sportv1.SportStat) dto.SportStatResponse {
 		SportID:           st.SportId,
 		StatTypeTagID:     st.StatTypeTagId,
 		StatTypeTag:       ToTagSimpleResponse(st.StatTypeTag),
-		AggregationMethod: st.AggregationMethod,
+		AggregationMethod: utils.AggregationMethodToString(st.AggregationMethod),
 	}
 }
 

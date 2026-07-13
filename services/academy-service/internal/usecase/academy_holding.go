@@ -14,6 +14,7 @@ import (
 	"microservice-golang/services/academy-service/internal/repository"
 	replicatedRepo "microservice-golang/services/academy-service/internal/repository/replicated"
 	"microservice-golang/shared/infrastructure/postgres"
+	"microservice-golang/shared/pkg/constants"
 	apperr "microservice-golang/shared/pkg/errors"
 )
 
@@ -44,7 +45,7 @@ func NewAcademyHoldingUseCase(
 }
 
 func (uc *academyHoldingUseCase) Create(ctx context.Context, req dto.CreateAcademyHoldingRequest) (*dto.AcademyHoldingResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.create"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyCreate); err != nil {
 		return nil, err
 	}
 	holdingID, err := uuid.NewV7()
@@ -117,7 +118,7 @@ func (uc *academyHoldingUseCase) Create(ctx context.Context, req dto.CreateAcade
 }
 
 func (uc *academyHoldingUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.AcademyHoldingResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyRead); err != nil {
 		return nil, err
 	}
 	holding, err := uc.repo.GetByID(ctx, id)
@@ -131,7 +132,7 @@ func (uc *academyHoldingUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dt
 }
 
 func (uc *academyHoldingUseCase) List(ctx context.Context, req dto.ListAcademyHoldingsRequest) (*dto.ListAcademyHoldingsResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyRead); err != nil {
 		return nil, err
 	}
 	filters := repository.AcademyHoldingFilters{
@@ -158,7 +159,7 @@ func (uc *academyHoldingUseCase) List(ctx context.Context, req dto.ListAcademyHo
 }
 
 func (uc *academyHoldingUseCase) Update(ctx context.Context, id uuid.UUID, req dto.UpdateAcademyHoldingRequest) (*dto.AcademyHoldingResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.update"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyUpdate); err != nil {
 		return nil, err
 	}
 	holding, err := uc.repo.GetByID(ctx, id)
@@ -231,7 +232,7 @@ func (uc *academyHoldingUseCase) Update(ctx context.Context, id uuid.UUID, req d
 }
 
 func (uc *academyHoldingUseCase) Delete(ctx context.Context, req dto.DeleteAcademyHoldingRequest) error {
-	if err := uc.permissionRepo.Validate(ctx, "academy.delete"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyDelete); err != nil {
 		return err
 	}
 	// Check if exists
