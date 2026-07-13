@@ -33,12 +33,20 @@ message Sport {
   google.protobuf.Timestamp updated_at = 14;
 }
 
+enum AggregationMethod {
+  AGGREGATION_METHOD_UNSPECIFIED = 0;
+  AGGREGATION_METHOD_SUM = 1;
+  AGGREGATION_METHOD_AVG = 2;
+  AGGREGATION_METHOD_MAX = 3;
+  AGGREGATION_METHOD_MIN = 4;
+}
+
 message SportStat {
   string id               = 1;
   string sport_id         = 2;
   string stat_type_tag_id = 3;
   common.v1.TagSimple stat_type_tag = 4;
-  string aggregation_method = 5; // e.g. "SUM", "AVG", "MAX", "MIN"
+  AggregationMethod aggregation_method = 5 [(buf.validate.field).enum.defined_only = true];
 }
 
 message SportConfig {
@@ -129,7 +137,7 @@ message DeleteSportRequest {
 
 message SportStatConfigInput {
   string stat_type_tag_id   = 1 [(buf.validate.field).string.uuid = true];
-  string aggregation_method = 2 [(buf.validate.field).string.min_len = 2];
+  AggregationMethod aggregation_method = 2 [(buf.validate.field).enum.defined_only = true];
 }
 
 message UpdateSportConfigRequest {

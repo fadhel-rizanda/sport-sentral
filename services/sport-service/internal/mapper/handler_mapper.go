@@ -4,6 +4,7 @@ import (
 	commonv1 "microservice-golang/gen/common/v1"
 	sportv1 "microservice-golang/gen/sport/v1"
 	"microservice-golang/services/sport-service/internal/dto"
+	"microservice-golang/shared/pkg/utils"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -134,7 +135,7 @@ func ToProtoSportStat(s *dto.SportStatResponse) *sportv1.SportStat {
 		SportId:           s.SportID.String(),
 		StatTypeTagId:     s.StatTypeTagID.String(),
 		StatTypeTag:       ToProtoTagSimple(s.StatTypeTag),
-		AggregationMethod: s.AggregationMethod,
+		AggregationMethod: utils.ParseAggregationMethod(s.AggregationMethod),
 	}
 }
 

@@ -8,6 +8,7 @@ import (
 	"microservice-golang/services/academy-service/internal/entity"
 	"microservice-golang/services/academy-service/internal/repository/replicated"
 	apperr "microservice-golang/shared/pkg/errors"
+	"microservice-golang/shared/pkg/utils"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -70,19 +71,30 @@ func (uc *SyncSportUseCase) upsert(ctx context.Context, evt *sportv1.SportEvent)
 		}
 	}
 
-	stats := make([]entity.SportStat, len(evt.GetStats()))
-	for i, statEvt := range evt.GetStats() {
+	stats := make([]entity.SportStat, 0, len(evt.GetStats()))
+	for _, statEvt := range evt.GetStats() {
 		statID, err := uuid.Parse(statEvt.GetId())
 		if err != nil {
-			statID, _ = uuid.NewV7()
+			uc.logger.Warn("invalid stat_id – skipping stat",
+				zap.String("stat_id", statEvt.GetId()),
+				zap.Error(err),
+			)
+			continue
 		}
-		statTypeTagID, _ := uuid.Parse(statEvt.GetStatTypeTagId())
-		stats[i] = entity.SportStat{
+		statTypeTagID, err := uuid.Parse(statEvt.GetStatTypeTagId())
+		if err != nil {
+			uc.logger.Warn("invalid stat_type_tag_id – skipping stat",
+				zap.String("stat_type_tag_id", statEvt.GetStatTypeTagId()),
+				zap.Error(err),
+			)
+			continue
+		}
+		stats = append(stats, entity.SportStat{
 			ID:                statID,
 			SportID:           id,
 			StatTypeTagID:     statTypeTagID,
-			AggregationMethod: statEvt.GetAggregationMethod(),
-		}
+			AggregationMethod: utils.AggregationMethodToString(statEvt.GetAggregationMethod()),
+		})
 	}
 
 	if err := uc.sportRepo.Upsert(ctx, entity.Sport{

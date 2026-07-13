@@ -9,6 +9,7 @@ import (
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/services/gateway/internal/request"
 	"microservice-golang/services/gateway/internal/response"
+	"microservice-golang/shared/pkg/utils"
 )
 
 type SportHandler struct {
@@ -194,7 +195,7 @@ func (h *SportHandler) UpdateSportConfig(c *fiber.Ctx) error {
 	for i, s := range reqBody.Stats {
 		statsInput[i] = &sportv1.SportStatConfigInput{
 			StatTypeTagId:     s.StatTypeTagID,
-			AggregationMethod: s.AggregationMethod,
+			AggregationMethod: utils.ParseAggregationMethod(s.AggregationMethod),
 		}
 	}
 

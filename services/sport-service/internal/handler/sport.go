@@ -8,6 +8,7 @@ import (
 	"microservice-golang/services/sport-service/internal/mapper"
 	"microservice-golang/services/sport-service/internal/usecase"
 	apperr "microservice-golang/shared/pkg/errors"
+	"microservice-golang/shared/pkg/utils"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -232,7 +233,7 @@ func (h *SportHandler) UpdateSportConfig(ctx context.Context, req *sportv1.Updat
 		}
 		statsInput[i] = dto.SportStatConfigInput{
 			StatTypeTagID:     tagID,
-			AggregationMethod: s.GetAggregationMethod(),
+			AggregationMethod: utils.AggregationMethodToString(s.GetAggregationMethod()),
 		}
 	}
 

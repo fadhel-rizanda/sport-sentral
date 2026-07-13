@@ -11,6 +11,7 @@ import (
 	"microservice-golang/services/academy-service/internal/repository"
 	replicatedRepo "microservice-golang/services/academy-service/internal/repository/replicated"
 	"microservice-golang/shared/infrastructure/postgres"
+	"microservice-golang/shared/pkg/constants"
 	apperr "microservice-golang/shared/pkg/errors"
 )
 
@@ -39,7 +40,7 @@ func NewEnrollmentUseCase(
 }
 
 func (uc *enrollmentUseCase) Create(ctx context.Context, req dto.CreateEnrollmentRequest) (*dto.EnrollmentResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyManage); err != nil {
 		return nil, err
 	}
 	id, err := uuid.NewV7()
@@ -74,7 +75,7 @@ func (uc *enrollmentUseCase) Create(ctx context.Context, req dto.CreateEnrollmen
 }
 
 func (uc *enrollmentUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.EnrollmentResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyRead); err != nil {
 		return nil, err
 	}
 	enrollment, err := uc.repo.GetByID(ctx, id)
@@ -88,7 +89,7 @@ func (uc *enrollmentUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.En
 }
 
 func (uc *enrollmentUseCase) GetByBranchAndAthlete(ctx context.Context, branchID, athleteID uuid.UUID) (*dto.EnrollmentResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyRead); err != nil {
 		return nil, err
 	}
 	enrollment, err := uc.repo.GetByBranchAndAthlete(ctx, branchID, athleteID)
@@ -102,7 +103,7 @@ func (uc *enrollmentUseCase) GetByBranchAndAthlete(ctx context.Context, branchID
 }
 
 func (uc *enrollmentUseCase) List(ctx context.Context, req dto.ListEnrollmentsRequest) (*dto.ListEnrollmentsResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyRead); err != nil {
 		return nil, err
 	}
 	filters := repository.EnrollmentFilters{
@@ -131,7 +132,7 @@ func (uc *enrollmentUseCase) List(ctx context.Context, req dto.ListEnrollmentsRe
 }
 
 func (uc *enrollmentUseCase) Update(ctx context.Context, id uuid.UUID, req dto.UpdateEnrollmentRequest) (*dto.EnrollmentResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyManage); err != nil {
 		return nil, err
 	}
 	enrollment, err := uc.repo.GetByID(ctx, id)
@@ -172,7 +173,7 @@ func (uc *enrollmentUseCase) Update(ctx context.Context, id uuid.UUID, req dto.U
 }
 
 func (uc *enrollmentUseCase) Delete(ctx context.Context, req dto.DeleteEnrollmentRequest) error {
-	if err := uc.permissionRepo.Validate(ctx, "academy.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionAcademyManage); err != nil {
 		return err
 	}
 	_, err := uc.repo.GetByID(ctx, req.ID)

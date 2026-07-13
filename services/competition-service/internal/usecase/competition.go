@@ -12,6 +12,7 @@ import (
 	"microservice-golang/services/competition-service/internal/repository"
 	replicatedRepo "microservice-golang/services/competition-service/internal/repository/replicated"
 	"microservice-golang/shared/infrastructure/postgres"
+	"microservice-golang/shared/pkg/constants"
 	apperr "microservice-golang/shared/pkg/errors"
 	sharedgrpc "microservice-golang/shared/pkg/grpc"
 )
@@ -50,7 +51,7 @@ func NewCompetitionUseCase(
 }
 
 func (uc *competitionUseCase) Create(ctx context.Context, adminID uuid.UUID, req dto.CreateCompetitionRequest) (*dto.CompetitionResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "competition.create"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCompetitionCreate); err != nil {
 		return nil, err
 	}
 
@@ -153,7 +154,7 @@ func (uc *competitionUseCase) Create(ctx context.Context, adminID uuid.UUID, req
 }
 
 func (uc *competitionUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.CompetitionResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "competition.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCompetitionRead); err != nil {
 		return nil, err
 	}
 	res, err := uc.repo.GetByID(ctx, id)
@@ -167,7 +168,7 @@ func (uc *competitionUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.C
 }
 
 func (uc *competitionUseCase) List(ctx context.Context, filters dto.CompetitionFilters, page, pageSize int) ([]*dto.CompetitionResponse, int64, error) {
-	if err := uc.permissionRepo.Validate(ctx, "competition.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCompetitionRead); err != nil {
 		return nil, 0, err
 	}
 	repoFilters := repository.CompetitionFilters{
@@ -191,7 +192,7 @@ func (uc *competitionUseCase) List(ctx context.Context, filters dto.CompetitionF
 }
 
 func (uc *competitionUseCase) Update(ctx context.Context, adminID, id uuid.UUID, req dto.UpdateCompetitionRequest) (*dto.CompetitionResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "competition.update"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCompetitionUpdate); err != nil {
 		return nil, err
 	}
 	if err := validateCompetitionAdmin(ctx, adminID, id, uc.repo, uc.academyAdminRepo); err != nil {
@@ -276,7 +277,7 @@ func (uc *competitionUseCase) Update(ctx context.Context, adminID, id uuid.UUID,
 }
 
 func (uc *competitionUseCase) Delete(ctx context.Context, adminID, id uuid.UUID) error {
-	if err := uc.permissionRepo.Validate(ctx, "competition.delete"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCompetitionDelete); err != nil {
 		return err
 	}
 	if err := validateCompetitionAdmin(ctx, adminID, id, uc.repo, uc.academyAdminRepo); err != nil {
@@ -298,7 +299,7 @@ func (uc *competitionUseCase) Delete(ctx context.Context, adminID, id uuid.UUID)
 }
 
 func (uc *competitionUseCase) UpdateStatus(ctx context.Context, adminID, id uuid.UUID, statusID uuid.UUID) error {
-	if err := uc.permissionRepo.Validate(ctx, "competition.regulate"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCompetitionRegulate); err != nil {
 		return err
 	}
 	if err := validateCompetitionAdmin(ctx, adminID, id, uc.repo, uc.academyAdminRepo); err != nil {

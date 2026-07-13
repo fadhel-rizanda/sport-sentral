@@ -13,6 +13,7 @@ import (
 	"microservice-golang/services/venue-service/internal/repository"
 	replicatedRepo "microservice-golang/services/venue-service/internal/repository/replicated"
 	"microservice-golang/shared/infrastructure/postgres"
+	"microservice-golang/shared/pkg/constants"
 	"microservice-golang/shared/pkg/database"
 	apperr "microservice-golang/shared/pkg/errors"
 )
@@ -53,7 +54,7 @@ func NewBookingUseCase(
 }
 
 func (uc *bookingUseCase) Create(ctx context.Context, req dto.CreateBookingRequest) (*dto.BookingResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "booking.create"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionBookingCreate); err != nil {
 		return nil, err
 	}
 
@@ -143,7 +144,7 @@ func (uc *bookingUseCase) Create(ctx context.Context, req dto.CreateBookingReque
 }
 
 func (uc *bookingUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.BookingResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "booking.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionBookingRead); err != nil {
 		return nil, err
 	}
 
@@ -159,7 +160,7 @@ func (uc *bookingUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.Booki
 }
 
 func (uc *bookingUseCase) List(ctx context.Context, req dto.ListBookingsRequest) (*dto.ListBookingsResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "booking.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionBookingRead); err != nil {
 		return nil, err
 	}
 
@@ -188,7 +189,7 @@ func (uc *bookingUseCase) List(ctx context.Context, req dto.ListBookingsRequest)
 }
 
 func (uc *bookingUseCase) UpdateStatus(ctx context.Context, id uuid.UUID, req dto.UpdateBookingStatusRequest) (*dto.BookingResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "booking.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionBookingManage); err != nil {
 		return nil, err
 	}
 
@@ -254,7 +255,7 @@ func (uc *bookingUseCase) UpdateStatus(ctx context.Context, id uuid.UUID, req dt
 }
 
 func (uc *bookingUseCase) CheckAvailability(ctx context.Context, courtID uuid.UUID, slotIDs []uuid.UUID) (bool, error) {
-	if err := uc.permissionRepo.Validate(ctx, "booking.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionBookingRead); err != nil {
 		return false, err
 	}
 

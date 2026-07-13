@@ -213,7 +213,7 @@ type SportStatEvent struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	StatTypeTagId     string                 `protobuf:"bytes,2,opt,name=stat_type_tag_id,json=statTypeTagId,proto3" json:"stat_type_tag_id,omitempty"`
-	AggregationMethod string                 `protobuf:"bytes,3,opt,name=aggregation_method,json=aggregationMethod,proto3" json:"aggregation_method,omitempty"`
+	AggregationMethod AggregationMethod      `protobuf:"varint,3,opt,name=aggregation_method,json=aggregationMethod,proto3,enum=sport.v1.AggregationMethod" json:"aggregation_method,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -262,18 +262,18 @@ func (x *SportStatEvent) GetStatTypeTagId() string {
 	return ""
 }
 
-func (x *SportStatEvent) GetAggregationMethod() string {
+func (x *SportStatEvent) GetAggregationMethod() AggregationMethod {
 	if x != nil {
 		return x.AggregationMethod
 	}
-	return ""
+	return AggregationMethod_AGGREGATION_METHOD_UNSPECIFIED
 }
 
 var File_sport_v1_sport_events_proto protoreflect.FileDescriptor
 
 const file_sport_v1_sport_events_proto_rawDesc = "" +
 	"\n" +
-	"\x1bsport/v1/sport_events.proto\x12\bsport.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xec\x04\n" +
+	"\x1bsport/v1/sport_events.proto\x12\bsport.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x14sport/v1/sport.proto\"\xec\x04\n" +
 	"\n" +
 	"SportEvent\x12#\n" +
 	"\bevent_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\aeventId\x12A\n" +
@@ -295,11 +295,11 @@ const file_sport_v1_sport_events_proto_rawDesc = "" +
 	"\x05stats\x18\f \x03(\v2\x18.sport.v1.SportStatEventR\x05statsB\x15\n" +
 	"\x13_icon_attachment_idB\x0f\n" +
 	"\r_regulator_idB\r\n" +
-	"\v_deleted_at\"x\n" +
+	"\v_deleted_at\"\x95\x01\n" +
 	"\x0eSportStatEvent\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
-	"\x10stat_type_tag_id\x18\x02 \x01(\tR\rstatTypeTagId\x12-\n" +
-	"\x12aggregation_method\x18\x03 \x01(\tR\x11aggregationMethod*\x8c\x01\n" +
+	"\x10stat_type_tag_id\x18\x02 \x01(\tR\rstatTypeTagId\x12J\n" +
+	"\x12aggregation_method\x18\x03 \x01(\x0e2\x1b.sport.v1.AggregationMethodR\x11aggregationMethod*\x8c\x01\n" +
 	"\x0eSportEventType\x12 \n" +
 	"\x1cSPORT_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18SPORT_EVENT_TYPE_CREATED\x10\x01\x12\x1c\n" +
@@ -325,17 +325,19 @@ var file_sport_v1_sport_events_proto_goTypes = []any{
 	(*SportEvent)(nil),            // 1: sport.v1.SportEvent
 	(*SportStatEvent)(nil),        // 2: sport.v1.SportStatEvent
 	(*timestamppb.Timestamp)(nil), // 3: google.protobuf.Timestamp
+	(AggregationMethod)(0),        // 4: sport.v1.AggregationMethod
 }
 var file_sport_v1_sport_events_proto_depIdxs = []int32{
 	0, // 0: sport.v1.SportEvent.event_type:type_name -> sport.v1.SportEventType
 	3, // 1: sport.v1.SportEvent.occurred_at:type_name -> google.protobuf.Timestamp
 	3, // 2: sport.v1.SportEvent.deleted_at:type_name -> google.protobuf.Timestamp
 	2, // 3: sport.v1.SportEvent.stats:type_name -> sport.v1.SportStatEvent
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	4, // 4: sport.v1.SportStatEvent.aggregation_method:type_name -> sport.v1.AggregationMethod
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_sport_v1_sport_events_proto_init() }
@@ -343,6 +345,7 @@ func file_sport_v1_sport_events_proto_init() {
 	if File_sport_v1_sport_events_proto != nil {
 		return
 	}
+	file_sport_v1_sport_proto_init()
 	file_sport_v1_sport_events_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

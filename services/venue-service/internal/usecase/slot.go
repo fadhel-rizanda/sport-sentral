@@ -12,6 +12,7 @@ import (
 	"microservice-golang/services/venue-service/internal/repository"
 	replicatedRepo "microservice-golang/services/venue-service/internal/repository/replicated"
 	"microservice-golang/shared/infrastructure/postgres"
+	"microservice-golang/shared/pkg/constants"
 	apperr "microservice-golang/shared/pkg/errors"
 )
 
@@ -40,7 +41,7 @@ func NewCourtSlotUseCase(
 }
 
 func (uc *courtSlotUseCase) CreateBulk(ctx context.Context, req dto.CreateCourtSlotsRequest) ([]*dto.CourtSlotResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "court.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCourtManage); err != nil {
 		return nil, err
 	}
 
@@ -103,7 +104,7 @@ func (uc *courtSlotUseCase) CreateBulk(ctx context.Context, req dto.CreateCourtS
 }
 
 func (uc *courtSlotUseCase) List(ctx context.Context, req dto.ListCourtSlotsRequest) ([]*dto.CourtSlotResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "court.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCourtRead); err != nil {
 		return nil, err
 	}
 
@@ -121,7 +122,7 @@ func (uc *courtSlotUseCase) List(ctx context.Context, req dto.ListCourtSlotsRequ
 }
 
 func (uc *courtSlotUseCase) Delete(ctx context.Context, id uuid.UUID) error {
-	if err := uc.permissionRepo.Validate(ctx, "court.manage"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCourtManage); err != nil {
 		return err
 	}
 

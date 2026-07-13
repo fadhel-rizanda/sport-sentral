@@ -12,6 +12,7 @@ import (
 	"microservice-golang/services/competition-service/internal/repository"
 	replicatedRepo "microservice-golang/services/competition-service/internal/repository/replicated"
 	"microservice-golang/shared/infrastructure/postgres"
+	"microservice-golang/shared/pkg/constants"
 	apperr "microservice-golang/shared/pkg/errors"
 )
 
@@ -55,7 +56,7 @@ func NewStatUseCase(
 }
 
 func (uc *statUseCase) RecordMatchStat(ctx context.Context, adminID, matchID uuid.UUID, req dto.RecordStatRequest) (*dto.MatchStatResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "competition.regulate"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCompetitionRegulate); err != nil {
 		return nil, err
 	}
 	match, err := uc.matchRepo.GetByID(ctx, matchID)
@@ -104,7 +105,7 @@ func (uc *statUseCase) RecordMatchStat(ctx context.Context, adminID, matchID uui
 }
 
 func (uc *statUseCase) UpdateMatchStat(ctx context.Context, adminID, statID uuid.UUID, value float64) error {
-	if err := uc.permissionRepo.Validate(ctx, "competition.regulate"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCompetitionRegulate); err != nil {
 		return err
 	}
 	stat, err := uc.statRepo.GetByID(ctx, statID)
@@ -138,7 +139,7 @@ func (uc *statUseCase) UpdateMatchStat(ctx context.Context, adminID, statID uuid
 }
 
 func (uc *statUseCase) DeleteMatchStat(ctx context.Context, adminID, statID uuid.UUID) error {
-	if err := uc.permissionRepo.Validate(ctx, "competition.regulate"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCompetitionRegulate); err != nil {
 		return err
 	}
 	stat, err := uc.statRepo.GetByID(ctx, statID)
@@ -171,7 +172,7 @@ func (uc *statUseCase) DeleteMatchStat(ctx context.Context, adminID, statID uuid
 }
 
 func (uc *statUseCase) GetMatchStats(ctx context.Context, matchID uuid.UUID) ([]*dto.MatchStatResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "competition.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCompetitionRead); err != nil {
 		return nil, err
 	}
 	stats, _, err := uc.statRepo.List(ctx, repository.MatchStatFilters{MatchID: &matchID}, 1, 1000)
@@ -187,7 +188,7 @@ func (uc *statUseCase) GetMatchStats(ctx context.Context, matchID uuid.UUID) ([]
 }
 
 func (uc *statUseCase) GetAthleteAggregate(ctx context.Context, athleteID, competitionID uuid.UUID) ([]*dto.AggregateResponse, error) {
-	if err := uc.permissionRepo.Validate(ctx, "competition.read"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCompetitionRead); err != nil {
 		return nil, err
 	}
 	aggregates, _, err := uc.statRepo.ListAggregates(ctx, repository.AggregateFilters{
@@ -206,7 +207,7 @@ func (uc *statUseCase) GetAthleteAggregate(ctx context.Context, athleteID, compe
 }
 
 func (uc *statUseCase) RecalculateAggregate(ctx context.Context, adminID, athleteID, competitionID uuid.UUID) error {
-	if err := uc.permissionRepo.Validate(ctx, "competition.regulate"); err != nil {
+	if err := uc.permissionRepo.Validate(ctx, constants.PermissionCompetitionRegulate); err != nil {
 		return err
 	}
 	if err := validateCompetitionAdmin(ctx, adminID, competitionID, uc.competitionRepo, uc.academyAdminRepo); err != nil {
