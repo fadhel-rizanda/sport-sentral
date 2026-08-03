@@ -123,10 +123,14 @@ func ToProtoUser(u *dto.UserResponse) *userv1.User {
 
 	roles := make([]*userv1.UserRole, len(u.Roles))
 	for i, r := range u.Roles {
+		var expiredAt *timestamppb.Timestamp
+		if r.ExpiredAt != nil {
+			expiredAt = timestamppb.New(*r.ExpiredAt)
+		}
 		roles[i] = &userv1.UserRole{
-			Role:     ToProtoRoleSimple(r.Role),
-			Status:   ToProtoStatusSimple(r.Status),
-			IsActive: r.IsActive,
+			Role:      ToProtoRoleSimple(r.Role),
+			Status:    ToProtoStatusSimple(r.Status),
+			ExpiredAt: expiredAt,
 		}
 	}
 

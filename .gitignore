@@ -40,7 +40,7 @@ coverage.out
 coverage.html
 
 # Protobuf
-# gen/
+gen/
 
 # Misc
 *.bak
@@ -49,4 +49,3 @@ coverage.html
 /documentation/checkpoint.md
 
 *.docx
-services/scout-service

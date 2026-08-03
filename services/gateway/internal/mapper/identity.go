@@ -119,10 +119,15 @@ func ToRoleResponse(role *rbacv1.Role) dto.RoleResponse {
 func ToUserResponse(u *userv1.User) dto.UserResponse {
 	roles := make([]dto.UserRoleSimpleResponse, len(u.Roles))
 	for i, r := range u.Roles {
+		var expiredAt *string
+		if r.ExpiredAt != nil {
+			t := r.ExpiredAt.AsTime().UTC().Format(time.RFC3339)
+			expiredAt = &t
+		}
 		roles[i] = dto.UserRoleSimpleResponse{
-			Role:     ToRoleSimpleResponse(r.Role),
-			Status:   ToStatusSimpleResponse(r.Status),
-			IsActive: r.IsActive,
+			Role:      ToRoleSimpleResponse(r.Role),
+			Status:    ToStatusSimpleResponse(r.Status),
+			ExpiredAt: expiredAt,
 		}
 	}
 

@@ -35,10 +35,10 @@ func ToUserResponse(user *entity.User) *dto.UserResponse {
 				Name: ur.Status.Name,
 				Slug: ur.Status.Slug,
 			},
-			IsActive: ur.IsActive,
+			ExpiredAt: ur.ExpiredAt,
 		}
 
-		if ur.IsActive {
+		if ur.IsActive() {
 			activeRole = roleSimple
 		}
 	}

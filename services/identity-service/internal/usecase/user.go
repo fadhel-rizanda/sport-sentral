@@ -165,7 +165,6 @@ func (uc *userUseCase) Create(ctx context.Context, req dto.CreateUserRequest) (*
 		if err := uc.userRoleRepo.Add(txCtx, &entity.UserRole{
 			UserID:   user.ID,
 			RoleID:   role.ID,
-			IsActive: true,
 			StatusID: roleStatusCache.ID,
 		}); err != nil {
 			return apperr.Internal(err)

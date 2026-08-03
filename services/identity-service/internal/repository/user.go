@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"time"
+
 	"microservice-golang/services/identity-service/internal/entity"
 	"microservice-golang/shared/infrastructure/postgres"
 
@@ -46,7 +48,7 @@ func (r *userRepository) List(ctx context.Context, page, pageSize int) ([]*entit
 	var rows []userWithStatus
 	err := postgres.GetTx(ctx, r.db).WithContext(ctx).
 		Table("users").
-		Preload("UserRoles", "is_active = ?", true).
+		Preload("UserRoles", "expired_at IS NULL OR expired_at > ?", time.Now()).
 		Preload("UserRoles.Role").
 		Joins("LEFT JOIN replicated_statuses sc ON sc.id = users.status_id").
 		Select("users.*, sc.id AS status_id, sc.type AS status_type, sc.name AS status_name, sc.slug AS status_slug").
