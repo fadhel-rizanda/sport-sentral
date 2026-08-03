@@ -122,9 +122,9 @@ type UserResponse struct {
 }
 
 type UserRoleSimpleResponse struct {
-	Role     RoleSimpleResponse
-	Status   StatusSimpleResponse
-	IsActive bool
+	Role      RoleSimpleResponse
+	Status    StatusSimpleResponse
+	ExpiredAt *time.Time
 }
 
 type ListUsersResponse struct {

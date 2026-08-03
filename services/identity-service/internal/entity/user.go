@@ -25,15 +25,22 @@ type User struct {
 }
 
 type UserRole struct {
-	UserID    uuid.UUID `gorm:"type:uuid;primaryKey"`
-	RoleID    uuid.UUID `gorm:"type:uuid;primaryKey"`
-	IsActive  bool      `gorm:"not null;default:false"`
-	StatusID  uuid.UUID `gorm:"type:uuid;not null"`
+	UserID    uuid.UUID  `gorm:"type:uuid;primaryKey"`
+	RoleID    uuid.UUID  `gorm:"type:uuid;primaryKey"`
+	ExpiredAt *time.Time `gorm:"type:timestamp"`
+	StatusID  uuid.UUID  `gorm:"type:uuid;not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
 	Status Status `gorm:"-"`
 	Role   Role   `gorm:"foreignKey:RoleID;references:ID"`
+}
+
+func (ur *UserRole) IsActive() bool {
+	if ur.ExpiredAt == nil {
+		return true
+	}
+	return time.Now().Before(*ur.ExpiredAt)
 }
 
 func (u *User) BeforeCreate(_ *gorm.DB) error {

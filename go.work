@@ -5,11 +5,11 @@ use (
 	./proto
 	./services/academy-service
 	./services/competition-service
-	./services/venue-service
 	./services/gateway
 	./services/identity-service
 	./services/meta-service
 	./services/scout-service
 	./services/sport-service
+	./services/venue-service
 	./shared
 )

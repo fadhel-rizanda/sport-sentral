@@ -13,7 +13,7 @@ import "common/v1/common.proto";
 message UserRole {
   common.v1.RoleSimple role = 1;
   common.v1.StatusSimple status = 2;
-  bool   is_active = 3;
+  google.protobuf.Timestamp expired_at = 3;
 }
 
 message User {

@@ -123,7 +123,6 @@ func (uc *profileUseCase) ApplyProfile(ctx context.Context, req dto.ApplyProfile
 	userRole := &entity.UserRole{
 		UserID:   user.ID,
 		RoleID:   targetRole.ID,
-		IsActive: false,
 		StatusID: status.ID,
 	}
 

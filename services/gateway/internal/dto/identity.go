@@ -51,9 +51,9 @@ type RoleResponse struct {
 }
 
 type UserRoleSimpleResponse struct {
-	Role     RoleSimpleResponse   `json:"role"`
-	Status   StatusSimpleResponse `json:"status"`
-	IsActive bool                 `json:"is_active"`
+	Role      RoleSimpleResponse   `json:"role"`
+	Status    StatusSimpleResponse `json:"status"`
+	ExpiredAt *string              `json:"expired_at,omitempty"`
 }
 
 type UserResponse struct {
