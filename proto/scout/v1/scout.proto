@@ -1,0 +1,227 @@
+syntax = "proto3";
+
+package scout.v1;
+
+option go_package = "microservice-golang/gen/scout/v1;scoutv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+import "common/v1/common.proto";
+
+service ScoutService {
+  // Scout Profile
+  rpc CreateScoutProfile(CreateScoutProfileRequest) returns (ScoutProfileResponse);
+  rpc GetScoutProfile(GetScoutProfileRequest) returns (ScoutProfileResponse);
+  rpc UpdateScoutProfile(UpdateScoutProfileRequest) returns (ScoutProfileResponse);
+  // TODO: Membership and feature access tiering is handled via RBAC roles/permissions in identity-service (e.g. scout_free vs scout_premium).
+  // Future Payment Service (Phase 4/5) will trigger RBAC updates upon subscription payments.
+
+  // Watchlist
+  rpc AddToWatchlist(AddToWatchlistRequest) returns (WatchlistEntryResponse);
+  rpc RemoveFromWatchlist(RemoveFromWatchlistRequest) returns (google.protobuf.Empty);
+  rpc ListWatchlist(ListWatchlistRequest) returns (ListWatchlistResponse);
+  rpc UpdateWatchlistEntry(UpdateWatchlistEntryRequest) returns (WatchlistEntryResponse);
+
+  // Athlete Profiles & Leaderboards
+  rpc ListAthleteProfiles(ListAthleteProfilesRequest) returns (ListAthleteProfilesResponse);
+  rpc GetAthleteProfile(GetAthleteProfileRequest) returns (AthleteProfileResponse);
+  rpc GetLeaderboard(GetLeaderboardRequest) returns (GetLeaderboardResponse);
+
+  // Activity Audit Logs
+  rpc LogScoutActivity(LogScoutActivityRequest) returns (google.protobuf.Empty);
+  rpc ListScoutActivities(ListScoutActivitiesRequest) returns (ListScoutActivitiesResponse);
+}
+
+// ────────────────────────────────────────────────────────────────
+// MESSAGES: SCOUT PROFILE
+// ────────────────────────────────────────────────────────────────
+
+message ScoutProfile {
+  string id = 1;
+  string user_id = 2;
+  string organization_name = 3;
+  string bio = 4;
+  optional string avatar_attachment_id = 5;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message CreateScoutProfileRequest {
+  string user_id = 1;
+  string organization_name = 2;
+  string bio = 3;
+  optional string avatar_attachment_id = 4;
+}
+
+message GetScoutProfileRequest {
+  string user_id = 1;
+}
+
+message UpdateScoutProfileRequest {
+  string scout_id = 1;
+  optional string organization_name = 2;
+  optional string bio = 3;
+  optional string avatar_attachment_id = 4;
+}
+
+message ScoutProfileResponse {
+  ScoutProfile scout = 1;
+}
+
+// ────────────────────────────────────────────────────────────────
+// MESSAGES: WATCHLIST
+// ────────────────────────────────────────────────────────────────
+
+message WatchlistEntry {
+  string id = 1;
+  string scout_id = 2;
+  string athlete_id = 3;
+  string notes = 4;
+  optional string priority_tag_id = 5;
+  google.protobuf.Timestamp added_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  optional AthleteProfile athlete_profile = 8;
+}
+
+message AddToWatchlistRequest {
+  string scout_id = 1;
+  string athlete_id = 2;
+  string notes = 3;
+  optional string priority_tag_id = 4;
+}
+
+message RemoveFromWatchlistRequest {
+  string scout_id = 1;
+  string athlete_id = 2;
+}
+
+message ListWatchlistRequest {
+  string scout_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message ListWatchlistResponse {
+  repeated WatchlistEntry entries = 1;
+  int64 total_hits = 2;
+  int32 page = 3;
+  int32 total_pages = 4;
+}
+
+message UpdateWatchlistEntryRequest {
+  string id = 1;
+  string scout_id = 2;
+  optional string notes = 3;
+  optional string priority_tag_id = 4;
+}
+
+message WatchlistEntryResponse {
+  WatchlistEntry entry = 1;
+}
+
+// ────────────────────────────────────────────────────────────────
+// MESSAGES: ATHLETE PROFILE & LEADERBOARD
+// ────────────────────────────────────────────────────────────────
+
+message AthleteProfile {
+  string id = 1;
+  string athlete_id = 2;
+  string sport_id = 3;
+  optional string current_academy_id = 4;
+  string current_academy_name = 5;
+  int32 age = 6;
+  int32 leaderboard_rank = 7;
+  double leaderboard_score = 8;
+  string highest_competition_level = 9;
+  int32 total_competitions = 10;
+  int32 total_academies = 11;
+  int32 years_active = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+}
+
+message ListAthleteProfilesRequest {
+  optional string sport_id = 1;
+  optional int32 min_age = 2;
+  optional int32 max_age = 3;
+  optional string highest_competition_level = 4;
+  int32 page = 5;
+  int32 limit = 6;
+}
+
+message ListAthleteProfilesResponse {
+  repeated AthleteProfile profiles = 1;
+  int64 total_hits = 2;
+  int32 page = 3;
+  int32 total_pages = 4;
+}
+
+message GetAthleteProfileRequest {
+  string athlete_id = 1;
+  optional string sport_id = 2;
+}
+
+message AthleteProfileResponse {
+  AthleteProfile profile = 1;
+}
+
+message GetLeaderboardRequest {
+  string sport_id = 1;
+  optional string period_tag_id = 2 [(buf.validate.field).string.uuid = true];
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+message LeaderboardEntry {
+  string id = 1;
+  string sport_id = 2;
+  optional string period_tag_id = 3;
+  optional common.v1.TagSimple period_tag = 4;
+  int32 rank = 5;
+  string athlete_id = 6;
+  double score = 7;
+  double previous_score = 8;
+  google.protobuf.Timestamp calculated_at = 9;
+  AthleteProfile athlete_profile = 10;
+}
+
+message GetLeaderboardResponse {
+  repeated LeaderboardEntry entries = 1;
+  int64 total_hits = 2;
+  int32 page = 3;
+  int32 total_pages = 4;
+}
+
+// ────────────────────────────────────────────────────────────────
+// MESSAGES: SCOUT ACTIVITY AUDIT LOG
+// ────────────────────────────────────────────────────────────────
+
+message LogScoutActivityRequest {
+  string scout_id = 1;
+  string action = 2; // VIEW_PROFILE, SEARCH, EXPORT
+  optional string resource_id = 3;
+  optional string resource_type = 4;
+}
+
+message ScoutActivityLog {
+  string id = 1;
+  string scout_id = 2;
+  string action = 3;
+  optional string resource_id = 4;
+  optional string resource_type = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message ListScoutActivitiesRequest {
+  string scout_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message ListScoutActivitiesResponse {
+  repeated ScoutActivityLog logs = 1;
+  int64 total_hits = 2;
+  int32 page = 3;
+  int32 total_pages = 4;
+}

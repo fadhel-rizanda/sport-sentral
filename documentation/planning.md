@@ -70,6 +70,10 @@ Baik, saya sudah baca planning document-nya. Mari saya breakdown dalam format ma
 │  │   Payment    │  │  Attachment  │  │ Notification │      │
 │  │   Service    │  │   Service    │  │   Service    │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
+│  ┌──────────────┐                                          │
+│  │  Audit Log   │                                          │
+│  │   Service    │                                          │
+│  └──────────────┘                                          │
 └────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -108,7 +112,51 @@ Baik, saya sudah baca planning document-nya. Mari saya breakdown dalam format ma
 - 👤 **Multi-Sport Identity**: Athlete can participate in multiple academies (per sport)
 - 🏢 **Academy Context**: Stats are tied to academy + sport, not just user
 - 🧹 **Soft Delete**: When athlete leaves academy, enrollment is soft-deleted but stats remain
+- 🔑 **RBAC-Driven Membership & Authorization**: 
+  - Domain services (`scout-service`, `academy-service`, `venue-service`) do **NOT** maintain hardcoded tier fields (`tier`, `is_premium`).
+  - Feature gating and membership privileges are driven by **Role-Permissions (RBAC)**.
+  - When payment/subscription feature is added in Phase 4/5, `payment-service` will trigger updates in `identity-service` (RBAC) to grant or revoke user roles/permissions upon payment events.
 
+---
+
+## 🔐 **MEMBERSHIP & AUTHORIZATION ARCHITECTURE**
+
+```
+┌─────────────────┐       ┌─────────────────────────────────┐       ┌────────────────────────┐
+│  User Purchase  │ ───►  │  Payment Service (Phase 4/5)    │ ───►  │  Identity Service /    │
+│  (Subscription) │       │  • Handles Payment Webhooks     │       │  RBAC                  │
+└─────────────────┘       │  • Manages Expirations & Crons  │       │  • Grants/Revokes      │
+                          └─────────────────────────────────┘       │    Roles & Permissions │
+                                                                    └───────────┬────────────┘
+                                                                                │
+                                                                                │ Enforces Permissions
+                                                                                ▼
+                                                                    ┌────────────────────────┐
+                                                                    │ Domain Services        │
+                                                                    │ (Scout, Academy, Venue)│
+                                                                    │ • No custom tier fields│
+                                                                    │ • Standard RBAC checks │
+                                                                    └────────────────────────┘
+```
+
+## 📜 **BUSINESS AUDIT & ACTIVITY LOG ARCHITECTURE**
+
+```
+┌─────────────────┐      NATS / Kafka       ┌────────────────────────┐
+│ Domain Services │ ─────────────────────┐  │ Audit / Activity       │
+│ (Scout, Academy,│  Publishes Domain    │  │ Log Service            │
+│  Venue, etc.)   │  Events Async        ├─►│ • Append-only Store    │
+└─────────────────┘                      │  │ • Unified Activity Feed│
+                                         │  │ • Zero User Request    │
+                                         │  │   Latency Impact       │
+                                         └─►└────────────────────────┘
+```
+
+### **Core Principles**
+- 🛡️ **Separation of Concerns**: Business process level logs (e.g. *"Scout A added Athlete B to watchlist"*, *"Academy C enrolled Athlete D"*) are isolated from domain service databases into a dedicated **Audit Log Service** (Phase 4-5).
+- ⚡ **Async Event-Driven Logging**: Domain services publish domain events asynchronously to the message broker (NATS/Kafka). The Audit Log Service consumes events without adding latency to primary user HTTP/gRPC requests.
+- 🔒 **Immutable & Tamper-Proof**: Audit trails are append-only. Domain services cannot mutate or delete historical activity logs.
+- 🔍 **Unified Global Activity Feed**: Enables administrators and users to query a consolidated timeline of activity across the entire platform.
 
 ## 📊 **ACADEMY-SERVICE DATABASE SCHEMA**
 

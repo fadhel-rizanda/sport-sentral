@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package competition.v1;
+
+option go_package = "microservice-golang/gen/competition/v1;competitionv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum CompetitionStatEventType {
+  COMPETITION_STAT_EVENT_TYPE_UNSPECIFIED = 0;
+  COMPETITION_STAT_EVENT_TYPE_UPDATED     = 1;
+}
+
+// ─── Event Envelopes ─────────────────────────────────────────────────────────
+
+message AthleteStatsAggregateEvent {
+  string event_id = 1 [(buf.validate.field).string.uuid = true];
+  CompetitionStatEventType event_type = 2 [(buf.validate.field).enum.defined_only = true];
+  google.protobuf.Timestamp occurred_at = 3 [(buf.validate.field).required = true];
+
+  string aggregate_id = 4 [(buf.validate.field).string.uuid = true];
+  string competition_id = 5 [(buf.validate.field).string.uuid = true];
+  string branch_id = 6 [(buf.validate.field).string.uuid = true];
+  string athlete_id = 7 [(buf.validate.field).string.uuid = true];
+  string stat_type_id = 8 [(buf.validate.field).string.uuid = true];
+  string sport_id = 9 [(buf.validate.field).string.uuid = true];
+
+  int32 total_matches = 10;
+  double avg_value = 11;
+  double sum_value = 12;
+  double max_value = 13;
+  double min_value = 14;
+}
