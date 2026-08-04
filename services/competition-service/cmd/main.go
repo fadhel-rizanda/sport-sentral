@@ -208,12 +208,15 @@ func main() {
 		}
 	}()
 
+	// ── Event Publishers ──────────────────────────────────────────────────────
+	competitionPublisher := nats.NewCompetitionEventPublisher(natsClient, log)
+
 	// ── Use Cases ─────────────────────────────────────────────────────────────
 	rosterUC := usecase.NewRosterUseCase(permissionRepo, rosterRepo)
 	competitionUC := usecase.NewCompetitionUseCase(permissionRepo, competitionRepo, academyAdminRepo, academyBranchRepo, roleRepo)
 	competitionBranchUC := usecase.NewCompetitionBranchUseCase(permissionRepo, competitionBranchRepo, competitionRepo, academyAdminRepo)
 	matchUC := usecase.NewMatchUseCase(permissionRepo, matchRepo, competitionBranchRepo, competitionRepo, academyAdminRepo)
-	statUC := usecase.NewStatUseCase(permissionRepo, statRepo, matchRepo, competitionBranchRepo, competitionRepo, sportRepo, academyAdminRepo)
+	statUC := usecase.NewStatUseCase(permissionRepo, statRepo, matchRepo, competitionBranchRepo, competitionRepo, sportRepo, academyAdminRepo, competitionPublisher)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	rosterHandler := handler.NewRosterHandler(rosterUC)

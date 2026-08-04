@@ -5,7 +5,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
+	competitionv1 "microservice-golang/gen/competition/v1"
+	"microservice-golang/services/competition-service/internal/delivery/nats"
 	"microservice-golang/services/competition-service/internal/dto"
 	"microservice-golang/services/competition-service/internal/entity"
 	"microservice-golang/services/competition-service/internal/mapper"
@@ -33,6 +36,7 @@ type statUseCase struct {
 	competitionRepo  repository.CompetitionRepository
 	sportRepo        replicatedRepo.SportRepository
 	academyAdminRepo replicatedRepo.AcademyAdminRepository
+	publisher        nats.CompetitionEventPublisher
 }
 
 func NewStatUseCase(
@@ -43,6 +47,7 @@ func NewStatUseCase(
 	competitionRepo repository.CompetitionRepository,
 	sportRepo replicatedRepo.SportRepository,
 	academyAdminRepo replicatedRepo.AcademyAdminRepository,
+	publisher nats.CompetitionEventPublisher,
 ) StatUseCase {
 	return &statUseCase{
 		permissionRepo:   permissionRepo,
@@ -52,6 +57,7 @@ func NewStatUseCase(
 		competitionRepo:  competitionRepo,
 		sportRepo:        sportRepo,
 		academyAdminRepo: academyAdminRepo,
+		publisher:        publisher,
 	}
 }
 
@@ -345,6 +351,26 @@ func (uc *statUseCase) RecalculateAggregate(ctx context.Context, adminID, athlet
 
 		if err := uc.statRepo.SaveAggregate(ctx, aggregate); err != nil {
 			return apperr.Internal(err)
+		}
+
+		if uc.publisher != nil {
+			eventID, _ := uuid.NewV7()
+			_ = uc.publisher.PublishAthleteStatsAggregated(ctx, &competitionv1.AthleteStatsAggregateEvent{
+				EventId:       eventID.String(),
+				EventType:     competitionv1.CompetitionStatEventType_COMPETITION_STAT_EVENT_TYPE_UPDATED,
+				OccurredAt:    timestamppb.Now(),
+				AggregateId:   aggregate.ID.String(),
+				CompetitionId: competitionID.String(),
+				BranchId:      key.BranchID.String(),
+				AthleteId:     athleteID.String(),
+				StatTypeId:    key.StatTypeID.String(),
+				SportId:       competition.SportID.String(),
+				TotalMatches:  aggregate.TotalMatches,
+				AvgValue:      aggregate.AvgValue,
+				SumValue:      aggregate.SumValue,
+				MaxValue:      aggregate.MaxValue,
+				MinValue:      aggregate.MinValue,
+			})
 		}
 	}
 

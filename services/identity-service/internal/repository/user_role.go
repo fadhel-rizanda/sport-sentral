@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"microservice-golang/services/identity-service/internal/entity"
 	"microservice-golang/shared/infrastructure/postgres"
@@ -36,7 +37,8 @@ func (r *userRoleRepository) GetActiveByUserID(ctx context.Context, userID uuid.
 	var userRole entity.UserRole
 	err := postgres.GetTx(ctx, r.db).WithContext(ctx).
 		Preload("Role").
-		First(&userRole, "user_id = ? AND is_active = true", userID).Error
+		Order("updated_at DESC").
+		First(&userRole, "user_id = ? AND (expired_at IS NULL OR expired_at > ?)", userID, time.Now()).Error
 	if err != nil {
 		return nil, err
 	}
@@ -87,20 +89,9 @@ func (r *userRoleRepository) Update(ctx context.Context, userRole *entity.UserRo
 }
 
 func (r *userRoleRepository) SetActive(ctx context.Context, userID, roleID uuid.UUID) error {
-	tx := postgres.GetTx(ctx, r.db)
-	return tx.WithContext(ctx).Transaction(func(nestedTx *gorm.DB) error {
-		if err := nestedTx.Model(&entity.UserRole{}).
-			Where("user_id = ?", userID).
-			Update("is_active", false).Error; err != nil {
-			return err
-		}
-		if err := nestedTx.Model(&entity.UserRole{}).
-			Where("user_id = ? AND role_id = ?", userID, roleID).
-			Update("is_active", true).Error; err != nil {
-			return err
-		}
-		return nil
-	})
+	return postgres.GetTx(ctx, r.db).WithContext(ctx).Model(&entity.UserRole{}).
+		Where("user_id = ? AND role_id = ?", userID, roleID).
+		Update("updated_at", time.Now()).Error
 }
 
 func (r *userRoleRepository) Delete(ctx context.Context, userID, roleID uuid.UUID) error {
