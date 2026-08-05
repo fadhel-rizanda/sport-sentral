@@ -11,6 +11,7 @@ import (
 	"microservice-golang/services/gateway/internal/handler"
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/services/gateway/internal/router"
+	"microservice-golang/shared/pkg/jwt"
 	"microservice-golang/shared/pkg/telemetry"
 	"net/http"
 	"strconv"
@@ -119,6 +120,14 @@ func main() {
 		DB:       cfg.Redis.DB,
 	})
 
+	// ── JWT Manager ───────────────────────────────────────────────────────────
+	var jwtManager *jwt.Manager
+	if cfg.JWT.AccessSecret != "" {
+		jwtManager = jwt.NewManager(jwt.Config{
+			AccessSecret: cfg.JWT.AccessSecret,
+		})
+	}
+
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	authHandler := handler.NewAuthHandler(identityClient.Auth, identityClient.User)
 	userHandler := handler.NewUserHandler(identityClient.User)
@@ -150,6 +159,7 @@ func main() {
 		authHandler,
 		userHandler,
 		profileHandler,
+		jwtManager,
 		identityClient.Auth,
 		statusHandler,
 		tagHandler,

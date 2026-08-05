@@ -13,7 +13,12 @@ type Config struct {
 	Redis       RedisConfig
 	RateLimit   RateLimitConfig
 	Telemetry   TelemetryConfig
+	JWT         JWTConfig
 	MetricsPort string
+}
+
+type JWTConfig struct {
+	AccessSecret string
 }
 
 type AppConfig struct {
@@ -98,6 +103,9 @@ func Load() (*Config, error) {
 		Telemetry: TelemetryConfig{
 			Enabled:        envConfig.GetEnvBool("TELEMETRY_ENABLED", false),
 			JaegerEndpoint: fmt.Sprintf("%s:%d", jaegerHost, jaegerPort),
+		},
+		JWT: JWTConfig{
+			AccessSecret: envConfig.GetEnv("JWT_ACCESS_SECRET", ""),
 		},
 		MetricsPort: fmt.Sprintf(":%s", metricPort),
 	}, nil

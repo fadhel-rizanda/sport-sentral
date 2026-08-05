@@ -2,9 +2,11 @@ package router
 
 import (
 	"github.com/gofiber/fiber/v2"
+
 	authv1 "microservice-golang/gen/auth/v1"
 	"microservice-golang/services/gateway/internal/handler"
 	"microservice-golang/services/gateway/internal/middleware"
+	"microservice-golang/shared/pkg/jwt"
 )
 
 func Setup(
@@ -12,6 +14,7 @@ func Setup(
 	authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
 	profileHandler *handler.ProfileHandler,
+	jwtManager *jwt.Manager,
 	authClient authv1.AuthServiceClient,
 	statusHandler *handler.StatusHandler,
 	tagHandler *handler.TagHandler,
@@ -25,7 +28,7 @@ func Setup(
 	api := app.Group("/api/v1")
 
 	// define middleware sekali di sini
-	auth := middleware.Auth(authClient)
+	auth := middleware.Auth(jwtManager, authClient)
 	adminOnly := middleware.RequireRole("platform_admin")
 
 	authHandler.Routes(api)
