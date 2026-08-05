@@ -26,7 +26,12 @@ func init() {
 }
 
 func Parse(c *fiber.Ctx, body interface{}) error {
-	dec := json.NewDecoder(bytes.NewReader(c.Body()))
+	rawBody := c.Body()
+	if len(rawBody) == 0 {
+		return response.Error(c, fiber.StatusBadRequest, "request body cannot be empty")
+	}
+
+	dec := json.NewDecoder(bytes.NewReader(rawBody))
 	dec.DisallowUnknownFields()
 
 	if err := dec.Decode(body); err != nil {
@@ -46,6 +51,7 @@ func Parse(c *fiber.Ctx, body interface{}) error {
 
 	return nil
 }
+
 func messageForTag(e validator.FieldError) string {
 	switch e.Tag() {
 	case "required":
@@ -53,13 +59,27 @@ func messageForTag(e validator.FieldError) string {
 	case "email":
 		return "invalid email format"
 	case "min":
-		return e.Field() + " must be at least " + e.Param() + " characters"
+		return e.Field() + " must be at least " + e.Param()
 	case "max":
-		return e.Field() + " must be at most " + e.Param() + " characters"
+		return e.Field() + " must be at most " + e.Param()
+	case "gt":
+		return e.Field() + " must be greater than " + e.Param()
+	case "gte":
+		return e.Field() + " must be greater than or equal to " + e.Param()
+	case "lt":
+		return e.Field() + " must be less than " + e.Param()
+	case "lte":
+		return e.Field() + " must be less than or equal to " + e.Param()
 	case "uuid":
 		return e.Field() + " must be a valid UUID"
 	case "oneof":
 		return e.Field() + " must be one of: " + e.Param()
+	case "numeric":
+		return e.Field() + " must be a numeric value"
+	case "alphanum":
+		return e.Field() + " must contain only alphanumeric characters"
+	case "url":
+		return e.Field() + " must be a valid URL"
 	default:
 		return e.Field() + " is invalid"
 	}

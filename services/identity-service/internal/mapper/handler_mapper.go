@@ -2,7 +2,6 @@ package mapper
 
 import (
 	commonv1 "microservice-golang/gen/common/v1"
-	metav1 "microservice-golang/gen/meta/v1"
 	rbacv1 "microservice-golang/gen/rbac/v1"
 	userv1 "microservice-golang/gen/user/v1"
 	"microservice-golang/services/identity-service/internal/dto"
@@ -30,8 +29,8 @@ func ToProtoStatusSimple(s dto.StatusSimpleResponse) *commonv1.StatusSimple {
 	}
 }
 
-func ToProtoTagSimple(t dto.TagSimpleResponse) *metav1.TagSimple {
-	return &metav1.TagSimple{
+func ToProtoTagSimple(t dto.TagSimpleResponse) *commonv1.TagSimple {
+	return &commonv1.TagSimple{
 		Id:   t.ID.String(),
 		Type: t.Type,
 		Name: t.Name,

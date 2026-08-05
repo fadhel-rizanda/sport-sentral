@@ -3,16 +3,22 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
-	"time"
 )
 
 func RateLimit(redisClient *redis.Client, max int, expiration time.Duration) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		ip := c.IP()
-		key := fmt.Sprintf("rate_limit:%s", ip)
-		ctx := context.Background()
+		key := fmt.Sprintf("rate_limit:ip:%s", c.IP())
+		if userID, ok := c.Locals(ContextUserID).(string); ok && userID != "" {
+			key = fmt.Sprintf("rate_limit:user:%s", userID)
+		}
+
+		// Use request context with timeout to avoid hanging on slow Redis connections
+		ctx, cancel := context.WithTimeout(c.UserContext(), 500*time.Millisecond)
+		defer cancel()
 
 		count, err := redisClient.Incr(ctx, key).Result()
 		if err != nil {
