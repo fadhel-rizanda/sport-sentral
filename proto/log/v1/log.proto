@@ -1,0 +1,192 @@
+syntax = "proto3";
+
+package log.v1;
+
+option go_package = "microservice-golang/gen/log/v1;logv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+message AuditLog {
+  string id                  = 1;
+  string service_name        = 2;
+  string module              = 3;
+  string action              = 4;
+  string entity_type         = 5;
+  optional string entity_id  = 6;
+  optional string user_id    = 7;
+  optional string user_email = 8;
+  optional string user_role  = 9;
+  optional string ip_address = 10;
+  optional string user_agent = 11;
+  string status              = 12;
+  string severity            = 13;
+  optional string old_value  = 14;
+  optional string new_value  = 15;
+  optional string metadata   = 16;
+  optional string error_message = 17;
+  int64 duration_ms          = 18;
+  google.protobuf.Timestamp created_at = 19;
+}
+
+message ActivityLog {
+  string id                 = 1;
+  string user_id            = 2;
+  string action             = 3;
+  string resource_type      = 4;
+  optional string resource_id = 5;
+  string description        = 6;
+  optional string metadata  = 7;
+  optional string ip_address = 8;
+  optional string user_agent = 9;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+message SeverityCount {
+  string severity = 1;
+  int64 count     = 2;
+}
+
+message ActionCount {
+  string action = 1;
+  int64 count   = 2;
+}
+
+message ServiceCount {
+  string service_name = 1;
+  int64 count        = 2;
+}
+
+// ─── Requests & Responses ────────────────────────────────────────────────────
+
+message CreateAuditLogRequest {
+  string service_name        = 1 [(buf.validate.field).string.min_len = 1];
+  string module              = 2 [(buf.validate.field).string.min_len = 1];
+  string action              = 3 [(buf.validate.field).string.min_len = 1];
+  string entity_type         = 4 [(buf.validate.field).string.min_len = 1];
+  optional string entity_id  = 5;
+  optional string user_id    = 6;
+  optional string user_email = 7;
+  optional string user_role  = 8;
+  optional string ip_address = 9;
+  optional string user_agent = 10;
+  string status              = 11 [(buf.validate.field).string.min_len = 1];
+  string severity            = 12 [(buf.validate.field).string.min_len = 1];
+  optional string old_value  = 13;
+  optional string new_value  = 14;
+  optional string metadata   = 15;
+  optional string error_message = 16;
+  int64 duration_ms          = 17;
+}
+
+message CreateAuditLogResponse {
+  AuditLog log = 1;
+}
+
+message GetAuditLogRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetAuditLogResponse {
+  AuditLog log = 1;
+}
+
+message ListAuditLogsRequest {
+  optional string service_name = 1;
+  optional string module       = 2;
+  optional string entity_type  = 3;
+  optional string entity_id   = 4;
+  optional string action       = 5;
+  optional string user_id     = 6;
+  optional string status       = 7;
+  optional string severity     = 8;
+  optional string search_query = 9;
+  optional google.protobuf.Timestamp start_time = 10;
+  optional google.protobuf.Timestamp end_time   = 11;
+  int32 page                  = 12 [(buf.validate.field).int32.gte = 1];
+  int32 limit                 = 13 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message ListAuditLogsResponse {
+  repeated AuditLog logs = 1;
+  int64 total_count       = 2;
+  int32 page              = 3;
+  int32 limit             = 4;
+}
+
+message CreateActivityLogRequest {
+  string user_id             = 1 [(buf.validate.field).string.uuid = true];
+  string action              = 2 [(buf.validate.field).string.min_len = 1];
+  string resource_type       = 3 [(buf.validate.field).string.min_len = 1];
+  optional string resource_id = 4;
+  string description         = 5 [(buf.validate.field).string.min_len = 1];
+  optional string metadata   = 6;
+  optional string ip_address = 7;
+  optional string user_agent = 8;
+}
+
+message CreateActivityLogResponse {
+  ActivityLog log = 1;
+}
+
+message GetActivityLogRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetActivityLogResponse {
+  ActivityLog log = 1;
+}
+
+message ListActivityLogsRequest {
+  optional string user_id       = 1;
+  optional string action        = 2;
+  optional string resource_type = 3;
+  optional string resource_id   = 4;
+  optional google.protobuf.Timestamp start_time = 5;
+  optional google.protobuf.Timestamp end_time   = 6;
+  int32 page                    = 7 [(buf.validate.field).int32.gte = 1];
+  int32 limit                   = 8 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+}
+
+message ListActivityLogsResponse {
+  repeated ActivityLog logs = 1;
+  int64 total_count          = 2;
+  int32 page                 = 3;
+  int32 limit                = 4;
+}
+
+message GetLogStatsRequest {
+  optional string service_name                  = 1;
+  optional google.protobuf.Timestamp start_time = 2;
+  optional google.protobuf.Timestamp end_time   = 3;
+}
+
+message GetLogStatsResponse {
+  int64 total_audit_logs                  = 1;
+  int64 total_activity_logs               = 2;
+  repeated SeverityCount count_by_severity = 3;
+  repeated ActionCount count_by_action     = 4;
+  repeated ServiceCount count_by_service   = 5;
+}
+
+// ─── Service ──────────────────────────────────────────────────────────────────
+
+service LogService {
+  rpc CreateAuditLog(CreateAuditLogRequest) returns (CreateAuditLogResponse);
+  rpc GetAuditLog(GetAuditLogRequest) returns (GetAuditLogResponse);
+  rpc ListAuditLogs(ListAuditLogsRequest) returns (ListAuditLogsResponse);
+
+  rpc CreateActivityLog(CreateActivityLogRequest) returns (CreateActivityLogResponse);
+  rpc GetActivityLog(GetActivityLogRequest) returns (GetActivityLogResponse);
+  rpc ListActivityLogs(ListActivityLogsRequest) returns (ListActivityLogsResponse);
+
+  rpc GetLogStats(GetLogStatsRequest) returns (GetLogStatsResponse);
+}

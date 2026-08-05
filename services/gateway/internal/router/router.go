@@ -24,6 +24,7 @@ func Setup(
 	sportHandler *handler.SportHandler,
 	competitionHandler *handler.CompetitionHandler,
 	venueHandler *handler.VenueHandler,
+	logHandler *handler.LogHandler,
 ) {
 	api := app.Group("/api/v1")
 
@@ -43,4 +44,5 @@ func Setup(
 	sportHandler.Routes(api, auth, adminOnly)
 	competitionHandler.Routes(api, auth, adminOnly)
 	venueHandler.Routes(api, auth, adminOnly)
+	logHandler.Routes(api, auth, adminOnly)
 }
