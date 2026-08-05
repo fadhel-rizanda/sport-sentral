@@ -1,4 +1,4 @@
-package mapper_test
+package test
 
 import (
 	"testing"
