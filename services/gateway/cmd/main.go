@@ -113,6 +113,13 @@ func main() {
 	}
 	defer venueClient.Close()
 
+	logClient, err := client.NewLogClient(cfg.GRPC.LogAddress)
+	if err != nil {
+		log.Warn("failed to connect to log-service (optional gRPC client)", zap.Error(err))
+	} else if logClient != nil {
+		defer logClient.Close()
+	}
+
 	// ── Redis ─────────────────────────────────────────────────────────────────
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.Redis.Address,
@@ -140,6 +147,10 @@ func main() {
 	sportHandler := handler.NewSportHandler(sportClient)
 	competitionHandler := handler.NewCompetitionHandler(competitionClient)
 	venueHandler := handler.NewVenueHandler(venueClient)
+	var logHandler *handler.LogHandler
+	if logClient != nil {
+		logHandler = handler.NewLogHandler(logClient.Log)
+	}
 
 	// ── Fiber ─────────────────────────────────────────────────────────────────
 	app := fiber.New(fiber.Config{
@@ -169,6 +180,7 @@ func main() {
 		sportHandler,
 		competitionHandler,
 		venueHandler,
+		logHandler,
 	)
 
 	// ── Start ─────────────────────────────────────────────────────────────────
