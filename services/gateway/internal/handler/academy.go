@@ -132,8 +132,7 @@ func (h *AcademyHandler) GetAcademyHolding(c *fiber.Ctx) error {
 }
 
 func (h *AcademyHandler) ListAcademyHoldings(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 	search := c.Query("search", "")
 	statusID := c.Query("status_id", "")
 
@@ -272,8 +271,7 @@ func (h *AcademyHandler) GetAcademyBranch(c *fiber.Ctx) error {
 }
 
 func (h *AcademyHandler) ListAcademyBranches(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 	search := c.Query("search", "")
 	holdingID := c.Query("holding_id", "")
 	sportID := c.Query("sport_id", "")
@@ -410,8 +408,7 @@ func (h *AcademyHandler) GetAcademyAdmin(c *fiber.Ctx) error {
 }
 
 func (h *AcademyHandler) ListAcademyAdmins(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 	search := c.Query("search", "")
 	academyID := c.Query("academy_id", "")
 	branchID := c.Query("branch_id", "")
@@ -671,8 +668,7 @@ func (h *AcademyHandler) GetEnrollmentByBranchAndAthlete(c *fiber.Ctx) error {
 }
 
 func (h *AcademyHandler) ListEnrollments(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 	search := c.Query("search", "")
 	branchID := c.Query("branch_id", "")
 	athleteID := c.Query("athlete_id", "")
@@ -826,8 +822,7 @@ func (h *AcademyHandler) GetRoster(c *fiber.Ctx) error {
 }
 
 func (h *AcademyHandler) ListRosters(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 	search := c.Query("search", "")
 	competitionID := c.Query("competition_id", "")
 	branchID := c.Query("branch_id", "")

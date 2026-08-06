@@ -32,9 +32,6 @@ func NewSystemEventSubscriber(
 
 func (s *SystemEventSubscriber) handleMessage(ctx context.Context, subject string, data []byte) error {
 	s.logger.Info("received nats event message", zap.String("subject", subject))
-	if subject == events.SubjectActivityLogCreated {
-		return s.syncUC.ProcessActivityEvent(ctx, subject, data)
-	}
 	return s.syncUC.ProcessSystemEvent(ctx, subject, data)
 }
 
@@ -53,7 +50,6 @@ func (s *SystemEventSubscriber) Listen(ctx context.Context) error {
 			events.SubjectPermissionCreated,
 			events.SubjectPermissionUpdated,
 			events.SubjectPermissionDeleted,
-			events.SubjectActivityLogCreated,
 		},
 		s.handleMessage,
 	)

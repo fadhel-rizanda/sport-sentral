@@ -5,6 +5,7 @@ import (
 	"time"
 
 	envConfig "microservice-golang/shared/pkg/config"
+	"microservice-golang/shared/pkg/events"
 	"microservice-golang/shared/pkg/mailer"
 )
 
@@ -140,8 +141,8 @@ func Load() (*Config, error) {
 			URL:                  fmt.Sprintf("%s:%d", identityNatsHost, identityNatsPort),
 			MaxReconnects:        -1,
 			ReconnectWait:        2 * time.Second,
-			StreamName:           "META_EVENTS",
-			StreamSubjects:       []string{"meta.status.*"},
+			StreamName:           events.MetaStreamName,
+			StreamSubjects:       []string{"meta.*"},
 			RetentionMaxAge:      7 * 24 * time.Hour,
 			PublishMaxAttempts:   3,
 			PublishBaseDelay:     100 * time.Millisecond,

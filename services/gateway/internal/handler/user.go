@@ -79,8 +79,7 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 }
 
 func (h *UserHandler) ListUsers(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 
 	resp, err := h.userClient.ListUsers(c.Context(), &userv1.ListUsersRequest{
 		Page:     int32(page),

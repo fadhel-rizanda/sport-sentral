@@ -56,7 +56,7 @@ func Load() (*Config, error) {
 	jaegerHost := envConfig.GetEnv("JAEGER_HOST", "localhost")
 	jaegerPort := envConfig.GetEnvInt("JAEGER_PORT", 4317)
 
-	metricPort := envConfig.GetEnv("METRIC_PORT", "9008")
+	metricPort := envConfig.GetEnv("METRIC_PORT", "9007")
 
 	return &Config{
 		GRPC: GRPCConfig{

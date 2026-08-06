@@ -152,15 +152,25 @@ func main() {
 		}
 	}()
 
-	// ── NATS Subscriber ───────────────────────────────────────────────────────
+	// ── NATS Subscribers ──────────────────────────────────────────────────────
 	if natsClient != nil {
 		systemDurableName := envConfig.GetEnv("USER_DURABLE_NAME", "log-service-system-events")
 		systemSub := natsDelivery.NewSystemEventSubscriber(natsSyncUC, natsClient, log, systemDurableName)
+
+		activityDurableName := envConfig.GetEnv("ACTIVITY_DURABLE_NAME", "log-service-activity-events")
+		activitySub := natsDelivery.NewActivityEventSubscriber(natsSyncUC, natsClient, log, activityDurableName)
 
 		go func() {
 			log.Info("starting system event subscriber for log service")
 			if err := systemSub.Listen(ctx); err != nil {
 				log.Error("system subscriber stopped", zap.Error(err))
+			}
+		}()
+
+		go func() {
+			log.Info("starting activity event subscriber for log service")
+			if err := activitySub.Listen(ctx); err != nil {
+				log.Error("activity subscriber stopped", zap.Error(err))
 			}
 		}()
 	}

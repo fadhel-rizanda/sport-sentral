@@ -87,8 +87,7 @@ func (h *SportHandler) GetSport(c *fiber.Ctx) error {
 }
 
 func (h *SportHandler) ListSports(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 	tierTagID := c.Query("tier_tag_id", "")
 	statusID := c.Query("status_id", "")
 	search := c.Query("search", "")

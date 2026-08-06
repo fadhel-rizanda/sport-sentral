@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	envConfig "microservice-golang/shared/pkg/config"
+	"microservice-golang/shared/pkg/events"
 	"time"
 )
 
@@ -103,8 +104,8 @@ func Load() (*Config, error) {
 			URL:                  fmt.Sprintf("%s:%d", natsHost, natsPort),
 			MaxReconnects:        -1,
 			ReconnectWait:        2 * time.Second,
-			StreamName:           "SYSTEM_LOG_EVENTS",
-			StreamSubjects:       []string{"identity.*", "meta.*", "academy.*", "scout.*", "sport.*", "venue.*", "competition.*", "log.*"},
+			StreamName:           events.LogStreamName,
+			StreamSubjects:       []string{"log.*"},
 			RetentionMaxAge:      30 * 24 * time.Hour,
 			PublishMaxAttempts:   3,
 			PublishBaseDelay:     100 * time.Millisecond,
