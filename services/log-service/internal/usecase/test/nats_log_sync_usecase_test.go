@@ -70,6 +70,26 @@ func TestNatsLogSyncUsecase_ProcessSystemEvent(t *testing.T) {
 				assert.Equal(t, entity.ServiceNameNatsBus, log.ServiceName)
 				assert.Equal(t, "competition.created", log.Action)
 				assert.Equal(t, testEntityID, *log.EntityID)
+				assert.Nil(t, log.UserID)
+				return log, nil
+			},
+		}
+
+		syncUC := usecase.NewNatsLogSyncUseCase(auditMock, nil, logger)
+		err := syncUC.ProcessSystemEvent(ctx, "competition.created", payload)
+		assert.NoError(t, err)
+	})
+
+	t.Run("successfully process event with json payload containing id and user_id", func(t *testing.T) {
+		testEntityID := uuid.New().String()
+		testUserID := uuid.New()
+		payload := []byte(`{"id":"` + testEntityID + `", "user_id":"` + testUserID.String() + `", "name":"Tournament B"}`)
+
+		auditMock := &mockAuditUsecaseForSync{
+			createAuditLogFunc: func(ctx context.Context, log *entity.AuditLog) (*entity.AuditLog, error) {
+				assert.Equal(t, testEntityID, *log.EntityID)
+				assert.NotNil(t, log.UserID)
+				assert.Equal(t, testUserID, *log.UserID)
 				return log, nil
 			},
 		}
@@ -117,6 +137,12 @@ func TestNatsLogSyncUsecase_ProcessActivityEvent(t *testing.T) {
 	t.Run("skips when payload missing user_id", func(t *testing.T) {
 		syncUC := usecase.NewNatsLogSyncUseCase(nil, nil, logger)
 		err := syncUC.ProcessActivityEvent(ctx, "log.activity.created", []byte(`{}`))
+		assert.NoError(t, err)
+	})
+
+	t.Run("skips when user_id is invalid UUID", func(t *testing.T) {
+		syncUC := usecase.NewNatsLogSyncUseCase(nil, nil, logger)
+		err := syncUC.ProcessActivityEvent(ctx, "log.activity.created", []byte(`{"user_id":"invalid-uuid"}`))
 		assert.NoError(t, err)
 	})
 }

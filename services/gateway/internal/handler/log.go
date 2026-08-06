@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -113,8 +112,7 @@ func (h *LogHandler) GetAuditLog(c *fiber.Ctx) error {
 }
 
 func (h *LogHandler) ListAuditLogs(c *fiber.Ctx) error {
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	limit, _ := strconv.Atoi(c.Query("limit", "10"))
+	page, limit := parsePagination(c)
 
 	req := &logv1.ListAuditLogsRequest{
 		Page:  int32(page),
@@ -223,8 +221,7 @@ func (h *LogHandler) GetActivityLog(c *fiber.Ctx) error {
 }
 
 func (h *LogHandler) ListActivityLogs(c *fiber.Ctx) error {
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	limit, _ := strconv.Atoi(c.Query("limit", "10"))
+	page, limit := parsePagination(c)
 
 	req := &logv1.ListActivityLogsRequest{
 		Page:  int32(page),
@@ -269,8 +266,7 @@ func (h *LogHandler) ListActivityLogs(c *fiber.Ctx) error {
 
 func (h *LogHandler) ListMyActivityLogs(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	limit, _ := strconv.Atoi(c.Query("limit", "10"))
+	page, limit := parsePagination(c)
 
 	req := &logv1.ListActivityLogsRequest{
 		UserId: &userID,
@@ -313,4 +309,8 @@ func (h *LogHandler) GetLogStats(c *fiber.Ctx) error {
 	}
 
 	return response.OK(c, resp)
+}
+
+func parsePagination(c *fiber.Ctx) (int, int) {
+	return request.ParsePagination(c)
 }

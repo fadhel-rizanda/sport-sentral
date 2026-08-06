@@ -6,6 +6,7 @@ import (
 	"microservice-golang/services/gateway/internal/dto"
 	"microservice-golang/services/gateway/internal/mapper"
 	"microservice-golang/services/gateway/internal/middleware"
+	"microservice-golang/services/gateway/internal/request"
 	"microservice-golang/services/gateway/internal/response"
 )
 
@@ -98,8 +99,7 @@ func (h *PermissionHandler) DeletePermission(c *fiber.Ctx) error {
 }
 
 func (h *PermissionHandler) ListPermissions(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 
 	resp, err := h.permissionClient.ListPermissions(c.Context(), &rbacv1.ListPermissionsRequest{
 		Page:     int32(page),

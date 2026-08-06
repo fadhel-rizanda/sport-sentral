@@ -110,8 +110,7 @@ func (h *VenueHandler) GetVenue(c *fiber.Ctx) error {
 }
 
 func (h *VenueHandler) ListVenues(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 	ownerID := c.Query("owner_id", "")
 	statusID := c.Query("status_id", "")
 	search := c.Query("search", "")
@@ -247,8 +246,7 @@ func (h *VenueHandler) GetCourt(c *fiber.Ctx) error {
 }
 
 func (h *VenueHandler) ListCourts(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 	venueID := c.Query("venue_id", "")
 	sportID := c.Query("sport_id", "")
 	statusID := c.Query("status_id", "")
@@ -481,8 +479,7 @@ func (h *VenueHandler) GetBooking(c *fiber.Ctx) error {
 }
 
 func (h *VenueHandler) ListBookings(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 	courtID := c.Query("court_id", "")
 	userID := c.Query("user_id", "")
 	statusID := c.Query("status_id", "")

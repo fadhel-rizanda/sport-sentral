@@ -120,8 +120,7 @@ func (h *CompetitionHandler) GetCompetition(c *fiber.Ctx) error {
 }
 
 func (h *CompetitionHandler) ListCompetitions(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 	branchID := c.Query("branch_id", "")
 	sportID := c.Query("sport_id", "")
 	tierID := c.Query("tier_id", "")
@@ -397,8 +396,7 @@ func (h *CompetitionHandler) GetMatch(c *fiber.Ctx) error {
 
 func (h *CompetitionHandler) ListMatchesByBranch(c *fiber.Ctx) error {
 	branchID := c.Params("id")
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 
 	resp, err := h.client.Match.ListMatchesByBranch(c.Context(), &competitionv1.ListMatchesByBranchRequest{
 		BranchId: branchID,

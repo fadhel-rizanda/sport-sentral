@@ -6,6 +6,7 @@ import (
 	"microservice-golang/services/gateway/internal/dto"
 	"microservice-golang/services/gateway/internal/mapper"
 	"microservice-golang/services/gateway/internal/middleware"
+	"microservice-golang/services/gateway/internal/request"
 	"microservice-golang/services/gateway/internal/response"
 )
 
@@ -108,8 +109,7 @@ func (h *RoleHandler) DeleteRole(c *fiber.Ctx) error {
 }
 
 func (h *RoleHandler) ListRoles(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 
 	resp, err := h.roleClient.ListRoles(c.Context(), &rbacv1.ListRolesRequest{
 		Page:     int32(page),

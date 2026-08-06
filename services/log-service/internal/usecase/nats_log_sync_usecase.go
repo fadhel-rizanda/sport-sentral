@@ -41,12 +41,10 @@ func (u *natsLogSyncUsecase) ProcessSystemEvent(ctx context.Context, subject str
 	var entityIDPtr *string
 
 	if err := json.Unmarshal(payload, &genericMap); err == nil {
-		if uidStr, ok := genericMap["id"].(string); ok && uidStr != "" {
-			entityIDPtr = &uidStr
-			if parsedUUID, err := uuid.Parse(uidStr); err == nil {
-				userIDPtr = &parsedUUID
-			}
-		} else if uidStr, ok := genericMap["user_id"].(string); ok && uidStr != "" {
+		if idStr, ok := genericMap["id"].(string); ok && idStr != "" {
+			entityIDPtr = &idStr
+		}
+		if uidStr, ok := genericMap["user_id"].(string); ok && uidStr != "" {
 			if parsedUUID, err := uuid.Parse(uidStr); err == nil {
 				userIDPtr = &parsedUUID
 			}
@@ -97,8 +95,8 @@ func (u *natsLogSyncUsecase) ProcessActivityEvent(ctx context.Context, subject s
 
 	userUUID, err := uuid.Parse(req.UserID)
 	if err != nil {
-		u.log.Warn("invalid user_id UUID in activity event", zap.String("user_id", req.UserID))
-		return err
+		u.log.Warn("invalid user_id UUID in activity event, skipping activity record", zap.String("user_id", req.UserID), zap.Error(err))
+		return nil
 	}
 
 	actionStr := req.Action

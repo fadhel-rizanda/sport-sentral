@@ -110,8 +110,7 @@ func (h *StatusHandler) GetStatusByID(c *fiber.Ctx) error {
 }
 
 func (h *StatusHandler) ListStatuses(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	pageSize := c.QueryInt("pageSize", 10)
+	page, pageSize := request.ParsePagination(c)
 	statusType := c.Query("type", "")
 	var statusTypePtr *string
 	if statusType != "" {
