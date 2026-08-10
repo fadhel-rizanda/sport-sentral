@@ -113,6 +113,13 @@ func main() {
 	}
 	defer venueClient.Close()
 
+	scoutClient, err := client.NewScoutClient(cfg.GRPC.ScoutAddress)
+	if err != nil {
+		log.Warn("failed to connect to scout-service (optional gRPC client)", zap.Error(err))
+	} else if scoutClient != nil {
+		defer scoutClient.Close()
+	}
+
 	logClient, err := client.NewLogClient(cfg.GRPC.LogAddress)
 	if err != nil {
 		log.Warn("failed to connect to log-service (optional gRPC client)", zap.Error(err))
@@ -147,6 +154,10 @@ func main() {
 	sportHandler := handler.NewSportHandler(sportClient)
 	competitionHandler := handler.NewCompetitionHandler(competitionClient)
 	venueHandler := handler.NewVenueHandler(venueClient)
+	var scoutHandler *handler.ScoutHandler
+	if scoutClient != nil {
+		scoutHandler = handler.NewScoutHandler(scoutClient)
+	}
 	var logHandler *handler.LogHandler
 	if logClient != nil {
 		logHandler = handler.NewLogHandler(logClient.Log)
@@ -180,6 +191,7 @@ func main() {
 		sportHandler,
 		competitionHandler,
 		venueHandler,
+		scoutHandler,
 		logHandler,
 	)
 
