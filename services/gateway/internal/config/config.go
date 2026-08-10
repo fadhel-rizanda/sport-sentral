@@ -33,6 +33,7 @@ type GRPCClients struct {
 	CompetitionAddress string
 	SportAddress       string
 	VenueAddress       string
+	ScoutAddress       string
 	LogAddress         string
 }
 
@@ -74,6 +75,9 @@ func Load() (*Config, error) {
 	venueHost := envConfig.GetEnv("VENUE_SERVICE_HOST", "localhost")
 	venuePort := envConfig.GetEnvInt("VENUE_SERVICE_PORT", 50058)
 
+	scoutHost := envConfig.GetEnv("SCOUT_SERVICE_HOST", "localhost")
+	scoutPort := envConfig.GetEnvInt("SCOUT_SERVICE_PORT", 50057)
+
 	logHost := envConfig.GetEnv("LOG_SERVICE_HOST", "localhost")
 	logPort := envConfig.GetEnvInt("LOG_SERVICE_PORT", 50059)
 
@@ -94,6 +98,7 @@ func Load() (*Config, error) {
 			CompetitionAddress: fmt.Sprintf("%s:%d", competitionHost, competitionPort),
 			SportAddress:       fmt.Sprintf("%s:%d", sportHost, sportPort),
 			VenueAddress:       fmt.Sprintf("%s:%d", venueHost, venuePort),
+			ScoutAddress:       fmt.Sprintf("%s:%d", scoutHost, scoutPort),
 			LogAddress:         fmt.Sprintf("%s:%d", logHost, logPort),
 		},
 		Redis: RedisConfig{
