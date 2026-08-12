@@ -58,7 +58,7 @@ type SportConfig struct {
 	// Relations
 	Sport              *Sport      `gorm:"foreignKey:SportID;references:ID;constraint:-;"`
 	ParticipantTypeTag *Tag        `gorm:"foreignKey:ParticipantTypeTagID;references:ID;constraint:-;"`
-	Stats              []SportStat `gorm:"foreignKey:SportID;references:SportID;constraint:OnDelete:CASCADE"`
+	Stats              []SportStat `gorm:"foreignKey:SportID;references:SportID;constraint:-;"`
 }
 
 type SportStat struct {

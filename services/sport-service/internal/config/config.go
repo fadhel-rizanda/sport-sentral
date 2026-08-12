@@ -75,7 +75,7 @@ func Load() (*Config, error) {
 			MaxReconnects:        -1,
 			ReconnectWait:        2 * time.Second,
 			StreamName:           events.SportStreamName,
-			StreamSubjects:       []string{"sport.sport.*"},
+			StreamSubjects:       []string{"sport.>"},
 			RetentionMaxAge:      7 * 24 * time.Hour,
 			PublishMaxAttempts:   3,
 			PublishBaseDelay:     100 * time.Millisecond,

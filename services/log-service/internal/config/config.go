@@ -2,16 +2,18 @@ package config
 
 import (
 	"fmt"
+	"time"
+
 	envConfig "microservice-golang/shared/pkg/config"
 	"microservice-golang/shared/pkg/events"
-	"time"
+	"microservice-golang/shared/pkg/messaging"
 )
 
 type Config struct {
 	GRPC        GRPCConfig
 	Database    DatabaseConfig
 	Redis       RedisConfig
-	Nats        NatsConfig
+	Nats        messaging.Config
 	Telemetry   TelemetryConfig
 	MetricsPort string
 }
@@ -27,23 +29,6 @@ type DatabaseConfig struct {
 	Password string
 	Name     string
 	SSLMode  string
-}
-
-type NatsConfig struct {
-	URL           string
-	MaxReconnects int
-	ReconnectWait time.Duration
-
-	StreamName      string
-	StreamSubjects  []string
-	RetentionMaxAge time.Duration
-
-	PublishMaxAttempts int
-	PublishBaseDelay   time.Duration
-
-	DefaultAckWait       time.Duration
-	DefaultMaxDeliver    int
-	DefaultMaxAckPending int
 }
 
 func (d *DatabaseConfig) GormDSN() string {
@@ -100,12 +85,12 @@ func Load() (*Config, error) {
 			Password: envConfig.GetEnv("REDIS_PASSWORD", ""),
 			DB:       envConfig.GetEnvInt("REDIS_DB", 9),
 		},
-		Nats: NatsConfig{
+		Nats: messaging.Config{
 			URL:                  fmt.Sprintf("%s:%d", natsHost, natsPort),
 			MaxReconnects:        -1,
 			ReconnectWait:        2 * time.Second,
 			StreamName:           events.LogStreamName,
-			StreamSubjects:       []string{"log.*"},
+			StreamSubjects:       []string{"log.>"},
 			RetentionMaxAge:      30 * 24 * time.Hour,
 			PublishMaxAttempts:   3,
 			PublishBaseDelay:     100 * time.Millisecond,

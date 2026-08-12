@@ -59,7 +59,7 @@ func main() {
 	}
 
 	// ── NATS ──────────────────────────────────────────────────────────────────
-	natsClient, err := messaging.Connect(messaging.Config(cfg.Nats), log)
+	natsClient, err := messaging.Connect(cfg.Nats, log)
 	if err != nil {
 		log.Fatal("failed to connect to nats server", zap.Error(err))
 	}

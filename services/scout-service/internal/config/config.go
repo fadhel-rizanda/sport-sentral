@@ -5,6 +5,7 @@ import (
 	"time"
 
 	envConfig "microservice-golang/shared/pkg/config"
+	"microservice-golang/shared/pkg/events"
 	"microservice-golang/shared/pkg/messaging"
 )
 
@@ -73,8 +74,8 @@ func Load() (*Config, error) {
 			URL:                  fmt.Sprintf("%s:%d", natsHost, natsPort),
 			MaxReconnects:        -1,
 			ReconnectWait:        2 * time.Second,
-			StreamName:           "SCOUT_EVENTS",
-			StreamSubjects:       []string{"scout.*.*"},
+			StreamName:           events.ScoutStreamName,
+			StreamSubjects:       []string{"scout.>"},
 			RetentionMaxAge:      7 * 24 * time.Hour,
 			PublishMaxAttempts:   3,
 			PublishBaseDelay:     100 * time.Millisecond,
