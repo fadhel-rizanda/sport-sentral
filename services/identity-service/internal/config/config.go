@@ -7,6 +7,7 @@ import (
 	envConfig "microservice-golang/shared/pkg/config"
 	"microservice-golang/shared/pkg/events"
 	"microservice-golang/shared/pkg/mailer"
+	"microservice-golang/shared/pkg/messaging"
 )
 
 type Config struct {
@@ -17,7 +18,7 @@ type Config struct {
 	Mailer      mailer.Config
 	AppURL      string
 	MetaService MetaServiceConfig
-	MetaNats    NatsConfig
+	Nats        messaging.Config
 	Telemetry   TelemetryConfig
 	MetricsPort string
 }
@@ -64,23 +65,6 @@ type JWTConfig struct {
 
 type MetaServiceConfig struct {
 	Address string
-}
-
-type NatsConfig struct {
-	URL           string
-	MaxReconnects int
-	ReconnectWait time.Duration
-
-	StreamName      string
-	StreamSubjects  []string
-	RetentionMaxAge time.Duration
-
-	PublishMaxAttempts int
-	PublishBaseDelay   time.Duration
-
-	DefaultAckWait       time.Duration
-	DefaultMaxDeliver    int
-	DefaultMaxAckPending int
 }
 
 type TelemetryConfig struct {
@@ -137,12 +121,12 @@ func Load() (*Config, error) {
 		MetaService: MetaServiceConfig{
 			Address: fmt.Sprintf("%s:%d", metaServiceHost, metaServicePort),
 		},
-		MetaNats: NatsConfig{
+		Nats: messaging.Config{
 			URL:                  fmt.Sprintf("%s:%d", identityNatsHost, identityNatsPort),
 			MaxReconnects:        -1,
 			ReconnectWait:        2 * time.Second,
-			StreamName:           events.MetaStreamName,
-			StreamSubjects:       []string{"meta.*"},
+			StreamName:           events.IdentityStreamName,
+			StreamSubjects:       []string{"identity.>"},
 			RetentionMaxAge:      7 * 24 * time.Hour,
 			PublishMaxAttempts:   3,
 			PublishBaseDelay:     100 * time.Millisecond,

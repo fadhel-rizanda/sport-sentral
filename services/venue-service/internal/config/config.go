@@ -75,7 +75,7 @@ func Load() (*Config, error) {
 			MaxReconnects:        -1,
 			ReconnectWait:        2 * time.Second,
 			StreamName:           events.CourtStreamName,
-			StreamSubjects:       []string{"court.court.*", "court.booking.*"},
+			StreamSubjects:       []string{"court.>"},
 			RetentionMaxAge:      7 * 24 * time.Hour,
 			PublishMaxAttempts:   3,
 			PublishBaseDelay:     100 * time.Millisecond,

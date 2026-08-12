@@ -2,18 +2,20 @@ package config
 
 import (
 	"fmt"
+	"time"
+
 	envConfig "microservice-golang/shared/pkg/config"
 	"microservice-golang/shared/pkg/events"
-	"time"
+	"microservice-golang/shared/pkg/messaging"
 )
 
 type Config struct {
-	GRPC         GRPCConfig
-	Database     DatabaseConfig
-	Redis        RedisConfig
-	IdentityNats NatsConfig
-	Telemetry    TelemetryConfig
-	MetricsPort  string
+	GRPC        GRPCConfig
+	Database    DatabaseConfig
+	Redis       RedisConfig
+	Nats        messaging.Config
+	Telemetry   TelemetryConfig
+	MetricsPort string
 }
 
 type GRPCConfig struct {
@@ -27,23 +29,6 @@ type DatabaseConfig struct {
 	Password string
 	Name     string
 	SSLMode  string
-}
-
-type NatsConfig struct {
-	URL           string
-	MaxReconnects int
-	ReconnectWait time.Duration
-
-	StreamName      string
-	StreamSubjects  []string
-	RetentionMaxAge time.Duration
-
-	PublishMaxAttempts int
-	PublishBaseDelay   time.Duration
-
-	DefaultAckWait       time.Duration
-	DefaultMaxDeliver    int
-	DefaultMaxAckPending int
 }
 
 func (d *DatabaseConfig) GormDSN() string {
@@ -75,8 +60,8 @@ func Load() (*Config, error) {
 	redisHost := envConfig.GetEnv("REDIS_HOST", "localhost")
 	redisPort := envConfig.GetEnvInt("REDIS_PORT", 6379)
 
-	identityNatsHost := envConfig.GetEnv("IDENTITY_NATS_HOST", "nats://localhost")
-	identityNatsPort := envConfig.GetEnvInt("IDENTITY_NATS_PORT", 4222)
+	natsHost := envConfig.GetEnv("IDENTITY_NATS_HOST", "nats://localhost")
+	natsPort := envConfig.GetEnvInt("IDENTITY_NATS_PORT", 4222)
 
 	jaegerHost := envConfig.GetEnv("JAEGER_HOST", "localhost")
 	jaegerPort := envConfig.GetEnvInt("JAEGER_PORT", 4317)
@@ -100,12 +85,12 @@ func Load() (*Config, error) {
 			Password: envConfig.GetEnv("REDIS_PASSWORD", ""),
 			DB:       envConfig.GetEnvInt("REDIS_DB", 1),
 		},
-		IdentityNats: NatsConfig{
-			URL:                  fmt.Sprintf("%s:%d", identityNatsHost, identityNatsPort),
+		Nats: messaging.Config{
+			URL:                  fmt.Sprintf("%s:%d", natsHost, natsPort),
 			MaxReconnects:        -1,
 			ReconnectWait:        2 * time.Second,
-			StreamName:           events.IdentityStreamName,
-			StreamSubjects:       []string{"identity.*"},
+			StreamName:           events.MetaStreamName,
+			StreamSubjects:       []string{"meta.>"},
 			RetentionMaxAge:      7 * 24 * time.Hour,
 			PublishMaxAttempts:   3,
 			PublishBaseDelay:     100 * time.Millisecond,

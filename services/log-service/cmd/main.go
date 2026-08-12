@@ -99,7 +99,7 @@ func main() {
 	}
 
 	// ── Nats ──────────────────────────────────────────────────────────────────
-	natsClient, err := messaging.Connect(messaging.Config(cfg.Nats), log)
+	natsClient, err := messaging.Connect(cfg.Nats, log)
 	if err != nil {
 		log.Warn("nats server connection warning (service will proceed)", zap.Error(err))
 	} else {
