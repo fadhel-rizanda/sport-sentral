@@ -22,8 +22,9 @@ type JWTConfig struct {
 }
 
 type AppConfig struct {
-	Port int
-	Env  string
+	Port           int
+	Env            string
+	ReadBufferSize int
 }
 
 type GRPCClients struct {
@@ -35,6 +36,7 @@ type GRPCClients struct {
 	VenueAddress       string
 	ScoutAddress       string
 	LogAddress         string
+	AttachmentAddress  string
 }
 
 type RedisConfig struct {
@@ -81,6 +83,9 @@ func Load() (*Config, error) {
 	logHost := envConfig.GetEnv("LOG_SERVICE_HOST", "localhost")
 	logPort := envConfig.GetEnvInt("LOG_SERVICE_PORT", 50059)
 
+	attachmentHost := envConfig.GetEnv("ATTACHMENT_SERVICE_HOST", "localhost")
+	attachmentPort := envConfig.GetEnvInt("ATTACHMENT_SERVICE_PORT", 50060)
+
 	jaegerHost := envConfig.GetEnv("JAEGER_HOST", "localhost")
 	jaegerPort := envConfig.GetEnvInt("JAEGER_PORT", 4317)
 
@@ -88,8 +93,9 @@ func Load() (*Config, error) {
 
 	return &Config{
 		App: AppConfig{
-			Port: envConfig.GetEnvInt("APP_PORT", 8080),
-			Env:  envConfig.GetEnv("APP_ENV", "development"),
+			Port:           envConfig.GetEnvInt("APP_PORT", 8080),
+			Env:            envConfig.GetEnv("APP_ENV", "development"),
+			ReadBufferSize: envConfig.GetEnvInt("READ_BUFFER_SIZE", 16384),
 		},
 		GRPC: GRPCClients{
 			IdentityAddress:    fmt.Sprintf("%s:%d", identityHost, identityPort),
@@ -100,6 +106,7 @@ func Load() (*Config, error) {
 			VenueAddress:       fmt.Sprintf("%s:%d", venueHost, venuePort),
 			ScoutAddress:       fmt.Sprintf("%s:%d", scoutHost, scoutPort),
 			LogAddress:         fmt.Sprintf("%s:%d", logHost, logPort),
+			AttachmentAddress:  fmt.Sprintf("%s:%d", attachmentHost, attachmentPort),
 		},
 		Redis: RedisConfig{
 			Address:  fmt.Sprintf("%s:%d", redisHost, redisPort),

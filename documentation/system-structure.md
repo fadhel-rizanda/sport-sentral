@@ -66,9 +66,16 @@ microservice-golang/
 ├── gen/                           # Berkas kode Go hasil generate dari proto (Modul Go)
 ├── proto/                         # Defenisi kontrak API Protocol Buffers (Modul Go)
 ├── services/                      # Direktori kumpulan layanan mandiri
+│   ├── academy-service/           # Layanan Akademi & Roster
+│   ├── attachment-service/        # Layanan Manajemen Berkas & Object Storage (S3/MinIO)
+│   ├── competition-service/      # Layanan Kompetisi & Turnamen
 │   ├── gateway/                   # API Gateway (Fiber Framework) (Modul Go)
 │   ├── identity-service/          # Layanan Identitas dan Akun Pengguna (Modul Go)
-│   └── meta-service/              # Layanan Status dan Metadata (Modul Go)
+│   ├── log-service/               # Layanan Audit Log & Aktivitas
+│   ├── meta-service/              # Layanan Status dan Metadata (Modul Go)
+│   ├── scout-service/             # Layanan Talent Scouting & Profil Atlet
+│   ├── sport-service/             # Layanan Olahraga & Regulating Body
+│   └── venue-service/             # Layanan Lapangan & Pemesanan (Booking)
 ├── shared/                        # Pustaka utilitas bersama (Modul Go)
 ├── Procfile                       # Daftar konfigurasi startup aplikasi terdistribusi
 └── go.work                        # Konfigurasi workspace Go lintas modul

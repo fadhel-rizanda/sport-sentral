@@ -86,6 +86,8 @@ Baik, saya sudah baca planning document-nya. Mari saya breakdown dalam format ma
 ### **Current Status (Done ✅)**
 - ✅ Identity Service (Auth, Users, RBAC)
 - ✅ Meta Service (Status, Tags)
+- ✅ Attachment Service (Files, S3/MinIO, Presigned URLs, Local Storage)
+- ✅ Log Service (Audit Logs, Activity Logs)
 - ✅ API Gateway (REST ↔ gRPC)
 - ✅ Telemetry (Jaeger, Prometheus, Grafana)
 

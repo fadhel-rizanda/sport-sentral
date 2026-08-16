@@ -11,11 +11,23 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func Seed(db *gorm.DB) error {
-	//return seedStatusesDB(db)
-	return nil
+	systemUserID, err := uuid.Parse("389d7e0d-4bdd-4ecc-9d7b-88ad8a8055db")
+	if err != nil {
+		return err
+	}
+
+	systemUser := entity.User{
+		ID:       systemUserID,
+		Email:    "system@internal.local",
+		Username: "system",
+		FullName: "System Administrator",
+	}
+
+	return db.Clauses(clause.OnConflict{DoNothing: true}).Create(&systemUser).Error
 }
 
 func SeedStatuses(uc usecase.StatusUseCase) error {
