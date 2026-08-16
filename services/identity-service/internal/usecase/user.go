@@ -181,7 +181,7 @@ func (uc *userUseCase) Create(ctx context.Context, req dto.CreateUserRequest) (*
 		}
 	}()
 
-	return uc.GetByID(ctx, user.ID)
+	return uc.getByIDInternal(ctx, user.ID)
 }
 
 func (uc *userUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.UserResponse, error) {
@@ -199,6 +199,10 @@ func (uc *userUseCase) GetByID(ctx context.Context, id uuid.UUID) (*dto.UserResp
 		}
 	}
 
+	return uc.getByIDInternal(ctx, id)
+}
+
+func (uc *userUseCase) getByIDInternal(ctx context.Context, id uuid.UUID) (*dto.UserResponse, error) {
 	user, err := uc.userRepo.GetByID(ctx, id)
 	if err != nil {
 		if postgres.IsNotFound(err) {

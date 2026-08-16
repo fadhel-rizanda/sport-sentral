@@ -59,13 +59,17 @@ func (uc *authUseCase) Login(ctx context.Context, req dto.LoginRequest) (*dto.Lo
 		return nil, apperr.Unauthorized("account not verified")
 	}
 
-	status, err := uc.statusCacheRepo.GetByTypeAndName(ctx, constants.StatusTypeUser, constants.StatusActive)
+	activeStatus, err := uc.statusCacheRepo.GetByTypeAndName(ctx, constants.StatusTypeUser, constants.StatusActive)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
 
-	if user.StatusID != status.ID {
-		return nil, apperr.Unauthorized("account is " + status.Name)
+	if user.StatusID != activeStatus.ID {
+		statusName := user.Status.Name
+		if statusName == "" {
+			statusName = "not active"
+		}
+		return nil, apperr.Unauthorized("account is " + statusName)
 	}
 
 	if !user.CheckPassword(req.Password) {
@@ -114,10 +118,10 @@ func (uc *authUseCase) Login(ctx context.Context, req dto.LoginRequest) (*dto.Lo
 			PermissionsIDs: roleIDs,
 		},
 		Status: dto.StatusSimpleResponse{
-			ID:   status.ID,
-			Name: status.Name,
-			Slug: status.Slug,
-			Type: status.Type,
+			ID:   activeStatus.ID,
+			Name: activeStatus.Name,
+			Slug: activeStatus.Slug,
+			Type: activeStatus.Type,
 		},
 	}, nil
 }

@@ -48,4 +48,8 @@ gen/
 
 /documentation/checkpoint.md
 
+# Uploaded files and local public storage
 *.docx
+public/
+**/public/*
+!**/public/.gitkeep

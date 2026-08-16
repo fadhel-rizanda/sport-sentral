@@ -1,4 +1,5 @@
 academy-service: cd .\services\academy-service\ && air
+attachment-service: cd .\services\attachment-service\ && air
 competition-service: cd .\services\competition-service\ && air
 gateway: cd .\services\gateway\ && air
 identity-service: cd .\services\identity-service\ && air

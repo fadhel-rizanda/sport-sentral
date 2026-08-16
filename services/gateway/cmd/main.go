@@ -1,20 +1,26 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/gofiber/contrib/otelfiber"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"microservice-golang/services/gateway/internal/client"
 	"microservice-golang/services/gateway/internal/config"
 	"microservice-golang/services/gateway/internal/handler"
 	"microservice-golang/services/gateway/internal/middleware"
+	"microservice-golang/services/gateway/internal/response"
 	"microservice-golang/services/gateway/internal/router"
 	"microservice-golang/shared/pkg/jwt"
 	"microservice-golang/shared/pkg/telemetry"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+
+	"github.com/gofiber/contrib/otelfiber"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -27,6 +33,35 @@ import (
 	envConfig "microservice-golang/shared/pkg/config"
 	zapLogger "microservice-golang/shared/pkg/logger"
 )
+
+func normalizeFilePayload(data []byte) []byte {
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return data
+	}
+
+	// Strip data URL prefix if present: data:image/png;base64,...
+	if bytes.HasPrefix(trimmed, []byte("data:")) {
+		if idx := bytes.Index(trimmed, []byte(",")); idx != -1 {
+			trimmed = trimmed[idx+1:]
+		}
+	}
+
+	// Attempt base64 decode if payload is base64 string
+	decoded := make([]byte, base64.StdEncoding.DecodedLen(len(trimmed)))
+	n, err := base64.StdEncoding.Decode(decoded, trimmed)
+	if err == nil && n > 0 {
+		decoded = decoded[:n]
+		if bytes.HasPrefix(decoded, []byte("\x89PNG\r\n\x1a\n")) ||
+			bytes.HasPrefix(decoded, []byte("\xFF\xD8\xFF")) ||
+			bytes.HasPrefix(decoded, []byte("GIF8")) ||
+			bytes.HasPrefix(decoded, []byte("%PDF")) ||
+			(len(decoded) > 12 && bytes.Equal(decoded[0:4], []byte("RIFF")) && bytes.Equal(decoded[8:12], []byte("WEBP"))) {
+			return decoded
+		}
+	}
+	return data
+}
 
 func main() {
 	// ── Env ───────────────────────────────────────────────────────────────────
@@ -127,6 +162,13 @@ func main() {
 		defer logClient.Close()
 	}
 
+	attachmentClient, err := client.NewAttachmentClient(cfg.GRPC.AttachmentAddress)
+	if err != nil {
+		log.Warn("failed to connect to attachment-service (optional gRPC client)", zap.Error(err))
+	} else if attachmentClient != nil {
+		defer attachmentClient.Close()
+	}
+
 	// ── Redis ─────────────────────────────────────────────────────────────────
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.Redis.Address,
@@ -154,18 +196,25 @@ func main() {
 	sportHandler := handler.NewSportHandler(sportClient)
 	competitionHandler := handler.NewCompetitionHandler(competitionClient)
 	venueHandler := handler.NewVenueHandler(venueClient)
-	var scoutHandler *handler.ScoutHandler
-	if scoutClient != nil {
-		scoutHandler = handler.NewScoutHandler(scoutClient)
-	}
+	scoutHandler := handler.NewScoutHandler(scoutClient)
 	var logHandler *handler.LogHandler
 	if logClient != nil {
 		logHandler = handler.NewLogHandler(logClient.Log)
+	} else {
+		logHandler = handler.NewLogHandler(nil)
+	}
+
+	var attachmentHandler *handler.AttachmentHandler
+	if attachmentClient != nil {
+		attachmentHandler = handler.NewAttachmentHandler(attachmentClient.Attachment)
+	} else {
+		attachmentHandler = handler.NewAttachmentHandler(nil)
 	}
 
 	// ── Fiber ─────────────────────────────────────────────────────────────────
 	app := fiber.New(fiber.Config{
-		ErrorHandler: handler.ErrorHandler(log),
+		ReadBufferSize: cfg.App.ReadBufferSize,
+		ErrorHandler:   handler.ErrorHandler(log),
 	})
 
 	// ── Global Middleware ─────────────────────────────────────────────────────
@@ -174,6 +223,46 @@ func main() {
 	app.Use(logger.New())
 	app.Use(cors.New())
 	app.Use(middleware.RateLimit(redisClient, cfg.RateLimit.Max, cfg.RateLimit.Expiration))
+
+	// ── Static Files (Local Attachments) ─────────────────────────────────────
+	publicDir := envConfig.GetEnv("PUBLIC_DIR", "../attachment-service/public")
+	if _, err := os.Stat(publicDir); err != nil {
+		publicDir = "./public"
+	}
+	_ = os.MkdirAll(publicDir, 0755)
+
+	// Serve static files on GET
+	app.Get("/public/*", func(c *fiber.Ctx) error {
+		relPath := c.Params("*")
+		targetPath := filepath.Join(publicDir, relPath)
+		content, err := os.ReadFile(targetPath)
+		if err != nil {
+			return response.Error(c, fiber.StatusNotFound, "File not found")
+		}
+
+		normalized := normalizeFilePayload(content)
+		if len(normalized) != len(content) {
+			_ = os.WriteFile(targetPath, normalized, 0644)
+		}
+
+		contentType := http.DetectContentType(normalized)
+		c.Set(fiber.HeaderContentType, contentType)
+		return c.Send(normalized)
+	})
+
+	// Local development support for presigned PUT upload
+	app.Put("/public/*", func(c *fiber.Ctx) error {
+		relPath := c.Params("*")
+		targetPath := filepath.Join(publicDir, relPath)
+		if err := os.MkdirAll(filepath.Dir(targetPath), 0755); err != nil {
+			return response.Error(c, fiber.StatusInternalServerError, "Failed to create storage directory")
+		}
+		body := normalizeFilePayload(c.Body())
+		if err := os.WriteFile(targetPath, body, 0644); err != nil {
+			return response.Error(c, fiber.StatusInternalServerError, "Failed to save file")
+		}
+		return c.SendStatus(fiber.StatusOK)
+	})
 
 	// ── Routes ────────────────────────────────────────────────────────────────
 	router.Setup(
@@ -193,6 +282,7 @@ func main() {
 		venueHandler,
 		scoutHandler,
 		logHandler,
+		attachmentHandler,
 	)
 
 	// ── Start ─────────────────────────────────────────────────────────────────

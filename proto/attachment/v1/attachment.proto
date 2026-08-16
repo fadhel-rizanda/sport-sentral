@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package attachment.v1;
+
+option go_package = "microservice-golang/gen/attachment/v1;attachmentv1";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+message Attachment {
+  string id                   = 1;
+  string filename             = 2;
+  string file_path            = 3;
+  string bucket_name          = 4;
+  int64 file_size             = 5;
+  string mime_type            = 6;
+  string file_category        = 7;
+  optional string uploaded_by_user_id = 8;
+  string status               = 9;
+  string url                  = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+// ─── Requests & Responses ────────────────────────────────────────────────────
+
+message CreatePresignedUploadUrlRequest {
+  string filename             = 1 [(buf.validate.field).string.min_len = 1];
+  string mime_type            = 2 [(buf.validate.field).string.min_len = 1];
+  int64 file_size             = 3 [(buf.validate.field).int64.gt = 0];
+  string file_category        = 4 [(buf.validate.field).string.min_len = 1];
+  optional string uploaded_by_user_id = 5;
+}
+
+message CreatePresignedUploadUrlResponse {
+  string attachment_id        = 1;
+  string upload_url           = 2;
+  string file_path            = 3;
+  map<string, string> headers = 4;
+}
+
+message ConfirmUploadRequest {
+  string attachment_id        = 1 [(buf.validate.field).string.uuid = true];
+  bool is_success             = 2;
+}
+
+message ConfirmUploadResponse {
+  Attachment attachment       = 1;
+}
+
+message UploadAttachmentRequest {
+  string filename             = 1 [(buf.validate.field).string.min_len = 1];
+  string mime_type            = 2 [(buf.validate.field).string.min_len = 1];
+  string file_category        = 3 [(buf.validate.field).string.min_len = 1];
+  bytes content               = 4 [(buf.validate.field).bytes.min_len = 1];
+  optional string uploaded_by_user_id = 5;
+}
+
+message UploadAttachmentResponse {
+  Attachment attachment       = 1;
+}
+
+message GetAttachmentRequest {
+  string id                   = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetAttachmentResponse {
+  Attachment attachment       = 1;
+}
+
+message GetAttachmentsRequest {
+  repeated string ids         = 1;
+}
+
+message GetAttachmentsResponse {
+  repeated Attachment attachments = 1;
+}
+
+message DeleteAttachmentRequest {
+  string id                   = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteAttachmentResponse {
+  bool success                = 1;
+  string message              = 2;
+}
+
+message ListAttachmentsRequest {
+  int32 page                  = 1 [(buf.validate.field).int32.gte = 1];
+  int32 limit                 = 2 [
+    (buf.validate.field).int32.gte = 1,
+    (buf.validate.field).int32.lte = 100
+  ];
+  optional string file_category = 3;
+  optional string uploaded_by_user_id = 4;
+  optional string status       = 5;
+}
+
+message ListAttachmentsResponse {
+  repeated Attachment attachments = 1;
+  int64 total_count           = 2;
+  int32 page                  = 3;
+  int32 limit                 = 4;
+}
+
+// ─── Service ──────────────────────────────────────────────────────────────────
+
+service AttachmentService {
+  rpc CreatePresignedUploadUrl(CreatePresignedUploadUrlRequest) returns (CreatePresignedUploadUrlResponse);
+  rpc ConfirmUpload(ConfirmUploadRequest) returns (ConfirmUploadResponse);
+  rpc UploadAttachment(UploadAttachmentRequest) returns (UploadAttachmentResponse);
+  rpc GetAttachment(GetAttachmentRequest) returns (GetAttachmentResponse);
+  rpc GetAttachments(GetAttachmentsRequest) returns (GetAttachmentsResponse);
+  rpc DeleteAttachment(DeleteAttachmentRequest) returns (DeleteAttachmentResponse);
+  rpc ListAttachments(ListAttachmentsRequest) returns (ListAttachmentsResponse);
+}

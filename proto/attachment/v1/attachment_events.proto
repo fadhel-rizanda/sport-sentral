@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package attachment.v1;
+
+option go_package = "microservice-golang/gen/attachment/v1;attachmentv1";
+
+import "google/protobuf/timestamp.proto";
+
+message AttachmentCreatedEvent {
+  string attachment_id        = 1;
+  string filename             = 2;
+  string file_path            = 3;
+  string bucket_name          = 4;
+  int64 file_size             = 5;
+  string mime_type            = 6;
+  string file_category        = 7;
+  optional string uploaded_by_user_id = 8;
+  string status               = 9;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+message AttachmentUpdatedEvent {
+  string attachment_id        = 1;
+  string status               = 2;
+  google.protobuf.Timestamp updated_at = 3;
+}
+
+message AttachmentDeletedEvent {
+  string attachment_id        = 1;
+  string file_path            = 2;
+  string bucket_name          = 3;
+  google.protobuf.Timestamp deleted_at = 4;
+}

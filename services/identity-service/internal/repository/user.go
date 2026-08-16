@@ -61,11 +61,14 @@ func (r *userRepository) List(ctx context.Context, page, pageSize int) ([]*entit
 
 	users := make([]*entity.User, len(rows))
 	for i := range rows {
-		rows[i].User.Status = entity.Status{
-			ID:   rows[i].StatusID,
-			Type: rows[i].StatusType,
-			Name: rows[i].StatusName,
-			Slug: rows[i].StatusSlug,
+		if rows[i].StatusID != uuid.Nil {
+			rows[i].User.StatusID = rows[i].StatusID
+			rows[i].User.Status = entity.Status{
+				ID:   rows[i].StatusID,
+				Type: rows[i].StatusType,
+				Name: rows[i].StatusName,
+				Slug: rows[i].StatusSlug,
+			}
 		}
 		users[i] = &rows[i].User
 	}
@@ -124,6 +127,7 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Use
 
 	// Only set status if the join returned a valid record
 	if row.StatusID != uuid.Nil {
+		row.User.StatusID = row.StatusID
 		row.User.Status = entity.Status{
 			ID:   row.StatusID,
 			Type: row.StatusType,
@@ -198,6 +202,7 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.
 
 	// Only set status if the join returned a valid record
 	if row.StatusID != uuid.Nil {
+		row.User.StatusID = row.StatusID
 		row.User.Status = entity.Status{
 			ID:   row.StatusID,
 			Type: row.StatusType,

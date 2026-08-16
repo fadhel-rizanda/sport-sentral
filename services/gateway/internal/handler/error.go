@@ -7,11 +7,17 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"microservice-golang/services/gateway/internal/request"
 	"microservice-golang/services/gateway/internal/response"
 )
 
 func ErrorHandler(logger *zap.Logger) fiber.ErrorHandler {
 	return func(c *fiber.Ctx, err error) error {
+		var valErr *request.ValidationError
+		if errors.As(err, &valErr) {
+			return response.ValidationError(c, valErr.Errors)
+		}
+
 		logger.Error("request error",
 			zap.String("path", c.Path()),
 			zap.String("method", c.Method()),

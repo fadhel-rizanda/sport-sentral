@@ -4,6 +4,7 @@ use (
 	./gen
 	./proto
 	./services/academy-service
+	./services/attachment-service
 	./services/competition-service
 	./services/gateway
 	./services/identity-service

@@ -2,9 +2,12 @@ package usecase
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
-	"microservice-golang/services/log-service/internal/entity"
 	"time"
+	"unicode/utf8"
+
+	"microservice-golang/services/log-service/internal/entity"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -87,7 +90,13 @@ func (u *natsLogSyncUsecase) ProcessActivityEvent(ctx context.Context, subject s
 		UserAgent    *string `json:"user_agent,omitempty"`
 	}
 
-	payloadStr := string(payload)
+	var payloadStr string
+	if utf8.Valid(payload) {
+		payloadStr = string(payload)
+	} else {
+		payloadStr = base64.StdEncoding.EncodeToString(payload)
+	}
+
 	if err := json.Unmarshal(payload, &req); err != nil || req.UserID == "" {
 		u.log.Warn("invalid activity event payload, skipping activity record", zap.String("subject", subject))
 		return nil

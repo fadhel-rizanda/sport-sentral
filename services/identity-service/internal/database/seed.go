@@ -2,13 +2,20 @@ package database
 
 import (
 	"errors"
+	"time"
+
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"microservice-golang/services/identity-service/internal/entity"
 	"microservice-golang/shared/pkg/constants"
 )
 
 func Seed(db *gorm.DB) error {
+	if err := seedSystemUser(db); err != nil {
+		return err
+	}
 	if err := seedPermissions(db); err != nil {
 		return err
 	}
@@ -16,6 +23,36 @@ func Seed(db *gorm.DB) error {
 		return err
 	}
 	return seedRolePermissions(db)
+}
+
+func seedSystemUser(db *gorm.DB) error {
+	systemUserID := uuid.MustParse("389d7e0d-4bdd-4ecc-9d7b-88ad8a8055db")
+
+	var count int64
+	db.Model(&entity.User{}).Where("id = ?", systemUserID).Count(&count)
+	if count > 0 {
+		return nil
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("SystemAdmin123!"), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+	systemUser := entity.User{
+		ID:             systemUserID,
+		Email:          "system@internal.local",
+		Username:       "system",
+		FullName:       "System Administrator",
+		HashedPassword: string(hashedPassword),
+		StatusID:       uuid.Nil,
+		CreatedAt:      now,
+		UpdatedAt:      now,
+		VerifiedAt:     &now,
+	}
+
+	return db.Clauses(clause.OnConflict{DoNothing: true}).Create(&systemUser).Error
 }
 
 func seedPermissions(db *gorm.DB) error {

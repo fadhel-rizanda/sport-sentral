@@ -26,6 +26,7 @@ func Setup(
 	venueHandler *handler.VenueHandler,
 	scoutHandler *handler.ScoutHandler,
 	logHandler *handler.LogHandler,
+	attachmentHandler *handler.AttachmentHandler,
 ) {
 	api := app.Group("/api/v1")
 
@@ -45,10 +46,7 @@ func Setup(
 	sportHandler.Routes(api, auth, adminOnly)
 	competitionHandler.Routes(api, auth, adminOnly)
 	venueHandler.Routes(api, auth, adminOnly)
-	if scoutHandler != nil {
-		scoutHandler.Routes(api, auth, adminOnly)
-	}
-	if logHandler != nil {
-		logHandler.Routes(api, auth, adminOnly)
-	}
+	scoutHandler.Routes(api, auth, adminOnly)
+	logHandler.Routes(api, auth, adminOnly)
+	attachmentHandler.Routes(api, auth, adminOnly)
 }
