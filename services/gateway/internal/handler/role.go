@@ -32,6 +32,17 @@ func (h *RoleHandler) Routes(router fiber.Router, auth fiber.Handler, admin ...f
 	adminGroup.Delete("/:id", h.DeleteRole)
 }
 
+// GetRoles godoc
+// @Summary      Get role details
+// @Description  Retrieve role data by role ID.
+// @Tags         Roles
+// @Produce      json
+// @Param        id   path      string  true  "Role ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.RoleResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /roles/{id} [get]
+// @Security     BearerAuth
 func (h *RoleHandler) GetRoles(c *fiber.Ctx) error {
 	roleId := c.Params("id")
 	res, err := h.roleClient.GetRole(c.Context(), &rbacv1.GetRoleRequest{
@@ -43,14 +54,22 @@ func (h *RoleHandler) GetRoles(c *fiber.Ctx) error {
 	return response.OK(c, fiber.Map{"role": mapper.ToRoleResponse(res.Role)})
 }
 
+// CreateRole godoc
+// @Summary      Create new role (Admin)
+// @Description  Create a new role definition and its permission associations.
+// @Tags         Roles
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.CreateRoleRequest true "New Role Data"
+// @Success      200  {object}  response.Response{data=dto.RoleResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/roles [post]
+// @Security     BearerAuth
 func (h *RoleHandler) CreateRole(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
-	var body struct {
-		Name        string   `json:"name"`
-		Description string   `json:"description"`
-		Permissions []string `json:"permissions"`
-		Slug        string   `json:"slug"`
-	}
+	var body dto.CreateRoleRequest
 	if err := c.BodyParser(&body); err != nil {
 		return err
 	}
@@ -67,15 +86,24 @@ func (h *RoleHandler) CreateRole(c *fiber.Ctx) error {
 	return response.OK(c, fiber.Map{"role": mapper.ToRoleResponse(res.Role)})
 }
 
+// UpdateRole godoc
+// @Summary      Update role (Admin)
+// @Description  Update name, description, or permissions of a role.
+// @Tags         Roles
+// @Accept       json
+// @Produce      json
+// @Param        id      path string                true "Role ID (UUID)"
+// @Param        request body dto.UpdateRoleRequest true "Role Update Data"
+// @Success      200  {object}  response.Response{data=dto.RoleResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/roles/{id} [put]
+// @Security     BearerAuth
 func (h *RoleHandler) UpdateRole(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 	roleID := c.Params("id")
-	var body struct {
-		Name        *string  `json:"name"`
-		Description *string  `json:"description"`
-		Permissions []string `json:"permissions"`
-		Slug        *string  `json:"slug"`
-	}
+	var body dto.UpdateRoleRequest
 	if err := c.BodyParser(&body); err != nil {
 		return err
 	}
@@ -93,6 +121,19 @@ func (h *RoleHandler) UpdateRole(c *fiber.Ctx) error {
 	return response.OK(c, fiber.Map{"role": mapper.ToRoleResponse(res.Role)})
 }
 
+// DeleteRole godoc
+// @Summary      Delete role (Admin)
+// @Description  Delete role via soft delete or permanently.
+// @Tags         Roles
+// @Produce      json
+// @Param        id        path  string true  "Role ID (UUID)"
+// @Param        permanent query bool   false "Permanent delete (default false)"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/roles/{id} [delete]
+// @Security     BearerAuth
 func (h *RoleHandler) DeleteRole(c *fiber.Ctx) error {
 	roleId := c.Params("id")
 	isPermanent := c.QueryBool("permanent", false)
@@ -108,6 +149,17 @@ func (h *RoleHandler) DeleteRole(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "role deleted")
 }
 
+// ListRoles godoc
+// @Summary      Get list of roles
+// @Description  Retrieve paginated list of all available roles.
+// @Tags         Roles
+// @Produce      json
+// @Param        page      query int false "Page number (default 1)"
+// @Param        page_size query int false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response{data=[]dto.RoleResponse}
+// @Failure      401  {object}  response.Response
+// @Router       /roles [get]
+// @Security     BearerAuth
 func (h *RoleHandler) ListRoles(c *fiber.Ctx) error {
 	page, pageSize := request.ParsePagination(c)
 

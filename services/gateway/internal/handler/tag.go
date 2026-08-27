@@ -32,6 +32,18 @@ func (h *TagHandler) Routes(router fiber.Router, auth fiber.Handler, admin ...fi
 	adminGroup.Delete("/:id", h.DeleteTag)
 }
 
+// ListTags godoc
+// @Summary      Get list of tags
+// @Description  Retrieve list of all registered tags, optional filter by tag type (e.g. SPORTS, PRIORITY).
+// @Tags         Tags
+// @Produce      json
+// @Param        type      query string false "Filter by tag type"
+// @Param        page      query int    false "Page number (default 1)"
+// @Param        page_size query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response{data=[]dto.TagResponse}
+// @Failure      401  {object}  response.Response
+// @Router       /tags [get]
+// @Security     BearerAuth
 func (h *TagHandler) ListTags(c *fiber.Ctx) error {
 	page, pageSize := request.ParsePagination(c)
 	tagType := c.Query("type")
@@ -61,6 +73,17 @@ func (h *TagHandler) ListTags(c *fiber.Ctx) error {
 	})
 }
 
+// GetTagByID godoc
+// @Summary      Get tag details
+// @Description  Retrieve tag details by tag ID (UUID).
+// @Tags         Tags
+// @Produce      json
+// @Param        id   path      string  true  "Tag ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.TagResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /tags/{id} [get]
+// @Security     BearerAuth
 func (h *TagHandler) GetTagByID(c *fiber.Ctx) error {
 	tagId := c.Params("id")
 
@@ -73,14 +96,23 @@ func (h *TagHandler) GetTagByID(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToTagResponse(resp.Tag))
 }
 
+// CreateTag godoc
+// @Summary      Create new tag (Admin)
+// @Description  Create new tag metadata for entity classification.
+// @Tags         Tags
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.CreateTagRequest true "New Tag Data"
+// @Success      200  {object}  response.Response{data=dto.TagResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/tags [post]
+// @Security     BearerAuth
 func (h *TagHandler) CreateTag(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
-	var body struct {
-		Name string `json:"name"`
-		Type string `json:"type"`
-		Slug string `json:"slug"`
-	}
+	var body dto.CreateTagRequest
 	if err := c.BodyParser(&body); err != nil {
 		return err
 	}
@@ -97,14 +129,24 @@ func (h *TagHandler) CreateTag(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToTagResponse(res.Tag))
 }
 
+// UpdateTag godoc
+// @Summary      Update tag (Admin)
+// @Description  Update name, type, or slug of a tag.
+// @Tags         Tags
+// @Accept       json
+// @Produce      json
+// @Param        id      path string               true "Tag ID (UUID)"
+// @Param        request body dto.UpdateTagRequest true "Tag Update Data"
+// @Success      200  {object}  response.Response{data=dto.TagResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/tags/{id} [put]
+// @Security     BearerAuth
 func (h *TagHandler) UpdateTag(c *fiber.Ctx) error {
 	tagID := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
-	var body struct {
-		Name *string `json:"name"`
-		Type *string `json:"type"`
-		Slug *string `json:"slug"`
-	}
+	var body dto.UpdateTagRequest
 	if err := c.BodyParser(&body); err != nil {
 		return err
 	}
@@ -121,6 +163,19 @@ func (h *TagHandler) UpdateTag(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToTagResponse(res.Tag))
 }
 
+// DeleteTag godoc
+// @Summary      Delete tag (Admin)
+// @Description  Delete tag via soft delete or permanently.
+// @Tags         Tags
+// @Produce      json
+// @Param        id        path  string true  "Tag ID (UUID)"
+// @Param        permanent query bool   false "Permanent delete (default false)"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/tags/{id} [delete]
+// @Security     BearerAuth
 func (h *TagHandler) DeleteTag(c *fiber.Ctx) error {
 	tagID := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)

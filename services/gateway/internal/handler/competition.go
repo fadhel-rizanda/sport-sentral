@@ -69,6 +69,19 @@ func (h *CompetitionHandler) Routes(router fiber.Router, auth fiber.Handler, adm
 
 // ─── COMPETITION HANDLERS ────────────────────────────────────────────────────
 
+// CreateCompetition godoc
+// @Summary      Create new tournament / competition (Admin)
+// @Description  Register a new championship / tournament event into the system.
+// @Tags         Competitions
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.CreateCompetitionRequest true "New Competition Data"
+// @Success      201  {object}  response.Response{data=dto.CompetitionResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/competitions [post]
+// @Security     BearerAuth
 func (h *CompetitionHandler) CreateCompetition(c *fiber.Ctx) error {
 	var body dto.CreateCompetitionRequest
 	if err := request.Parse(c, &body); err != nil {
@@ -106,6 +119,17 @@ func (h *CompetitionHandler) CreateCompetition(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToCompetitionResponse(resp.Competition))
 }
 
+// GetCompetition godoc
+// @Summary      Get competition details
+// @Description  Retrieve competition profile data including schedule and host.
+// @Tags         Competitions
+// @Produce      json
+// @Param        id   path      string  true  "Competition ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.CompetitionResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /competitions/{id} [get]
+// @Security     BearerAuth
 func (h *CompetitionHandler) GetCompetition(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -119,6 +143,22 @@ func (h *CompetitionHandler) GetCompetition(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToCompetitionResponse(resp.Competition))
 }
 
+// ListCompetitions godoc
+// @Summary      Get list of competitions
+// @Description  Retrieve list of competitions with filters for sport, tier, host academy branch, or status.
+// @Tags         Competitions
+// @Produce      json
+// @Param        branch_id query string false "Filter Host Academy Branch ID (UUID)"
+// @Param        sport_id  query string false "Filter Sport ID (UUID)"
+// @Param        tier_id   query string false "Filter Tier ID (UUID)"
+// @Param        status_id query string false "Filter Status ID (UUID)"
+// @Param        search    query string false "Search competition name"
+// @Param        page      query int    false "Page number (default 1)"
+// @Param        page_size query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response{data=[]dto.CompetitionResponse}
+// @Failure      401  {object}  response.Response
+// @Router       /competitions [get]
+// @Security     BearerAuth
 func (h *CompetitionHandler) ListCompetitions(c *fiber.Ctx) error {
 	page, pageSize := request.ParsePagination(c)
 	branchID := c.Query("branch_id", "")
@@ -177,6 +217,20 @@ func (h *CompetitionHandler) ListCompetitions(c *fiber.Ctx) error {
 	})
 }
 
+// UpdateCompetition godoc
+// @Summary      Update competition (Admin)
+// @Description  Update competition name, dates, or description.
+// @Tags         Competitions
+// @Accept       json
+// @Produce      json
+// @Param        id      path string                      true "Competition ID (UUID)"
+// @Param        request body dto.UpdateCompetitionRequest true "Competition Update Data"
+// @Success      200  {object}  response.Response{data=dto.CompetitionResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/competitions/{id} [put]
+// @Security     BearerAuth
 func (h *CompetitionHandler) UpdateCompetition(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -221,6 +275,17 @@ func (h *CompetitionHandler) UpdateCompetition(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToCompetitionResponse(resp.Competition))
 }
 
+// DeleteCompetition godoc
+// @Summary      Delete competition (Admin)
+// @Description  Delete competition data and its branches.
+// @Tags         Competitions
+// @Produce      json
+// @Param        id   path      string  true  "Competition ID (UUID)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/competitions/{id} [delete]
+// @Security     BearerAuth
 func (h *CompetitionHandler) DeleteCompetition(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -234,6 +299,20 @@ func (h *CompetitionHandler) DeleteCompetition(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "competition deleted successfully")
 }
 
+// UpdateCompetitionStatus godoc
+// @Summary      Update competition status (Admin)
+// @Description  Change competition phase status (e.g. Registration, Ongoing, Completed).
+// @Tags         Competitions
+// @Accept       json
+// @Produce      json
+// @Param        id      path string true "Competition ID (UUID)"
+// @Param        request body object true "New Status ID"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/competitions/{id}/status [put]
+// @Security     BearerAuth
 func (h *CompetitionHandler) UpdateCompetitionStatus(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -257,6 +336,19 @@ func (h *CompetitionHandler) UpdateCompetitionStatus(c *fiber.Ctx) error {
 
 // ─── BRANCH HANDLERS ─────────────────────────────────────────────────────────
 
+// CreateBranch godoc
+// @Summary      Create competition category/stage (Admin)
+// @Description  Register a phase/stage (e.g. Group Stage, Semifinals, U-16 Division) for a competition.
+// @Tags         Competitions
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.CreateCompetitionBranchRequest true "Competition Category/Stage Data"
+// @Success      201  {object}  response.Response{data=dto.CompetitionBranchResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/branches [post]
+// @Security     BearerAuth
 func (h *CompetitionHandler) CreateBranch(c *fiber.Ctx) error {
 	var body dto.CreateCompetitionBranchRequest
 	if err := request.Parse(c, &body); err != nil {
@@ -277,6 +369,17 @@ func (h *CompetitionHandler) CreateBranch(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToCompetitionBranchResponse(resp.Branch))
 }
 
+// GetBranch godoc
+// @Summary      Get competition stage details
+// @Description  Retrieve detailed stage/category information for a competition by ID.
+// @Tags         Competitions
+// @Produce      json
+// @Param        id   path      string  true  "Branch ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.CompetitionBranchResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /branches/{id} [get]
+// @Security     BearerAuth
 func (h *CompetitionHandler) GetBranch(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -290,6 +393,15 @@ func (h *CompetitionHandler) GetBranch(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToCompetitionBranchResponse(resp.Branch))
 }
 
+// ListBranchesByCompetition godoc
+// @Summary      Get list of stages/categories for a competition
+// @Tags         Competitions
+// @Produce      json
+// @Param        id path string true "Competition ID (UUID)"
+// @Success      200  {object}  response.Response{data=[]dto.CompetitionBranchResponse}
+// @Failure      401  {object}  response.Response
+// @Router       /competitions/{id}/branches [get]
+// @Security     BearerAuth
 func (h *CompetitionHandler) ListBranchesByCompetition(c *fiber.Ctx) error {
 	competitionID := c.Params("id")
 
@@ -308,6 +420,19 @@ func (h *CompetitionHandler) ListBranchesByCompetition(c *fiber.Ctx) error {
 	return response.OK(c, branches)
 }
 
+// UpdateBranch godoc
+// @Summary      Update competition stage (Admin)
+// @Tags         Competitions
+// @Accept       json
+// @Produce      json
+// @Param        id      path string                              true "Branch ID (UUID)"
+// @Param        request body dto.UpdateCompetitionBranchRequest true "Stage Update Data"
+// @Success      200  {object}  response.Response{data=dto.CompetitionBranchResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/branches/{id} [put]
+// @Security     BearerAuth
 func (h *CompetitionHandler) UpdateBranch(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -330,6 +455,16 @@ func (h *CompetitionHandler) UpdateBranch(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToCompetitionBranchResponse(resp.Branch))
 }
 
+// DeleteBranch godoc
+// @Summary      Delete competition stage (Admin)
+// @Tags         Competitions
+// @Produce      json
+// @Param        id   path      string  true  "Branch ID (UUID)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/branches/{id} [delete]
+// @Security     BearerAuth
 func (h *CompetitionHandler) DeleteBranch(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -345,6 +480,19 @@ func (h *CompetitionHandler) DeleteBranch(c *fiber.Ctx) error {
 
 // ─── MATCH HANDLERS ──────────────────────────────────────────────────────────
 
+// CreateMatch godoc
+// @Summary      Create new match schedule (Admin)
+// @Description  Register a match between two or more participating teams/rosters.
+// @Tags         Matches
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.CreateMatchRequest true "New Match Data"
+// @Success      201  {object}  response.Response{data=dto.MatchResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/matches [post]
+// @Security     BearerAuth
 func (h *CompetitionHandler) CreateMatch(c *fiber.Ctx) error {
 	var body dto.CreateMatchRequest
 	if err := request.Parse(c, &body); err != nil {
@@ -381,6 +529,17 @@ func (h *CompetitionHandler) CreateMatch(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToMatchResponse(resp.Match))
 }
 
+// GetMatch godoc
+// @Summary      Get match details
+// @Description  Retrieve schedule, location, referee, participant scores, and match status.
+// @Tags         Matches
+// @Produce      json
+// @Param        id   path      string  true  "Match ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.MatchResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /matches/{id} [get]
+// @Security     BearerAuth
 func (h *CompetitionHandler) GetMatch(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -394,6 +553,17 @@ func (h *CompetitionHandler) GetMatch(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToMatchResponse(resp.Match))
 }
 
+// ListMatchesByBranch godoc
+// @Summary      Get list of matches by competition stage
+// @Tags         Matches
+// @Produce      json
+// @Param        id        path  string true  "Competition Branch ID (UUID)"
+// @Param        page      query int    false "Page number (default 1)"
+// @Param        page_size query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response{data=[]dto.MatchResponse}
+// @Failure      401  {object}  response.Response
+// @Router       /branches/{id}/matches [get]
+// @Security     BearerAuth
 func (h *CompetitionHandler) ListMatchesByBranch(c *fiber.Ctx) error {
 	branchID := c.Params("id")
 	page, pageSize := request.ParsePagination(c)
@@ -419,6 +589,20 @@ func (h *CompetitionHandler) ListMatchesByBranch(c *fiber.Ctx) error {
 	})
 }
 
+// UpdateMatchStatus godoc
+// @Summary      Update match status (Admin)
+// @Description  Update match status (e.g. scheduled, live, completed, cancelled).
+// @Tags         Matches
+// @Accept       json
+// @Produce      json
+// @Param        id      path string true "Match ID (UUID)"
+// @Param        request body object true "New Match Status"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/matches/{id}/status [put]
+// @Security     BearerAuth
 func (h *CompetitionHandler) UpdateMatchStatus(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -440,6 +624,20 @@ func (h *CompetitionHandler) UpdateMatchStatus(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "match status updated successfully")
 }
 
+// UpdateMatchScore godoc
+// @Summary      Update final match score (Admin)
+// @Description  Record final scores for match participants.
+// @Tags         Matches
+// @Accept       json
+// @Produce      json
+// @Param        id      path string                     true "Match ID (UUID)"
+// @Param        request body dto.UpdateMatchScoreRequest true "Match Participant Scores"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/matches/{id}/score [put]
+// @Security     BearerAuth
 func (h *CompetitionHandler) UpdateMatchScore(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -467,6 +665,16 @@ func (h *CompetitionHandler) UpdateMatchScore(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "match score updated successfully")
 }
 
+// DeleteMatch godoc
+// @Summary      Delete match (Admin)
+// @Tags         Matches
+// @Produce      json
+// @Param        id   path      string  true  "Match ID (UUID)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/matches/{id} [delete]
+// @Security     BearerAuth
 func (h *CompetitionHandler) DeleteMatch(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -482,6 +690,19 @@ func (h *CompetitionHandler) DeleteMatch(c *fiber.Ctx) error {
 
 // ─── STATS HANDLERS ──────────────────────────────────────────────────────────
 
+// RecordMatchStat godoc
+// @Summary      Record player performance statistics in match (Admin)
+// @Description  Record stats (points, assists, rebounds, yellow cards, etc.) for an athlete in a specific match.
+// @Tags         Match Stats
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.RecordMatchStatRequest true "Match Statistic Data"
+// @Success      201  {object}  response.Response{data=dto.MatchStatResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/stats [post]
+// @Security     BearerAuth
 func (h *CompetitionHandler) RecordMatchStat(c *fiber.Ctx) error {
 	var body dto.RecordMatchStatRequest
 	if err := request.Parse(c, &body); err != nil {
@@ -501,6 +722,19 @@ func (h *CompetitionHandler) RecordMatchStat(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToMatchStatResponse(resp.Stat))
 }
 
+// UpdateMatchStat godoc
+// @Summary      Update match performance statistic value (Admin)
+// @Tags         Match Stats
+// @Accept       json
+// @Produce      json
+// @Param        id      path string                    true "Match Stat ID (UUID)"
+// @Param        request body dto.UpdateMatchStatRequest true "Statistic Update Data"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/stats/{id} [put]
+// @Security     BearerAuth
 func (h *CompetitionHandler) UpdateMatchStat(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -520,6 +754,16 @@ func (h *CompetitionHandler) UpdateMatchStat(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "match statistic updated successfully")
 }
 
+// DeleteMatchStat godoc
+// @Summary      Delete match statistic record (Admin)
+// @Tags         Match Stats
+// @Produce      json
+// @Param        id   path      string  true  "Match Stat ID (UUID)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/stats/{id} [delete]
+// @Security     BearerAuth
 func (h *CompetitionHandler) DeleteMatchStat(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -533,6 +777,17 @@ func (h *CompetitionHandler) DeleteMatchStat(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "match statistic deleted successfully")
 }
 
+// GetMatchStats godoc
+// @Summary      Get all player statistics for a match
+// @Description  Retrieve complete box score match statistics for all players.
+// @Tags         Match Stats
+// @Produce      json
+// @Param        id   path      string  true  "Match ID (UUID)"
+// @Success      200  {object}  response.Response{data=[]dto.MatchStatResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /matches/{id}/stats [get]
+// @Security     BearerAuth
 func (h *CompetitionHandler) GetMatchStats(c *fiber.Ctx) error {
 	matchID := c.Params("id")
 
@@ -551,6 +806,18 @@ func (h *CompetitionHandler) GetMatchStats(c *fiber.Ctx) error {
 	return response.OK(c, stats)
 }
 
+// GetAthleteAggregate godoc
+// @Summary      Get athlete statistical aggregates in a competition
+// @Description  Retrieve average or total individual statistics for an athlete across a tournament.
+// @Tags         Match Stats
+// @Produce      json
+// @Param        athleteId      path  string true "Athlete User ID (UUID)"
+// @Param        competition_id query string true "Competition ID (UUID)"
+// @Success      200  {object}  response.Response{data=[]dto.AthleteStatsAggregateResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /stats/athlete/{athleteId} [get]
+// @Security     BearerAuth
 func (h *CompetitionHandler) GetAthleteAggregate(c *fiber.Ctx) error {
 	athleteID := c.Params("athleteId")
 	competitionID := c.Query("competition_id", "")
@@ -575,6 +842,20 @@ func (h *CompetitionHandler) GetAthleteAggregate(c *fiber.Ctx) error {
 	return response.OK(c, aggregates)
 }
 
+// RecalculateAggregate godoc
+// @Summary      Recalculate athlete statistical aggregates in a competition (Admin)
+// @Description  Recalculate and re-aggregate average / total performance data for an athlete in a tournament.
+// @Tags         Match Stats
+// @Accept       json
+// @Produce      json
+// @Param        athleteId path string true "Athlete User ID (UUID)"
+// @Param        request   body object true "Competition ID Data"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/stats/athlete/{athleteId}/recalculate [post]
+// @Security     BearerAuth
 func (h *CompetitionHandler) RecalculateAggregate(c *fiber.Ctx) error {
 	athleteID := c.Params("athleteId")
 
