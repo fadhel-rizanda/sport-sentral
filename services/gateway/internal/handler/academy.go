@@ -77,6 +77,18 @@ func (h *AcademyHandler) Routes(router fiber.Router, auth fiber.Handler, admin .
 
 // ─── Academy Holding Handlers ──────────────────────────────────────────────────
 
+// CreateAcademyHolding godoc
+// @Summary      Create new academy holding
+// @Description  Register a sports academy holding / parent organization.
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        request body object true "New Academy Holding Data"
+// @Success      201  {object}  response.Response{data=dto.AcademyHoldingResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/holdings [post]
+// @Security     BearerAuth
 func (h *AcademyHandler) CreateAcademyHolding(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
@@ -118,6 +130,17 @@ func (h *AcademyHandler) CreateAcademyHolding(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToAcademyHoldingResponse(resp.Holding))
 }
 
+// GetAcademyHolding godoc
+// @Summary      Get academy holding details
+// @Description  Retrieve academy holding profile data by holding ID (UUID).
+// @Tags         Academies
+// @Produce      json
+// @Param        id   path      string  true  "Holding ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.AcademyHoldingResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /academy/holdings/{id} [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) GetAcademyHolding(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -131,6 +154,19 @@ func (h *AcademyHandler) GetAcademyHolding(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToAcademyHoldingResponse(resp.Holding))
 }
 
+// ListAcademyHoldings godoc
+// @Summary      Get list of academy holdings
+// @Description  Retrieve list of all academy holdings with name search and status filters.
+// @Tags         Academies
+// @Produce      json
+// @Param        search    query string false "Search holding name"
+// @Param        status_id query string false "Filter Status ID (UUID)"
+// @Param        page      query int    false "Page number (default 1)"
+// @Param        page_size query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response{data=[]dto.AcademyHoldingResponse}
+// @Failure      401  {object}  response.Response
+// @Router       /academy/holdings [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) ListAcademyHoldings(c *fiber.Ctx) error {
 	page, pageSize := request.ParsePagination(c)
 	search := c.Query("search", "")
@@ -168,6 +204,19 @@ func (h *AcademyHandler) ListAcademyHoldings(c *fiber.Ctx) error {
 	})
 }
 
+// UpdateAcademyHolding godoc
+// @Summary      Update academy holding
+// @Description  Update academy holding profile information.
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        id      path string true "Holding ID (UUID)"
+// @Param        request body object true "Holding Update Data"
+// @Success      200  {object}  response.Response{data=dto.AcademyHoldingResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/holdings/{id} [put]
+// @Security     BearerAuth
 func (h *AcademyHandler) UpdateAcademyHolding(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
@@ -199,6 +248,17 @@ func (h *AcademyHandler) UpdateAcademyHolding(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToAcademyHoldingResponse(resp.Holding))
 }
 
+// DeleteAcademyHolding godoc
+// @Summary      Delete academy holding
+// @Description  Soft-delete academy holding.
+// @Tags         Academies
+// @Produce      json
+// @Param        id   path      string  true  "Holding ID (UUID)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /academy/holdings/{id} [delete]
+// @Security     BearerAuth
 func (h *AcademyHandler) DeleteAcademyHolding(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
@@ -216,6 +276,18 @@ func (h *AcademyHandler) DeleteAcademyHolding(c *fiber.Ctx) error {
 
 // ─── Academy Branch Handlers ───────────────────────────────────────────────────
 
+// CreateAcademyBranch godoc
+// @Summary      Create new academy branch
+// @Description  Register an academy branch for a specific sport and location.
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        request body object true "New Academy Branch Data"
+// @Success      201  {object}  response.Response{data=dto.AcademyBranchResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/branches [post]
+// @Security     BearerAuth
 func (h *AcademyHandler) CreateAcademyBranch(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
@@ -257,6 +329,17 @@ func (h *AcademyHandler) CreateAcademyBranch(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToAcademyBranchResponse(resp.Branch))
 }
 
+// GetAcademyBranch godoc
+// @Summary      Get academy branch details
+// @Description  Retrieve academy branch data by branch ID (UUID).
+// @Tags         Academies
+// @Produce      json
+// @Param        id   path      string  true  "Branch ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.AcademyBranchResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /academy/branches/{id} [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) GetAcademyBranch(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -270,6 +353,21 @@ func (h *AcademyHandler) GetAcademyBranch(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToAcademyBranchResponse(resp.Branch))
 }
 
+// ListAcademyBranches godoc
+// @Summary      Get list of academy branches
+// @Description  Retrieve list of all academy branches with filters for holding, sport, status, or search query.
+// @Tags         Academies
+// @Produce      json
+// @Param        holding_id query string false "Filter Holding ID (UUID)"
+// @Param        sport_id   query string false "Filter Sport ID (UUID)"
+// @Param        status_id  query string false "Filter Status ID (UUID)"
+// @Param        search     query string false "Search branch name"
+// @Param        page       query int    false "Page number (default 1)"
+// @Param        page_size  query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response{data=[]dto.AcademyBranchResponse}
+// @Failure      401  {object}  response.Response
+// @Router       /academy/branches [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) ListAcademyBranches(c *fiber.Ctx) error {
 	page, pageSize := request.ParsePagination(c)
 	search := c.Query("search", "")
@@ -321,6 +419,19 @@ func (h *AcademyHandler) ListAcademyBranches(c *fiber.Ctx) error {
 	})
 }
 
+// UpdateAcademyBranch godoc
+// @Summary      Update academy branch
+// @Description  Update academy branch name, contact, or status information.
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        id      path string true "Branch ID (UUID)"
+// @Param        request body object true "Branch Update Data"
+// @Success      200  {object}  response.Response{data=dto.AcademyBranchResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/branches/{id} [put]
+// @Security     BearerAuth
 func (h *AcademyHandler) UpdateAcademyBranch(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
@@ -350,6 +461,17 @@ func (h *AcademyHandler) UpdateAcademyBranch(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToAcademyBranchResponse(resp.Branch))
 }
 
+// DeleteAcademyBranch godoc
+// @Summary      Delete academy branch
+// @Description  Soft-delete academy branch.
+// @Tags         Academies
+// @Produce      json
+// @Param        id   path      string  true  "Branch ID (UUID)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /academy/branches/{id} [delete]
+// @Security     BearerAuth
 func (h *AcademyHandler) DeleteAcademyBranch(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
@@ -367,6 +489,17 @@ func (h *AcademyHandler) DeleteAcademyBranch(c *fiber.Ctx) error {
 
 // ─── Academy Admin Handlers ────────────────────────────────────────────────────
 
+// CreateAcademyAdmin godoc
+// @Summary      Register new academy admin
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        request body object true "Academy Admin Data"
+// @Success      201  {object}  response.Response{data=dto.AcademyAdminResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/admins [post]
+// @Security     BearerAuth
 func (h *AcademyHandler) CreateAcademyAdmin(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
@@ -394,6 +527,16 @@ func (h *AcademyHandler) CreateAcademyAdmin(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToAcademyAdminResponse(resp.Admin))
 }
 
+// GetAcademyAdmin godoc
+// @Summary      Get academy admin details
+// @Tags         Academies
+// @Produce      json
+// @Param        id   path      string  true  "Admin Record ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.AcademyAdminResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /academy/admins/{id} [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) GetAcademyAdmin(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -407,6 +550,18 @@ func (h *AcademyHandler) GetAcademyAdmin(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToAcademyAdminResponse(resp.Admin))
 }
 
+// ListAcademyAdmins godoc
+// @Summary      Get list of academy admins
+// @Tags         Academies
+// @Produce      json
+// @Param        academy_id query string false "Filter Academy ID"
+// @Param        branch_id  query string false "Filter Branch ID"
+// @Param        page       query int    false "Page number (default 1)"
+// @Param        page_size  query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response{data=[]dto.AcademyAdminResponse}
+// @Failure      401  {object}  response.Response
+// @Router       /academy/admins [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) ListAcademyAdmins(c *fiber.Ctx) error {
 	page, pageSize := request.ParsePagination(c)
 	search := c.Query("search", "")
@@ -458,6 +613,18 @@ func (h *AcademyHandler) ListAcademyAdmins(c *fiber.Ctx) error {
 	})
 }
 
+// UpdateAcademyAdmin godoc
+// @Summary      Update academy admin role
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        id      path string true "Admin Record ID (UUID)"
+// @Param        request body object true "Admin Update Data"
+// @Success      200  {object}  response.Response{data=dto.AcademyAdminResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/admins/{id} [put]
+// @Security     BearerAuth
 func (h *AcademyHandler) UpdateAcademyAdmin(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
@@ -481,6 +648,15 @@ func (h *AcademyHandler) UpdateAcademyAdmin(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToAcademyAdminResponse(resp.Admin))
 }
 
+// DeleteAcademyAdmin godoc
+// @Summary      Delete academy admin
+// @Tags         Academies
+// @Produce      json
+// @Param        id   path      string  true  "Admin Record ID (UUID)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/admins/{id} [delete]
+// @Security     BearerAuth
 func (h *AcademyHandler) DeleteAcademyAdmin(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
@@ -496,6 +672,17 @@ func (h *AcademyHandler) DeleteAcademyAdmin(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "academy admin deleted")
 }
 
+// AssignAcademyAdmin godoc
+// @Summary      Assign admin to academy or branch
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        request body object true "Admin Assignment Data"
+// @Success      201  {object}  response.Response{data=dto.AcademyAdminResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/admins/assign [post]
+// @Security     BearerAuth
 func (h *AcademyHandler) AssignAcademyAdmin(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
@@ -523,6 +710,15 @@ func (h *AcademyHandler) AssignAcademyAdmin(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToAcademyAdminResponse(resp.Admin))
 }
 
+// RevokeAcademyAdmin godoc
+// @Summary      Revoke academy admin access
+// @Tags         Academies
+// @Produce      json
+// @Param        id   path      string  true  "Admin Record ID (UUID)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/admins/{id}/revoke [post]
+// @Security     BearerAuth
 func (h *AcademyHandler) RevokeAcademyAdmin(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
@@ -540,6 +736,18 @@ func (h *AcademyHandler) RevokeAcademyAdmin(c *fiber.Ctx) error {
 	})
 }
 
+// GetAcademyAdminByUser godoc
+// @Summary      Get academy admin data by user ID
+// @Tags         Academies
+// @Produce      json
+// @Param        userID     path  string  true  "User ID (UUID)"
+// @Param        holding_id query string  false "Holding ID (UUID)"
+// @Param        branch_id  query string  false "Branch ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.AcademyAdminResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /academy/admins/user/{userID} [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) GetAcademyAdminByUser(c *fiber.Ctx) error {
 	userID := c.Params("userID")
 	holdingID := c.Query("holding_id", "")
@@ -567,6 +775,17 @@ func (h *AcademyHandler) GetAcademyAdminByUser(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToAcademyAdminResponse(resp.Admin))
 }
 
+// CheckUserIsAcademyAdmin godoc
+// @Summary      Check if user is an academy admin
+// @Tags         Academies
+// @Produce      json
+// @Param        userID     path  string  true  "User ID (UUID)"
+// @Param        holding_id query string  false "Holding ID (UUID)"
+// @Param        branch_id  query string  false "Branch ID (UUID)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/admins/check/{userID} [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) CheckUserIsAcademyAdmin(c *fiber.Ctx) error {
 	userID := c.Params("userID")
 	holdingID := c.Query("holding_id", "")
@@ -596,6 +815,18 @@ func (h *AcademyHandler) CheckUserIsAcademyAdmin(c *fiber.Ctx) error {
 
 // ─── Enrollment Handlers ───────────────────────────────────────────────────────
 
+// CreateEnrollment godoc
+// @Summary      Enroll athlete to academy branch
+// @Description  Create a new athlete enrollment into an academy branch.
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        request body object true "Athlete Enrollment Data"
+// @Success      201  {object}  response.Response{data=dto.EnrollmentResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/enrollments [post]
+// @Security     BearerAuth
 func (h *AcademyHandler) CreateEnrollment(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
@@ -639,6 +870,17 @@ func (h *AcademyHandler) CreateEnrollment(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToEnrollmentResponse(resp.Enrollment))
 }
 
+// GetEnrollment godoc
+// @Summary      Get athlete enrollment details
+// @Description  Retrieve academy enrollment data by enrollment ID.
+// @Tags         Academies
+// @Produce      json
+// @Param        id   path      string  true  "Enrollment ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.EnrollmentResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /academy/enrollments/{id} [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) GetEnrollment(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -652,6 +894,17 @@ func (h *AcademyHandler) GetEnrollment(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToEnrollmentResponse(resp.Enrollment))
 }
 
+// GetEnrollmentByBranchAndAthlete godoc
+// @Summary      Get athlete enrollment in a specific branch
+// @Tags         Academies
+// @Produce      json
+// @Param        branchID  path string true "Branch ID (UUID)"
+// @Param        athleteID path string true "Athlete User ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.EnrollmentResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /academy/enrollments/branch/{branchID}/athlete/{athleteID} [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) GetEnrollmentByBranchAndAthlete(c *fiber.Ctx) error {
 	branchID := c.Params("branchID")
 	athleteID := c.Params("athleteID")
@@ -667,6 +920,20 @@ func (h *AcademyHandler) GetEnrollmentByBranchAndAthlete(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToEnrollmentResponse(resp.Enrollment))
 }
 
+// ListEnrollments godoc
+// @Summary      Get list of academy athlete enrollments
+// @Tags         Academies
+// @Produce      json
+// @Param        branch_id  query string false "Filter Branch ID (UUID)"
+// @Param        athlete_id query string false "Filter Athlete ID (UUID)"
+// @Param        status_id  query string false "Filter Status ID (UUID)"
+// @Param        search     query string false "Search athlete name"
+// @Param        page       query int    false "Page number (default 1)"
+// @Param        page_size  query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response{data=[]dto.EnrollmentResponse}
+// @Failure      401  {object}  response.Response
+// @Router       /academy/enrollments [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) ListEnrollments(c *fiber.Ctx) error {
 	page, pageSize := request.ParsePagination(c)
 	search := c.Query("search", "")
@@ -718,6 +985,18 @@ func (h *AcademyHandler) ListEnrollments(c *fiber.Ctx) error {
 	})
 }
 
+// UpdateEnrollment godoc
+// @Summary      Update athlete enrollment status
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        id      path string true "Enrollment ID (UUID)"
+// @Param        request body object true "Enrollment Update Data"
+// @Success      200  {object}  response.Response{data=dto.EnrollmentResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/enrollments/{id} [put]
+// @Security     BearerAuth
 func (h *AcademyHandler) UpdateEnrollment(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
@@ -763,6 +1042,15 @@ func (h *AcademyHandler) UpdateEnrollment(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToEnrollmentResponse(resp.Enrollment))
 }
 
+// DeleteEnrollment godoc
+// @Summary      Delete athlete enrollment
+// @Tags         Academies
+// @Produce      json
+// @Param        id   path      string  true  "Enrollment ID (UUID)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/enrollments/{id} [delete]
+// @Security     BearerAuth
 func (h *AcademyHandler) DeleteEnrollment(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
@@ -780,6 +1068,18 @@ func (h *AcademyHandler) DeleteEnrollment(c *fiber.Ctx) error {
 
 // ─── Roster Handlers ───────────────────────────────────────────────────────────
 
+// CreateRoster godoc
+// @Summary      Create new team roster
+// @Description  Create a team roster for an academy branch / competition.
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        request body object true "New Roster Data"
+// @Success      201  {object}  response.Response{data=dto.RosterResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/rosters [post]
+// @Security     BearerAuth
 func (h *AcademyHandler) CreateRoster(c *fiber.Ctx) error {
 	var body struct {
 		AcademyBranchID string  `json:"academy_branch_id" validate:"required,uuid"`
@@ -808,6 +1108,17 @@ func (h *AcademyHandler) CreateRoster(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToRosterResponse(resp.Roster))
 }
 
+// GetRoster godoc
+// @Summary      Get team roster details
+// @Description  Retrieve team roster information by ID.
+// @Tags         Academies
+// @Produce      json
+// @Param        id   path      string  true  "Roster ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.RosterResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /academy/rosters/{id} [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) GetRoster(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -821,6 +1132,22 @@ func (h *AcademyHandler) GetRoster(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToRosterResponse(resp.Roster))
 }
 
+// ListRosters godoc
+// @Summary      Get list of team rosters
+// @Description  Retrieve list of team rosters filtered by competition, academy branch, or category tag.
+// @Tags         Academies
+// @Produce      json
+// @Param        competition_id query string false "Filter Competition ID"
+// @Param        branch_id      query string false "Filter Branch ID"
+// @Param        status_id      query string false "Filter Status ID"
+// @Param        tag_id         query string false "Filter Tag ID"
+// @Param        search         query string false "Search roster name"
+// @Param        page           query int    false "Page number (default 1)"
+// @Param        page_size      query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response{data=[]dto.RosterResponse}
+// @Failure      401  {object}  response.Response
+// @Router       /academy/rosters [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) ListRosters(c *fiber.Ctx) error {
 	page, pageSize := request.ParsePagination(c)
 	search := c.Query("search", "")
@@ -879,6 +1206,18 @@ func (h *AcademyHandler) ListRosters(c *fiber.Ctx) error {
 	})
 }
 
+// UpdateRoster godoc
+// @Summary      Update team roster data
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        id      path string true "Roster ID (UUID)"
+// @Param        request body object true "Roster Update Data"
+// @Success      200  {object}  response.Response{data=dto.RosterResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/rosters/{id} [put]
+// @Security     BearerAuth
 func (h *AcademyHandler) UpdateRoster(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -908,6 +1247,15 @@ func (h *AcademyHandler) UpdateRoster(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToRosterResponse(resp.Roster))
 }
 
+// DeleteRoster godoc
+// @Summary      Delete team roster
+// @Tags         Academies
+// @Produce      json
+// @Param        id   path      string  true  "Roster ID (UUID)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/rosters/{id} [delete]
+// @Security     BearerAuth
 func (h *AcademyHandler) DeleteRoster(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
@@ -923,6 +1271,15 @@ func (h *AcademyHandler) DeleteRoster(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "roster deleted")
 }
 
+// GetRosterMembers godoc
+// @Summary      Get list of team roster members
+// @Tags         Academies
+// @Produce      json
+// @Param        id   path      string  true  "Roster ID (UUID)"
+// @Success      200  {object}  response.Response{data=[]dto.RosterMemberResponse}
+// @Failure      401  {object}  response.Response
+// @Router       /academy/rosters/{id}/members [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) GetRosterMembers(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -941,6 +1298,17 @@ func (h *AcademyHandler) GetRosterMembers(c *fiber.Ctx) error {
 	return response.OK(c, members)
 }
 
+// GetRosterMember godoc
+// @Summary      Get team roster member details
+// @Tags         Academies
+// @Produce      json
+// @Param        id       path string true "Roster ID (UUID)"
+// @Param        memberID path string true "Member ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.RosterMemberResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /academy/rosters/{id}/members/{memberID} [get]
+// @Security     BearerAuth
 func (h *AcademyHandler) GetRosterMember(c *fiber.Ctx) error {
 	id := c.Params("id")
 	memberID := c.Params("memberID")
@@ -956,6 +1324,18 @@ func (h *AcademyHandler) GetRosterMember(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToRosterMemberResponse(resp.Member))
 }
 
+// AddRosterMember godoc
+// @Summary      Add member/athlete to team roster
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        id      path string true "Roster ID (UUID)"
+// @Param        request body object true "Roster Member Data"
+// @Success      201  {object}  response.Response{data=dto.RosterMemberResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/rosters/{id}/members [post]
+// @Security     BearerAuth
 func (h *AcademyHandler) AddRosterMember(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userID := c.Locals(middleware.ContextUserID).(string)
@@ -985,6 +1365,19 @@ func (h *AcademyHandler) AddRosterMember(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToRosterMemberResponse(resp.Member))
 }
 
+// RemoveRosterMember godoc
+// @Summary      Record member release/departure from team roster
+// @Tags         Academies
+// @Accept       json
+// @Produce      json
+// @Param        id       path string true "Roster ID (UUID)"
+// @Param        memberID path string true "Member ID (UUID)"
+// @Param        request  body object true "Removal Reason"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/rosters/{id}/members/{memberID}/remove [post]
+// @Security     BearerAuth
 func (h *AcademyHandler) RemoveRosterMember(c *fiber.Ctx) error {
 	id := c.Params("id")
 	memberID := c.Params("memberID")
@@ -1010,6 +1403,16 @@ func (h *AcademyHandler) RemoveRosterMember(c *fiber.Ctx) error {
 	return response.OK(c, fiber.Map{"member_id": resp.MemberId})
 }
 
+// DeleteRosterMember godoc
+// @Summary      Permanently delete member from team roster
+// @Tags         Academies
+// @Produce      json
+// @Param        id       path string true "Roster ID (UUID)"
+// @Param        memberID path string true "Member ID (UUID)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /academy/rosters/{id}/members/{memberID} [delete]
+// @Security     BearerAuth
 func (h *AcademyHandler) DeleteRosterMember(c *fiber.Ctx) error {
 	id := c.Params("id")
 	memberID := c.Params("memberID")

@@ -2,8 +2,10 @@ package router
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 
 	authv1 "microservice-golang/gen/auth/v1"
+	_ "microservice-golang/services/gateway/docs"
 	"microservice-golang/services/gateway/internal/handler"
 	"microservice-golang/services/gateway/internal/middleware"
 	"microservice-golang/shared/pkg/jwt"
@@ -28,7 +30,14 @@ func Setup(
 	logHandler *handler.LogHandler,
 	attachmentHandler *handler.AttachmentHandler,
 ) {
+	// Swagger UI Route
+	app.Get("/swagger/*", swagger.HandlerDefault)
+
 	api := app.Group("/api/v1")
+
+	api.Get("/", func(ctx *fiber.Ctx) error {
+		return ctx.SendString("Welcome to Sport Sentral V1 API Gateway")
+	})
 
 	// define middleware sekali di sini
 	auth := middleware.Auth(jwtManager, authClient)

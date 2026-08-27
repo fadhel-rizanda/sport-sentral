@@ -43,6 +43,19 @@ func (h *LogHandler) Routes(router fiber.Router, auth fiber.Handler, admin ...fi
 	userLogs.Get("/my-activity", h.ListMyActivityLogs)
 }
 
+// CreateAuditLog godoc
+// @Summary      Create audit log (Admin)
+// @Description  Record critical data change / system audit trail to log-service.
+// @Tags         Logs
+// @Accept       json
+// @Produce      json
+// @Param        request body object true "Audit Log Data"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/logs/audit [post]
+// @Security     BearerAuth
 func (h *LogHandler) CreateAuditLog(c *fiber.Ctx) error {
 	var body struct {
 		ServiceName  string  `json:"service_name"`
@@ -102,6 +115,18 @@ func (h *LogHandler) CreateAuditLog(c *fiber.Ctx) error {
 	return response.OK(c, resp.Log)
 }
 
+// GetAuditLog godoc
+// @Summary      Get audit log details (Admin)
+// @Description  Retrieve audit trail record by log ID.
+// @Tags         Logs
+// @Produce      json
+// @Param        id   path      string  true  "Audit Log ID"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /admin/logs/audit/{id} [get]
+// @Security     BearerAuth
 func (h *LogHandler) GetAuditLog(c *fiber.Ctx) error {
 	id := c.Params("id")
 	resp, err := h.logClient.GetAuditLog(c.Context(), &logv1.GetAuditLogRequest{Id: id})
@@ -111,6 +136,29 @@ func (h *LogHandler) GetAuditLog(c *fiber.Ctx) error {
 	return response.OK(c, resp.Log)
 }
 
+// ListAuditLogs godoc
+// @Summary      Get list of audit logs (Admin)
+// @Description  Retrieve system audit log list filtered by service_name, module, entity_type, action, status, and time range.
+// @Tags         Logs
+// @Produce      json
+// @Param        service_name query string false "Filter Service Name"
+// @Param        module       query string false "Filter Module"
+// @Param        entity_type  query string false "Filter Entity Type"
+// @Param        entity_id    query string false "Filter Entity ID"
+// @Param        action       query string false "Filter Action"
+// @Param        user_id      query string false "Filter User ID"
+// @Param        status       query string false "Filter Status"
+// @Param        severity     query string false "Filter Severity"
+// @Param        search       query string false "Search query"
+// @Param        start_time   query string false "Start Time (RFC3339)"
+// @Param        end_time     query string false "End Time (RFC3339)"
+// @Param        page         query int    false "Page number (default 1)"
+// @Param        limit        query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/logs/audit [get]
+// @Security     BearerAuth
 func (h *LogHandler) ListAuditLogs(c *fiber.Ctx) error {
 	page, limit := parsePagination(c)
 
@@ -170,6 +218,19 @@ func (h *LogHandler) ListAuditLogs(c *fiber.Ctx) error {
 	})
 }
 
+// CreateActivityLog godoc
+// @Summary      Record user activity log (Admin)
+// @Description  Save user action history into the activity log.
+// @Tags         Logs
+// @Accept       json
+// @Produce      json
+// @Param        request body object true "Activity Log Data"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/logs/activity [post]
+// @Security     BearerAuth
 func (h *LogHandler) CreateActivityLog(c *fiber.Ctx) error {
 	var body struct {
 		UserID       string  `json:"user_id"`
@@ -211,6 +272,18 @@ func (h *LogHandler) CreateActivityLog(c *fiber.Ctx) error {
 	return response.OK(c, resp.Log)
 }
 
+// GetActivityLog godoc
+// @Summary      Get activity log details (Admin)
+// @Description  Retrieve user activity data by log ID.
+// @Tags         Logs
+// @Produce      json
+// @Param        id   path      string  true  "Activity Log ID"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /admin/logs/activity/{id} [get]
+// @Security     BearerAuth
 func (h *LogHandler) GetActivityLog(c *fiber.Ctx) error {
 	id := c.Params("id")
 	resp, err := h.logClient.GetActivityLog(c.Context(), &logv1.GetActivityLogRequest{Id: id})
@@ -220,6 +293,24 @@ func (h *LogHandler) GetActivityLog(c *fiber.Ctx) error {
 	return response.OK(c, resp.Log)
 }
 
+// ListActivityLogs godoc
+// @Summary      Get list of activity logs (Admin)
+// @Description  Retrieve all user activity logs on the platform with various filters.
+// @Tags         Logs
+// @Produce      json
+// @Param        user_id       query string false "Filter User ID"
+// @Param        action        query string false "Filter Action"
+// @Param        resource_type query string false "Filter Resource Type"
+// @Param        resource_id   query string false "Filter Resource ID"
+// @Param        start_time    query string false "Start Time (RFC3339)"
+// @Param        end_time      query string false "End Time (RFC3339)"
+// @Param        page          query int    false "Page number (default 1)"
+// @Param        limit         query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/logs/activity [get]
+// @Security     BearerAuth
 func (h *LogHandler) ListActivityLogs(c *fiber.Ctx) error {
 	page, limit := parsePagination(c)
 
@@ -264,6 +355,17 @@ func (h *LogHandler) ListActivityLogs(c *fiber.Ctx) error {
 	})
 }
 
+// ListMyActivityLogs godoc
+// @Summary      Get own account activity history
+// @Description  Retrieve activity logs performed by the currently logged-in user account.
+// @Tags         Logs
+// @Produce      json
+// @Param        page  query int false "Page number (default 1)"
+// @Param        limit query int false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /logs/my-activity [get]
+// @Security     BearerAuth
 func (h *LogHandler) ListMyActivityLogs(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 	page, limit := parsePagination(c)
@@ -287,6 +389,19 @@ func (h *LogHandler) ListMyActivityLogs(c *fiber.Ctx) error {
 	})
 }
 
+// GetLogStats godoc
+// @Summary      Get system log statistics (Admin)
+// @Description  Retrieve summary metrics and volume of audit logs.
+// @Tags         Logs
+// @Produce      json
+// @Param        service_name query string false "Filter Service Name"
+// @Param        start_time   query string false "Start Time (RFC3339)"
+// @Param        end_time     query string false "End Time (RFC3339)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /admin/logs/stats [get]
+// @Security     BearerAuth
 func (h *LogHandler) GetLogStats(c *fiber.Ctx) error {
 	req := &logv1.GetLogStatsRequest{}
 	if s := c.Query("service_name"); s != "" {

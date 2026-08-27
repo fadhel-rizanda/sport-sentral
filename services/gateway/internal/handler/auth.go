@@ -43,14 +43,19 @@ func (h *AuthHandler) MeRoutes(router fiber.Router, middlewares ...fiber.Handler
 	me.Get("/", h.Me)
 }
 
+// Register godoc
+// @Summary      Register a new user
+// @Description  Create a new account with an initial role (athlete, scout, court_owner, academy_admin).
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.RegisterRequest true "User Registration Data"
+// @Success      201  {object}  response.Response{data=dto.UserResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      409  {object}  response.Response
+// @Router       /auth/register [post]
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
-	var body struct {
-		Email    string `json:"email"`
-		Username string `json:"username"`
-		FullName string `json:"full_name"`
-		Password string `json:"password"`
-		RoleID   string `json:"role_id"`
-	}
+	var body dto.RegisterRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -69,11 +74,19 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	return response.Created(c, fiber.Map{"user": mapper.ToUserResponse(resp.User)})
 }
 
+// Login godoc
+// @Summary      User authentication & login
+// @Description  Login using email & password, returning JWT access & refresh tokens and active role.
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.LoginRequest true "Login Credentials"
+// @Success      200  {object}  response.Response{data=dto.LoginResponseData}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /auth/login [post]
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
-	var body struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var body dto.LoginRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -109,10 +122,18 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	})
 }
 
+// Logout godoc
+// @Summary      Logout from active session
+// @Description  Revoke and blacklist the user's refresh token.
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.LogoutRequest true "Refresh token to revoke"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Router       /auth/logout [post]
 func (h *AuthHandler) Logout(c *fiber.Ctx) error {
-	var body struct {
-		RefreshToken string `json:"refresh_token"`
-	}
+	var body dto.LogoutRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -127,10 +148,19 @@ func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "logged out")
 }
 
+// RefreshToken godoc
+// @Summary      Refresh access token
+// @Description  Obtain a new access token using a valid refresh token.
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.RefreshTokenRequest true "Refresh Token"
+// @Success      200  {object}  response.Response{data=dto.TokenPairResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /auth/refresh [post]
 func (h *AuthHandler) RefreshToken(c *fiber.Ctx) error {
-	var body struct {
-		RefreshToken string `json:"refresh_token"`
-	}
+	var body dto.RefreshTokenRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -147,10 +177,18 @@ func (h *AuthHandler) RefreshToken(c *fiber.Ctx) error {
 	})
 }
 
+// SendVerifyEmail godoc
+// @Summary      Resend verification email
+// @Description  Send account verification link/token to user's email.
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.SendVerifyEmailRequest true "Target Email"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Router       /auth/verify-email [post]
 func (h *AuthHandler) SendVerifyEmail(c *fiber.Ctx) error {
-	var body struct {
-		Email string `json:"email"`
-	}
+	var body dto.SendVerifyEmailRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -165,6 +203,15 @@ func (h *AuthHandler) SendVerifyEmail(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "verification email sent")
 }
 
+// VerifyAccount godoc
+// @Summary      Verify user account
+// @Description  Verify email and activate account using verification token.
+// @Tags         Auth
+// @Produce      json
+// @Param        token query string true "Account Verification Token"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Router       /auth/verify [get]
 func (h *AuthHandler) VerifyAccount(c *fiber.Ctx) error {
 	token := c.Query("token")
 	if token == "" {
@@ -181,10 +228,18 @@ func (h *AuthHandler) VerifyAccount(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "account verified")
 }
 
+// ForgotPassword godoc
+// @Summary      Forgot password request
+// @Description  Send password reset instructions & token to registered email.
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.ForgotPasswordRequest true "Account Email"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Router       /auth/forgot-password [post]
 func (h *AuthHandler) ForgotPassword(c *fiber.Ctx) error {
-	var body struct {
-		Email string `json:"email"`
-	}
+	var body dto.ForgotPasswordRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -199,11 +254,18 @@ func (h *AuthHandler) ForgotPassword(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "reset password email sent")
 }
 
+// ResetPassword godoc
+// @Summary      Reset password
+// @Description  Reset user password using a valid password reset token.
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.ResetPasswordRequest true "Password Reset Data"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Router       /auth/reset-password [post]
 func (h *AuthHandler) ResetPassword(c *fiber.Ctx) error {
-	var body struct {
-		Token    string `json:"token"`
-		Password string `json:"password"`
-	}
+	var body dto.ResetPasswordRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -221,6 +283,15 @@ func (h *AuthHandler) ResetPassword(c *fiber.Ctx) error {
 
 // ─── Me ───────────────────────────────────────────────────────────────────────
 
+// Me godoc
+// @Summary      Get current logged-in user profile
+// @Description  Retrieve profile data, status, and active role of the currently authenticated user.
+// @Tags         Auth
+// @Produce      json
+// @Success      200  {object}  response.Response{data=dto.UserResponse}
+// @Failure      401  {object}  response.Response
+// @Router       /me [get]
+// @Security     BearerAuth
 func (h *AuthHandler) Me(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 

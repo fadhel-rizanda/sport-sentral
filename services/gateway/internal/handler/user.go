@@ -42,6 +42,18 @@ func (h *UserHandler) Routes(router fiber.Router, auth fiber.Handler, admin ...f
 	adminGroup.Post("/remove-roles", h.RemoveRolesFromUser)
 }
 
+// GetUser godoc
+// @Summary      Get user by ID
+// @Description  Retrieve detailed user profile information by user ID (UUID).
+// @Tags         Users
+// @Produce      json
+// @Param        id   path      string  true  "User ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.UserResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /users/{id} [get]
+// @Security     BearerAuth
 func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -55,13 +67,22 @@ func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 	return response.OK(c, fiber.Map{"user": mapper.ToUserResponse(resp.User)})
 }
 
+// UpdateUser godoc
+// @Summary      Update current user profile
+// @Description  Update username or full name of the currently logged-in account.
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.UpdateUserRequest true "Profile Update Data"
+// @Success      200  {object}  response.Response{data=dto.UserResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /me [put]
+// @Security     BearerAuth
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
-	var body struct {
-		FullName *string `json:"full_name"`
-		Username *string `json:"username"`
-	}
+	var body dto.UpdateUserRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -78,6 +99,18 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	return response.OK(c, fiber.Map{"user": mapper.ToUserResponse(resp.User)})
 }
 
+// ListUsers godoc
+// @Summary      Get list of users (Admin)
+// @Description  Retrieve paginated list of all users (platform admin only).
+// @Tags         Users
+// @Produce      json
+// @Param        page      query int false "Page number (default 1)"
+// @Param        page_size query int false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response{data=[]dto.UserResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /users [get]
+// @Security     BearerAuth
 func (h *UserHandler) ListUsers(c *fiber.Ctx) error {
 	page, pageSize := request.ParsePagination(c)
 
@@ -101,12 +134,22 @@ func (h *UserHandler) ListUsers(c *fiber.Ctx) error {
 	})
 }
 
+// DeleteUser godoc
+// @Summary      Delete current user account
+// @Description  Soft-delete current user account with password confirmation.
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.DeleteUserRequest true "Password Confirmation"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /me [delete]
+// @Security     BearerAuth
 func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
-	var body struct {
-		Password string `json:"password"`
-	}
+	var body dto.DeleteUserRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -122,14 +165,18 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "user deleted")
 }
 
+// CreateUser godoc
+// @Summary      Create new user (Direct register)
+// @Description  Create a new user through the root registration endpoint.
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.RegisterRequest true "New User Data"
+// @Success      200  {object}  response.Response{data=dto.UserResponse}
+// @Failure      400  {object}  response.Response
+// @Router       /register [post]
 func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
-	var body struct {
-		Email    string `json:"email"`
-		Username string `json:"username"`
-		FullName string `json:"full_name"`
-		Password string `json:"password"`
-		RoleID   string `json:"role_id"`
-	}
+	var body dto.RegisterRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -146,10 +193,16 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	return response.OK(c, fiber.Map{"user": mapper.ToUserResponse(resp.User)})
 }
 
+// SendVerifyEmail godoc
+// @Summary      Send verification email (Root alias)
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.SendVerifyEmailRequest true "Target Email"
+// @Success      200  {object}  response.Response
+// @Router       /verify-email [post]
 func (h *UserHandler) SendVerifyEmail(c *fiber.Ctx) error {
-	var body struct {
-		Email string `json:"email"`
-	}
+	var body dto.SendVerifyEmailRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -162,10 +215,16 @@ func (h *UserHandler) SendVerifyEmail(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "verification email sent")
 }
 
+// VerifyAccount godoc
+// @Summary      Verify account (POST Body)
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.VerifyAccountRequest true "Verification Token"
+// @Success      200  {object}  response.Response
+// @Router       /verify-account [post]
 func (h *UserHandler) VerifyAccount(c *fiber.Ctx) error {
-	var body struct {
-		Token string `json:"token"`
-	}
+	var body dto.VerifyAccountRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -178,10 +237,16 @@ func (h *UserHandler) VerifyAccount(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "account verified")
 }
 
+// ForgotPassword godoc
+// @Summary      Forgot password (Root alias)
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.ForgotPasswordRequest true "Account Email"
+// @Success      200  {object}  response.Response
+// @Router       /forgot-password [post]
 func (h *UserHandler) ForgotPassword(c *fiber.Ctx) error {
-	var body struct {
-		Email string `json:"email"`
-	}
+	var body dto.ForgotPasswordRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -194,11 +259,16 @@ func (h *UserHandler) ForgotPassword(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "Forgot password email sent")
 }
 
+// ResetPassword godoc
+// @Summary      Reset password (Root alias)
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.ResetPasswordRequest true "Password Reset Data"
+// @Success      200  {object}  response.Response
+// @Router       /reset-password [post]
 func (h *UserHandler) ResetPassword(c *fiber.Ctx) error {
-	var body struct {
-		Token    string `json:"token"`
-		Password string `json:"password"`
-	}
+	var body dto.ResetPasswordRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -212,11 +282,21 @@ func (h *UserHandler) ResetPassword(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "password changed")
 }
 
+// AssignRolesToUser godoc
+// @Summary      Assign roles to user (Admin)
+// @Description  Assign a list of roles to a specific user account.
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.AssignRolesRequest true "Assign Roles Data"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /users/assign-roles [post]
+// @Security     BearerAuth
 func (h *UserHandler) AssignRolesToUser(c *fiber.Ctx) error {
-	var body struct {
-		UserID string   `json:"user_id"`
-		Roles  []string `json:"roles"`
-	}
+	var body dto.AssignRolesRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}
@@ -230,11 +310,21 @@ func (h *UserHandler) AssignRolesToUser(c *fiber.Ctx) error {
 	return response.OKWithMessage(c, "assigned roles to user")
 }
 
+// RemoveRolesFromUser godoc
+// @Summary      Remove roles from user (Admin)
+// @Description  Remove a list of roles from a specific user account.
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.RemoveRolesRequest true "Remove Roles Data"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Failure      403  {object}  response.Response
+// @Router       /users/remove-roles [post]
+// @Security     BearerAuth
 func (h *UserHandler) RemoveRolesFromUser(c *fiber.Ctx) error {
-	var body struct {
-		UserID string   `json:"user_id"`
-		Roles  []string `json:"roles"`
-	}
+	var body dto.RemoveRolesRequest
 	if err := request.Parse(c, &body); err != nil {
 		return err
 	}

@@ -46,6 +46,18 @@ func (h *ScoutHandler) Routes(router fiber.Router, auth fiber.Handler, admin ...
 	scouts.Get("/logs", h.ListScoutActivities)
 }
 
+// CreateScoutProfile godoc
+// @Summary      Create talent scout profile
+// @Description  Create a new scout profile linked to the logged-in user account.
+// @Tags         Scouts
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.CreateScoutProfileRequest true "Scout Profile Data"
+// @Success      201  {object}  response.Response{data=dto.ScoutProfileResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /scouts/profile [post]
+// @Security     BearerAuth
 func (h *ScoutHandler) CreateScoutProfile(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
@@ -69,6 +81,16 @@ func (h *ScoutHandler) CreateScoutProfile(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToScoutProfileResponseFromProto(resp.Scout))
 }
 
+// GetScoutProfile godoc
+// @Summary      Get own talent scout profile
+// @Description  Retrieve scout profile data for the logged-in account.
+// @Tags         Scouts
+// @Produce      json
+// @Success      200  {object}  response.Response{data=dto.ScoutProfileResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /scouts/profile [get]
+// @Security     BearerAuth
 func (h *ScoutHandler) GetScoutProfile(c *fiber.Ctx) error {
 	userID := c.Locals(middleware.ContextUserID).(string)
 
@@ -82,6 +104,19 @@ func (h *ScoutHandler) GetScoutProfile(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToScoutProfileResponseFromProto(resp.Scout))
 }
 
+// UpdateScoutProfile godoc
+// @Summary      Update talent scout profile
+// @Description  Update scout organization, bio, or avatar information.
+// @Tags         Scouts
+// @Accept       json
+// @Produce      json
+// @Param        id      path string                           true "Scout ID (UUID)"
+// @Param        request body dto.UpdateScoutProfileRequest    true "Scout Profile Update Data"
+// @Success      200  {object}  response.Response{data=dto.ScoutProfileResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /scouts/profile/{id} [put]
+// @Security     BearerAuth
 func (h *ScoutHandler) UpdateScoutProfile(c *fiber.Ctx) error {
 	scoutID := c.Params("id")
 
@@ -105,6 +140,19 @@ func (h *ScoutHandler) UpdateScoutProfile(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToScoutProfileResponseFromProto(resp.Scout))
 }
 
+// AddToWatchlist godoc
+// @Summary      Add athlete to watchlist
+// @Description  Add an athlete to talent scout watchlist with notes and priority.
+// @Tags         Scouts
+// @Accept       json
+// @Produce      json
+// @Param        scout_id query string                      true "Scout ID (UUID)"
+// @Param        request  body  dto.AddToWatchlistRequest   true "Athlete Watchlist Data"
+// @Success      201  {object}  response.Response{data=dto.WatchlistEntryResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /scouts/watchlist [post]
+// @Security     BearerAuth
 func (h *ScoutHandler) AddToWatchlist(c *fiber.Ctx) error {
 	scoutID := c.Query("scout_id", "")
 	if scoutID == "" {
@@ -131,6 +179,18 @@ func (h *ScoutHandler) AddToWatchlist(c *fiber.Ctx) error {
 	return response.Created(c, mapper.ToWatchlistEntryResponseFromProto(resp.Entry))
 }
 
+// RemoveFromWatchlist godoc
+// @Summary      Remove athlete from watchlist
+// @Description  Remove an athlete from the scout watchlist.
+// @Tags         Scouts
+// @Produce      json
+// @Param        athlete_id path  string true "Athlete ID (UUID)"
+// @Param        scout_id   query string true "Scout ID (UUID)"
+// @Success      204
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /scouts/watchlist/{athlete_id} [delete]
+// @Security     BearerAuth
 func (h *ScoutHandler) RemoveFromWatchlist(c *fiber.Ctx) error {
 	scoutID := c.Query("scout_id", "")
 	athleteID := c.Params("athlete_id")
@@ -149,6 +209,19 @@ func (h *ScoutHandler) RemoveFromWatchlist(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
+// ListWatchlist godoc
+// @Summary      Get athlete watchlist
+// @Description  Retrieve list of athletes monitored by scout with pagination.
+// @Tags         Scouts
+// @Produce      json
+// @Param        scout_id  query string true  "Scout ID (UUID)"
+// @Param        page      query int    false "Page number (default 1)"
+// @Param        page_size query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /scouts/watchlist [get]
+// @Security     BearerAuth
 func (h *ScoutHandler) ListWatchlist(c *fiber.Ctx) error {
 	scoutID := c.Query("scout_id", "")
 	if scoutID == "" {
@@ -179,6 +252,20 @@ func (h *ScoutHandler) ListWatchlist(c *fiber.Ctx) error {
 	})
 }
 
+// UpdateWatchlistEntry godoc
+// @Summary      Update watchlist entry notes
+// @Description  Update notes or priority for an athlete in the watchlist.
+// @Tags         Scouts
+// @Accept       json
+// @Produce      json
+// @Param        id       path  string                              true "Watchlist Entry ID (UUID)"
+// @Param        scout_id query string                              true "Scout ID (UUID)"
+// @Param        request  body  dto.UpdateWatchlistEntryRequest     true "Watchlist Update Data"
+// @Success      200  {object}  response.Response{data=dto.WatchlistEntryResponse}
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /scouts/watchlist/{id} [put]
+// @Security     BearerAuth
 func (h *ScoutHandler) UpdateWatchlistEntry(c *fiber.Ctx) error {
 	entryID := c.Params("id")
 	scoutID := c.Query("scout_id", "")
@@ -206,6 +293,21 @@ func (h *ScoutHandler) UpdateWatchlistEntry(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToWatchlistEntryResponseFromProto(resp.Entry))
 }
 
+// ListAthleteProfiles godoc
+// @Summary      Search and filter athlete profiles
+// @Description  Search athlete profile directory filtered by sport, age range, and highest competition level.
+// @Tags         Scouts
+// @Produce      json
+// @Param        sport_id  query string false "Filter Sport ID (UUID)"
+// @Param        min_age   query int    false "Minimum age"
+// @Param        max_age   query int    false "Maximum age"
+// @Param        level     query string false "Highest competition level"
+// @Param        page      query int    false "Page number (default 1)"
+// @Param        page_size query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /scouts/athletes [get]
+// @Security     BearerAuth
 func (h *ScoutHandler) ListAthleteProfiles(c *fiber.Ctx) error {
 	page, pageSize := request.ParsePagination(c)
 
@@ -251,6 +353,18 @@ func (h *ScoutHandler) ListAthleteProfiles(c *fiber.Ctx) error {
 	})
 }
 
+// GetAthleteProfile godoc
+// @Summary      Get athlete performance and statistics profile
+// @Description  Retrieve career statistics, leaderboard rankings, competition history, and academy background for an athlete.
+// @Tags         Scouts
+// @Produce      json
+// @Param        id       path  string  true  "Athlete User ID (UUID)"
+// @Param        sport_id query string  false "Sport ID (UUID)"
+// @Success      200  {object}  response.Response{data=dto.AthleteProfileResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      404  {object}  response.Response
+// @Router       /scouts/athletes/{id} [get]
+// @Security     BearerAuth
 func (h *ScoutHandler) GetAthleteProfile(c *fiber.Ctx) error {
 	athleteID := c.Params("id")
 
@@ -269,6 +383,20 @@ func (h *ScoutHandler) GetAthleteProfile(c *fiber.Ctx) error {
 	return response.OK(c, mapper.ToAthleteProfileResponseFromProto(resp.Profile))
 }
 
+// GetLeaderboard godoc
+// @Summary      Get athlete leaderboard rankings
+// @Description  Retrieve top athlete rankings calculated from official tournament score weighting per sport.
+// @Tags         Scouts
+// @Produce      json
+// @Param        sport_id      query string true  "Sport ID (UUID)"
+// @Param        period_tag_id query string false "Period Tag ID (UUID)"
+// @Param        page          query int    false "Page number (default 1)"
+// @Param        page_size     query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /scouts/leaderboard [get]
+// @Security     BearerAuth
 func (h *ScoutHandler) GetLeaderboard(c *fiber.Ctx) error {
 	sportID := c.Query("sport_id", "")
 	if sportID == "" {
@@ -305,6 +433,19 @@ func (h *ScoutHandler) GetLeaderboard(c *fiber.Ctx) error {
 	})
 }
 
+// LogScoutActivity godoc
+// @Summary      Log talent scout activity
+// @Description  Record scout activity history when viewing/analyzing athlete profiles.
+// @Tags         Scouts
+// @Accept       json
+// @Produce      json
+// @Param        scout_id query string                         true "Scout ID (UUID)"
+// @Param        request  body  dto.LogScoutActivityRequest    true "Activity Log Data"
+// @Success      204
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /scouts/logs [post]
+// @Security     BearerAuth
 func (h *ScoutHandler) LogScoutActivity(c *fiber.Ctx) error {
 	scoutID := c.Query("scout_id", "")
 	if scoutID == "" {
@@ -331,6 +472,19 @@ func (h *ScoutHandler) LogScoutActivity(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
+// ListScoutActivities godoc
+// @Summary      Get talent scout activity history
+// @Description  Retrieve activity logs performed by a talent scout.
+// @Tags         Scouts
+// @Produce      json
+// @Param        scout_id  query string true  "Scout ID (UUID)"
+// @Param        page      query int    false "Page number (default 1)"
+// @Param        page_size query int    false "Number of items per page (default 10)"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      401  {object}  response.Response
+// @Router       /scouts/logs [get]
+// @Security     BearerAuth
 func (h *ScoutHandler) ListScoutActivities(c *fiber.Ctx) error {
 	scoutID := c.Query("scout_id", "")
 	if scoutID == "" {

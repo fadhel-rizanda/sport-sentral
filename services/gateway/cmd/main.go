@@ -63,6 +63,24 @@ func normalizeFilePayload(data []byte) []byte {
 	return data
 }
 
+// @title                      Sport-Sentral API Gateway
+// @version                    1.0
+// @description                Centralized API Documentation for Sport-Sentral Microservices Gateway (Auth, RBAC, Academy, Venue, Sport, Competition, Scout, Attachment, Log).
+// @termsOfService             http://swagger.io/terms/
+
+// @contact.name               Sport-Sentral Development Team
+// @contact.email              dev@sportsentral.id
+
+// @license.name               Apache 2.0
+// @license.url                http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host                       localhost:8000
+// @BasePath                   /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in                         header
+// @name                       Authorization
+// @description                Enter JWT token in the format: `Bearer <access_token>`
 func main() {
 	// ── Env ───────────────────────────────────────────────────────────────────
 	_ = godotenv.Load()
